@@ -1,179 +1,161 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="es">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CellaTesto — Gestione Interventi</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<title>CellaTesto Pro — Gestión de Obra</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-:root {
-  --bg: #f4f3ef; --surface: #ffffff; --surface2: #f9f8f5; --border: #e2e0d8; --border2: #ccc9be;
-  --text: #1a1916; --text2: #5c5a54; --text3: #9c9a94; --accent: #2a5c45; --accent2: #1e4433;
-  --accent-light: #e8f2ed; --accent-mid: #4a9470; --warn: #b84a00; --warn-light: #fff0e6;
-  --info: #1a4a7a; --info-light: #e8f0fa; --danger: #8b1a1a; --danger-light: #faeaea;
-  --success: #1a5c2a; --success-light: #eaf5ec; --radius: 10px; --radius-sm: 6px;
-  --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.04);
-}
+:root { --accent: #2a5c45; --bg: #f4f3ef; --surface: #ffffff; --border: #e2e0d8; --text: #1a1916; --radius: 12px; }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); font-size: 14px; min-height: 100vh; }
-.app-header { background: var(--accent); color: #fff; padding: 0 1.5rem; display: flex; align-items: center; justify-content: space-between; height: 56px; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
-.app-logo { font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
-.tabs-bar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 1.5rem; display: flex; }
-.tab-btn { padding: 12px 20px; font-size: 13px; font-weight: 500; border: none; background: none; cursor: pointer; color: var(--text2); border-bottom: 2px solid transparent; transition: all 0.15s; display: flex; align-items: center; gap: 7px; }
-.tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
-.main-content { padding: 1.5rem; max-width: 1400px; margin: 0 auto; }
-.btn { padding: 7px 14px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--surface); color: var(--text); font-size: 13px; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
-.btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
-.btn-export { background: var(--info-light); border-color: #9ab5d8; color: var(--info); }
-.table-wrapper { background: var(--surface); border-radius: var(--radius); border: 1px solid var(--border); overflow: hidden; box-shadow: var(--shadow); }
-.table-scroll { overflow-x: auto; }
-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-thead th { background: var(--surface2); border-bottom: 1px solid var(--border); padding: 10px 12px; text-align: left; font-weight: 600; font-size: 11px; text-transform: uppercase; color: var(--text2); }
-tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; }
-tbody tr:hover { background: var(--surface2); }
-tbody td { padding: 10px 12px; vertical-align: middle; }
-.cell-img { width: 44px; height: 44px; border-radius: 6px; object-fit: cover; border: 1px solid var(--border); cursor: pointer; }
-.action-btns { display: flex; gap: 6px; }
-.btn-icon { width: 30px; height: 30px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--surface); cursor: pointer; display: flex; align-items: center; justify-content: center; }
-.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 200; align-items: flex-start; justify-content: center; padding: 1.5rem; overflow-y: auto; }
-.modal-overlay.open { display: flex; }
-.modal { background: var(--surface); border-radius: 14px; width: 100%; max-width: 860px; margin: auto; }
-.modal-header { padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
-.form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; padding: 1.5rem; }
-.form-group { display: flex; flex-direction: column; gap: 5px; }
-.form-group.full { grid-column: 1 / -1; }
-.form-group input, .form-group textarea, .form-group select { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 10px; font-size: 13px; width: 100%; }
-.photo-upload-zone { border: 2px dashed var(--border2); border-radius: var(--radius); padding: 1.25rem; text-align: center; cursor: pointer; position: relative; }
-.photo-upload-zone input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
-.foto-preview-img { width: 100%; max-height: 150px; object-fit: cover; border-radius: 8px; }
-.lightbox { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 300; align-items: center; justify-content: center; }
-.lightbox.open { display: flex; }
-.lightbox img { max-width: 90vw; max-height: 85vh; border-radius: 8px; }
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); padding-bottom: 50px; }
+header { background: var(--accent); color: #fff; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
+.status-pill { font-size: 11px; background: rgba(0,0,0,0.2); padding: 4px 12px; border-radius: 20px; font-family: 'DM Mono', monospace; }
+.container { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
+.toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+.btn { padding: 10px 20px; border-radius: 8px; border: 1px solid var(--border); background: #fff; cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; transition: 0.2s; }
+.btn-primary { background: var(--accent); color: #fff; border: none; }
+.card { background: #fff; border-radius: var(--radius); border: 1px solid var(--border); overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+table { width: 100%; border-collapse: collapse; }
+th { background: #f9f8f5; padding: 15px; text-align: left; font-size: 11px; text-transform: uppercase; color: #777; border-bottom: 1px solid var(--border); }
+td { padding: 15px; border-bottom: 1px solid var(--border); font-size: 14px; }
+.img-thumb { width: 45px; height: 45px; border-radius: 6px; object-fit: cover; border: 1px solid var(--border); cursor: pointer; }
+.modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 200; align-items: flex-start; justify-content: center; padding: 2rem 1rem; overflow-y: auto; }
+.modal.open { display: flex; }
+.modal-content { background: #fff; border-radius: 16px; width: 100%; max-width: 800px; padding: 2rem; }
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+.full { grid-column: 1 / -1; }
+input, textarea, select { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; background: #fafafa; }
+.photo-box { border: 2px dashed var(--border); border-radius: 8px; padding: 1.5rem; text-align: center; cursor: pointer; }
+.signature-wrap { border: 1px solid var(--border); border-radius: 8px; background: #fff; margin-top: 10px; }
 </style>
 </head>
 <body>
 
-<header class="app-header">
-  <div class="app-logo">CellaTesto <span>v1.0</span> <span id="sync-status" style="font-size:10px; background:rgba(0,0,0,0.2); padding:2px 6px; border-radius:4px; margin-left:10px;">☁️ Locale</span></div>
+<header>
+  <div style="font-weight:600; font-size:1.2rem;">CellaTesto <span>PRO</span></div>
+  <div id="sync-status" class="status-pill">☁️ Conectando...</div>
 </header>
 
-<nav class="tabs-bar">
-  <button class="tab-btn active" id="tab-btn-int" onclick="switchTab('interventi')">Interventi <span id="badge-interventi" style="background:#eee; padding:1px 5px; border-radius:10px; font-size:10px;">0</span></button>
-  <button class="tab-btn" id="tab-btn-mat" onclick="switchTab('materiali')">Magazzino</button>
-</nav>
-
-<div id="tab-interventi" class="main-content">
-  <div style="display:flex; justify-content:space-between; margin-bottom:1rem;">
-    <div>
-      <button class="btn btn-export" onclick="exportCSV()">↓ CSV</button>
-      <button class="btn btn-export" onclick="exportWeeklyReport()" style="background:#fcf3cf; color:#9a7d0a;">📅 Report Settimanale</button>
+<div class="container">
+  <div class="toolbar">
+    <h1>Registro de Actividad</h1>
+    <div style="display:flex; gap:10px;">
+      <button class="btn" onclick="exportWeekly()">📅 Informe Semanal</button>
+      <button class="btn btn-primary" onclick="showModal()">+ Nueva Intervención</button>
     </div>
-    <button class="btn btn-primary" onclick="openModal('intervento')">+ Nuovo Intervento</button>
   </div>
-  <div class="table-wrapper"><div class="table-scroll"><table><thead><tr><th>ID</th><th>Data</th><th>Operatore</th><th>Casa</th><th>Descrizione</th><th>Foto</th><th>Firma</th><th>Conf.</th><th>Azioni</th></tr></thead><tbody id="bodyInterventi"></tbody></table></div></div>
-</div>
 
-<!-- MODALE INTERVENTO -->
-<div class="modal-overlay" id="modalIntervento">
-  <div class="modal">
-    <div class="modal-header"><h2>Nuovo Intervento</h2><button class="btn-icon" onclick="closeModal('modalIntervento')">✕</button></div>
-    <div class="form-grid">
-      <div class="form-group"><label>Data</label><input type="date" id="f-data"></div>
-      <div class="form-group"><label>Operatore</label><input type="text" id="f-operatore"></div>
-      <div class="form-group"><label>Casa</label><input type="text" id="f-casa"></div>
-      <div class="form-group full"><label>Descrizione</label><textarea id="f-desc" rows="3"></textarea></div>
-      <div class="form-group"><label>Foto Prima</label><div class="photo-upload-zone"><input type="file" onchange="handlePhoto(this,'prima')"><div id="pre-prima">Scegli Foto</div></div></div>
-      <div class="form-group"><label>Foto Dopo</label><div class="photo-upload-zone"><input type="file" onchange="handlePhoto(this,'dopo')"><div id="pre-dopo">Scegli Foto</div></div></div>
-      <div class="form-group full"><label>Firma</label><canvas id="firmaCanvas" width="500" height="150" style="width:100%; border:1px solid #ccc;"></canvas><button class="btn" onclick="clearFirma()">Cancella Firma</button></div>
-    </div>
-    <div style="padding:1.5rem; text-align:right;"><button class="btn" onclick="closeModal('modalIntervento')">Annulla</button> <button class="btn btn-primary" onclick="saveIntervento()">Salva</button></div>
+  <div class="card">
+    <table>
+      <thead><tr><th>Fecha</th><th>Operario</th><th>Casa</th><th>Descripción</th><th>Foto</th><th>Firma</th><th>Acciones</th></tr></thead>
+      <tbody id="table-body"></tbody>
+    </table>
   </div>
 </div>
 
-<div class="lightbox" id="lightbox" onclick="this.classList.remove('open')"><img id="lightboxImg"></div>
+<!-- MODAL -->
+<div class="modal" id="modalInt">
+  <div class="modal-content">
+    <h2 style="margin-bottom:1.5rem;">Nueva Intervención</h2>
+    <div class="grid">
+      <div><label>Fecha</label><input type="date" id="f-data"></div>
+      <div><label>Operario</label><input type="text" id="f-operatore" placeholder="Nombre"></div>
+      <div><label>Casa / Alojamiento</label><input type="text" id="f-casa" placeholder="Ej: B22"></div>
+      <div><label>Clima</label><select id="f-meteo"><option>☀️ Soleado</option><option>☁️ Nublado</option><option>🌧️ Lluvia</option></select></div>
+      <div class="full"><label>Descripción del Trabajo</label><textarea id="f-desc" rows="3" placeholder="¿Qué se ha reparado?"></textarea></div>
+      <div><label>Foto ANTES</label><div class="photo-box" onclick="document.getElementById('in-prima').click()"><input type="file" id="in-prima" hidden onchange="handleFile(this,'prima')"><div id="p-prima">Subir Foto</div></div></div>
+      <div><label>Foto DESPUÉS</label><div class="photo-box" onclick="document.getElementById('in-dopo').click()"><input type="file" id="in-dopo" hidden onchange="handleFile(this,'dopo')"><div id="p-dopo">Subir Foto</div></div></div>
+      <div class="full">
+        <label>Firma del Técnico</label>
+        <div class="signature-wrap"><canvas id="canvasFirma" width="600" height="150" style="width:100%; touch-action:none;"></canvas></div>
+        <button class="btn" style="margin-top:5px; font-size:11px;" onclick="clearFirma()">Borrar Firma</button>
+      </div>
+    </div>
+    <div style="margin-top:2rem; display:flex; justify-content:flex-end; gap:10px;">
+      <button class="btn" onclick="hideModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="salva()">💾 Guardar en la Nube</button>
+    </div>
+  </div>
+</div>
 
 <script>
-// ═══ CONFIGURAZIONE ═══
-const SUPABASE_URL = 'https://IL_TUO_ID.supabase.co'; // <--- METTI QUI
-const SUPABASE_KEY = 'LA_TUA_CHIAVE_ANON';           // <--- METTI QUI
-let supabase = null;
-if (window.supabase && SUPABASE_URL.includes('supabase.co')) supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const S_URL = 'https://ukzconegwpoaculadefx.supabase.co/rest/v1/.supabase.co'; 
+const S_KEY = 'sb_publishable_dS8SzPIks90Yd1ISjsXQFQ_T8VtusA1';
+let db = null;
+if (window.supabase) db = window.supabase.createClient(S_URL, S_KEY);
 
-let interventi = JSON.parse(localStorage.getItem('ct_interventi') || '[]');
-let fotoPrima = null, fotoDopo = null, firmaData = null;
+let dati = [];
+let imgP = null, imgD = null, imgF = null;
 
-// ═══ SYNC ═══
 async function sync() {
-  if (!supabase) return;
-  document.getElementById('sync-status').textContent = '🔄...';
-  const { data } = await supabase.from('interventi').select('*').order('data', {ascending: false});
-  if (data) { interventi = data; render(); }
-  document.getElementById('sync-status').textContent = '✅ Cloud';
+  if (!db) return;
+  const { data } = await db.from('interventi').select('*').order('data', {ascending: false});
+  if (data) { dati = data; render(); document.getElementById('sync-status').textContent = '✅ Sincronizado'; }
 }
 
 function render() {
-  const b = document.getElementById('bodyInterventi');
-  b.innerHTML = interventi.map(r => `<tr>
-    <td>${r.id}</td><td>${r.data}</td><td>${r.operatore}</td><td>${r.casa}</td><td>${r.desc}</td>
-    <td>${r.fotoPrima ? `<img src="${r.fotoPrima}" class="cell-img" onclick="openLight('${r.fotoPrima}')">` : '-'}</td>
-    <td>${r.firma ? '✅' : '-'}</td><td>${r.conferma ? '✔' : '○'}</td>
-    <td><button class="btn-icon" onclick="exportPDF('${r.id}')">📄</button><button class="btn-icon" onclick="del('${r.id}')">🗑</button></td>
+  const tb = document.getElementById('table-body');
+  tb.innerHTML = dati.map(r => `<tr>
+    <td>${r.data}</td><td><b>${r.operatore}</b></td><td>${r.casa}</td>
+    <td style="max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${r.desc}</td>
+    <td>${r.fotoPrima ? `<img src="${r.fotoPrima}" class="img-thumb">` : '-'}</td>
+    <td>${r.firma ? '✅' : '-'}</td>
+    <td><button class="btn" style="padding:4px 8px;" onclick="pdf('${r.id}')">📄 PDF</button></td>
   </tr>`).join('');
-  document.getElementById('badge-interventi').textContent = interventi.length;
 }
 
-// ═══ LOGICA MODALE ═══
-function openModal(id) { document.getElementById('modalIntervento').classList.add('open'); initFirma(); }
-function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function showModal() { document.getElementById('modalInt').classList.add('open'); initFirma(); }
+function hideModal() { document.getElementById('modalInt').classList.remove('open'); }
 
-function handlePhoto(input, type) {
+function handleFile(input, type) {
   const reader = new FileReader();
   reader.onload = e => {
-    if (type === 'prima') { fotoPrima = e.target.result; document.getElementById('pre-prima').innerHTML = `<img src="${fotoPrima}" class="foto-preview-img">`; }
-    else { fotoDopo = e.target.result; document.getElementById('pre-dopo').innerHTML = `<img src="${fotoDopo}" class="foto-preview-img">`; }
+    if (type === 'prima') { imgP = e.target.result; document.getElementById('p-prima').innerHTML = '<img src="'+imgP+'" style="width:50px">'; }
+    else { imgD = e.target.result; document.getElementById('p-dopo').innerHTML = '<img src="'+imgD+'" style="width:50px">'; }
   };
   reader.readAsDataURL(input.files[0]);
 }
 
-async function saveIntervento() {
+let ctx, drawing = false;
+function initFirma() {
+  const c = document.getElementById('canvasFirma'); ctx = c.getContext('2d');
+  const getPos = (e) => { const r = c.getBoundingClientRect(); return { x: (e.clientX || e.touches[0].clientX) - r.left, y: (e.clientY || e.touches[0].clientY) - r.top }; };
+  const start = (e) => { drawing = true; ctx.beginPath(); const p = getPos(e); ctx.moveTo(p.x, p.y); };
+  const move = (e) => { if(!drawing) return; const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); };
+  c.onmousedown = start; c.ontouchstart = start;
+  window.onmouseup = () => { drawing = false; imgF = c.toDataURL(); };
+  window.ontouchend = () => { drawing = false; imgF = c.toDataURL(); };
+  c.onmousemove = move; c.ontouchmove = move;
+}
+function clearFirma() { ctx.clearRect(0,0,600,150); imgF = null; }
+
+async function salva() {
   const row = {
     id: 'INT-' + Date.now(), data: document.getElementById('f-data').value,
     operatore: document.getElementById('f-operatore').value, casa: document.getElementById('f-casa').value,
-    desc: document.getElementById('f-desc').value, fotoPrima, fotoDopo, firma: firmaData, conferma: true
+    meteo: document.getElementById('f-meteo').value, desc: document.getElementById('f-desc').value,
+    fotoPrima: imgP, fotoDopo: imgD, firma: imgF, conferma: true
   };
-  interventi.push(row);
-  localStorage.setItem('ct_interventi', JSON.stringify(interventi));
-  if (supabase) await supabase.from('interventi').insert([row]);
-  render(); closeModal('modalIntervento');
+  if (!row.data || !row.operatore) return alert("¡Rellene los campos obligatorios!");
+  await db.from('interventi').insert([row]);
+  hideModal(); sync();
 }
 
-// ═══ FIRMA ═══
-let ctx, drawing = false;
-function initFirma() {
-  const c = document.getElementById('firmaCanvas'); ctx = c.getContext('2d');
-  c.onmousedown = () => drawing = true; 
-  window.onmouseup = () => { drawing = false; firmaData = c.toDataURL(); };
-  c.onmousemove = (e) => { if(!drawing) return; ctx.lineTo(e.offsetX, e.offsetY); ctx.stroke(); };
-  ctx.beginPath();
-}
-function clearFirma() { ctx.clearRect(0,0,500,150); ctx.beginPath(); firmaData=null; }
-
-// ═══ PDF ═══
-function exportPDF(id) {
-  const r = interventi.find(x => x.id === id);
+function pdf(id) {
+  const r = dati.find(x => x.id === id);
   const { jsPDF } = window.jspdf; const doc = new jsPDF();
-  doc.text("REPORT INTERVENTO", 10, 10);
-  doc.autoTable({ startY: 20, body: [['ID', r.id], ['Data', r.data], ['Operatore', r.operatore], ['Desc', r.desc]] });
-  doc.save(`report_${r.id}.pdf`);
+  doc.text("INFORME DE TRABAJO", 15, 20);
+  doc.text(`Operario: ${r.operatore} | Fecha: ${r.data} | Casa: ${r.casa}`, 15, 35);
+  doc.text("Descripción del trabajo:", 15, 50);
+  doc.text(r.desc || "", 15, 60);
+  if (r.firma) doc.addImage(r.firma, 'PNG', 140, 25, 50, 15);
+  doc.save(`informe_${r.casa}_${r.data}.pdf`);
 }
-
-function openLight(src) { document.getElementById('lightboxImg').src = src; document.getElementById('lightbox').classList.add('open'); }
-
-render();
-if (supabase) { sync(); supabase.channel('obs').on('postgres_changes',{event:'*',schema:'public',table:'interventi'},sync).subscribe(); }
+if (db) sync();
 </script>
 </body>
 </html>
