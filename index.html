@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CellaTesto PRO — Suite Gestionale Avanzata</title>
+<title>CellaTesto PRO — Suite Gestionale</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
@@ -33,7 +33,7 @@ td { padding: 15px; border-bottom: 1px solid var(--border); }
 label { display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #777; margin-bottom: 6px; }
 input, textarea, select { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; background: #fafafa; }
 .photo-zone { border: 2px dashed var(--border); border-radius: 10px; padding: 1rem; text-align: center; cursor: pointer; background: #fbfbfb; }
-.img-prev { max-height: 80px; margin-top: 5px; border-radius: 4px; border: 1px solid #ddd; }
+.img-prev { max-height: 80px; margin-top: 5px; border-radius: 4px; }
 </style>
 </head>
 <body>
@@ -44,25 +44,25 @@ input, textarea, select { width: 100%; padding: 12px; border: 1px solid var(--bo
 </header>
 
 <div class="tabs">
-  <div class="tab active" onclick="switchView('interventi', this)">Registro Giornaliero</div>
-  <div class="tab" onclick="switchView('magazzino', this)">Inventario Magazzino</div>
+  <div class="tab active" onclick="switchView('interventi', this)">Registro Lavori</div>
+  <div class="tab" onclick="switchView('magazzino', this)">Gestione Magazzino Inventario</div>
 </div>
 
 <div class="container">
-  <!-- REGISTRO INTERVENTI -->
+  <!-- INTERVENTI -->
   <div id="view-interventi" class="view active">
     <div class="toolbar">
-      <h1>Registro Giornaliero Interventi</h1>
+      <h1>Registro Giornaliero</h1>
       <div style="display:flex; gap:10px;">
         <button class="btn" style="background:#b84a00; color:#fff; border:none;" onclick="exportBulk()">📄 Report Selezionati</button>
         <button class="btn btn-primary" onclick="openModal('int')">+ Nuovo Intervento</button>
       </div>
     </div>
     <div class="card">
-      <table id="tbl-int">
+      <table>
         <thead><tr>
           <th><input type="checkbox" onclick="toggleAll(this)"></th>
-          <th>Data</th><th>Bungalow</th><th>Responsabile</th><th>Operaio</th><th>Foto</th><th>Azioni</th>
+          <th>Data</th><th>Bungalow</th><th>Responsabile</th><th>Operaio</th><th>Azioni</th>
         </tr></thead>
         <tbody id="tb-interventi"></tbody>
       </table>
@@ -72,12 +72,12 @@ input, textarea, select { width: 100%; padding: 12px; border: 1px solid var(--bo
   <!-- MAGAZZINO -->
   <div id="view-magazzino" class="view">
     <div class="toolbar">
-      <h1>Giacenze Magazzino</h1>
-      <button class="btn btn-primary" onclick="openModal('mag')">+ Aggiungi Materiale</button>
+      <h1>Magazzino / Materiali</h1>
+      <button class="btn btn-primary" onclick="openModal('mag')">+ Aggiungi a Inventario</button>
     </div>
     <div class="card">
       <table>
-        <thead><tr><th>Materiale</th><th>Giacenza</th><th>Unità</th><th>Azioni</th></tr></thead>
+        <thead><tr><th>Articolo</th><th>Giacenza</th><th>Unità</th><th>Azioni</th></tr></thead>
         <tbody id="tb-magazzino"></tbody>
       </table>
     </div>
@@ -87,52 +87,48 @@ input, textarea, select { width: 100%; padding: 12px; border: 1px solid var(--bo
 <!-- MODALE -->
 <div class="modal" id="modalApp">
   <div class="modal-content">
-    <h2 id="m-title" style="margin-bottom:2rem; color:var(--accent);">Nuovo Rapporto Intervento</h2>
-    
+    <h2 id="m-title" style="margin-bottom:1.5rem; color:var(--accent);">Nuovo Intervento</h2>
     <div id="form-int" class="grid">
       <div><label>Data</label><input type="date" id="f-data"></div>
-      <div><label>Città (Meteo)</label><div style="display:flex; gap:5px;"><input type="text" id="f-citta" placeholder="Roma"><button class="btn" onclick="getWeather()">☁️</button></div></div>
-      <div class="full"><label>Meteo e Vento (Aggiornato)</label><input type="text" id="f-meteo" readonly style="background:#f0f7f3; font-weight:600;"></div>
+      <div><label>Città (Meteo)</label><div style="display:flex; gap:5px;"><input type="text" id="f-citta"><button class="btn" onclick="getWeather()">☁️</button></div></div>
+      <div class="full"><label>Meteo Auto</label><input type="text" id="f-meteo" readonly style="background:#f0f7f3; font-weight:600;"></div>
       
       <div><label>N. Operatori</label><input type="number" id="f-nop" value="1"></div>
-      <div><label>Responsabile</label><input type="text" id="f-responsabile" placeholder="Capo Cantiere"></div>
-      <div><label>Operaio / Operatore</label><input type="text" id="f-operaio" placeholder="Esecutore"></div>
-      <div><label>Area Lavoro</label><input type="text" id="f-area" placeholder="Es: Area Sport"></div>
-      <div><label>Bungalow / Casetta</label><input type="text" id="f-casetta" placeholder="N. 195"></div>
+      <div><label>Responsabile</label><input type="text" id="f-responsabile"></div>
+      <div><label>Operaio / Operatore</label><input type="text" id="f-operaio"></div>
+      <div><label>Area</label><input type="text" id="f-area"></div>
+      <div><label>Bungalow / Casetta</label><input type="text" id="f-casetta"></div>
       
-      <div><label>Materiale Magazzino</label><select id="f-mat-sel"></select></div>
-      <div><label>Qtà Scaricata</label><input type="number" id="f-mat-qty" value="0"></div>
+      <div><label>Seleziona Materiale</label><select id="f-mat-sel"></select></div>
+      <div><label>Quantità Usata</label><input type="number" id="f-mat-qty" value="0"></div>
       
-      <div class="full"><label>Descrizione Dettagliata Lavoro</label><textarea id="f-desc" rows="3"></textarea></div>
+      <div class="full"><label>Descrizione</label><textarea id="f-desc" rows="2"></textarea></div>
       
-      <div><label>Foto PRIMA</label><div class="photo-zone" onclick="document.getElementById('i-p').click()"><input type="file" id="i-p" hidden onchange="processFile(this,'p')"><div id="v-p">Carica / Scatta</div></div><textarea id="f-n-p" placeholder="Commento Stato Iniziale"></textarea></div>
-      <div><label>Foto DOPO</label><div class="photo-zone" onclick="document.getElementById('i-d').click()"><input type="file" id="i-d" hidden onchange="processFile(this,'d')"><div id="v-d">Carica / Scatta</div></div><textarea id="f-n-d" placeholder="Commento Stato Finale"></textarea></div>
+      <div><label>Foto PRIMA</label><div class="photo-zone" onclick="document.getElementById('i-p').click()"><input type="file" id="i-p" hidden onchange="processFile(this,'p')"><div id="v-p">Carica</div></div><textarea id="f-n-p" placeholder="Nota foto prima"></textarea></div>
+      <div><label>Foto DOPO</label><div class="photo-zone" onclick="document.getElementById('i-d').click()"><input type="file" id="i-d" hidden onchange="processFile(this,'d')"><div id="v-d">Carica</div></div><textarea id="f-n-d" placeholder="Nota foto dopo"></textarea></div>
       
-      <div class="full"><label>Firma per Chiusura Lavoro</label><canvas id="canvasF" width="800" height="180" style="width:100%; border:1px solid #ddd; border-radius:8px; touch-action:none;"></canvas></div>
+      <div class="full"><label>Firma</label><canvas id="canvasF" width="800" height="150" style="width:100%; border:1px solid #ddd; touch-action:none;"></canvas></div>
       
-      <div class="full" style="display:flex; justify-content:flex-end; gap:10px; margin-top:1rem;">
+      <div class="full" style="display:flex; justify-content:flex-end; gap:10px;">
         <button class="btn" onclick="closeModal()">Annulla</button>
-        <button class="btn btn-primary" onclick="salvaIntervento()">💾 Salva e Scarica PDF</button>
+        <button class="btn btn-primary" onclick="salvaIntervento()">💾 Salva nel Registro</button>
       </div>
     </div>
 
-    <!-- MAGAZZINO -->
+    <!-- FORM MAGAZZINO -->
     <div id="form-mag" class="grid" style="display:none;">
-      <div class="full"><label>Nome Materiale</label><input type="text" id="m-nome"></div>
-      <div><label>Giacenza Iniziale</label><input type="number" id="m-qty"></div>
+      <div class="full"><label>Nome Articolo</label><input type="text" id="m-nome"></div>
+      <div><label>Quantità</label><input type="number" id="m-qty"></div>
       <div><label>Unità</label><input type="text" id="m-unita" value="pz"></div>
-      <div class="full" style="display:flex; justify-content:flex-end; gap:10px;">
-        <button class="btn" onclick="closeModal()">Annulla</button>
-        <button class="btn btn-primary" onclick="salvaMagazzino()">📦 Aggiungi Materiale</button>
-      </div>
+      <div class="full" style="display:flex; justify-content:flex-end;"><button class="btn btn-primary" onclick="salvaMagazzino()">📦 Salva in Inventario</button></div>
     </div>
   </div>
 </div>
 
 <script>
-// --- CHIAVI SUPABASE ---
+// --- CHIAVI ---
 const S_URL = 'https://ukzconegwpoaculadefx.supabase.co/rest/v1/.supabase.co'; 
-const S_KEY = 'sb_publishable_dS8SzPIks90Yd1ISjsXQFQ_T8VtusA1';
+const S_KEY = 'https://ukzconegwpoaculadefx.supabase.co/rest/v1/.supabase.co';
 let db = null;
 if (window.supabase) db = window.supabase.createClient(S_URL, S_KEY);
 
@@ -151,74 +147,36 @@ async function sync() {
   const { data: i } = await db.from('interventi').select('*').order('data', {ascending:false});
   materiali = m || []; interventi = i || [];
   render(); updateSelect();
-  document.getElementById('sync-status').textContent = '✅ Cloud Sincronizzato';
+  document.getElementById('sync-status').textContent = '✅ Sincronizzato';
 }
 
 function render() {
   document.getElementById('tb-interventi').innerHTML = interventi.map(r => `<tr>
     <td><input type="checkbox" class="sel-row" value="${r.id}"></td>
-    <td>${r.data}</td><td><b>${r.casa || r.casetta || '-'}</b></td><td>${r.operatore || r.responsabile || '-'}</td><td>${r.operaio || '-'}</td>
-    <td>${r.fotoPrima ? '📸' : '-'}</td>
+    <td>${r.data}</td><td><b>${r.casetta || '-'}</b></td><td>${r.responsabile || '-'}</td><td>${r.operaio || '-'}</td>
     <td><button class="btn" style="padding:4px 8px;" onclick="pdf('${r.id}')">📄 PDF</button></td>
   </tr>`).join('');
   document.getElementById('tb-magazzino').innerHTML = materiali.map(m => `<tr>
-    <td><b>${m.nome}</b></td><td style="color:${m.qty < 5 ? '#b84a00' : 'inherit'}">${m.qty}</td><td>${m.unita}</td>
+    <td><b>${m.nome}</b></td><td>${m.qty}</td><td>${m.unita}</td>
     <td><button class="btn" onclick="delMat('${m.id}')">🗑️</button></td>
   </tr>`).join('');
 }
 
 function updateSelect() {
   const sel = document.getElementById('f-mat-sel');
-  sel.innerHTML = '<option value="">-- Nessuno --</option>' + materiali.map(m => `<option value="${m.nome}">${m.nome} (Disp: ${m.qty})</option>`).join('');
+  sel.innerHTML = '<option value="">-- Seleziona --</option>' + materiali.map(m => `<option value="${m.nome}">${m.nome} (${m.qty} disp)</option>`).join('');
 }
 
 function openModal(t) {
   document.getElementById('modalApp').classList.add('open');
   if(t==='int'){
     document.getElementById('form-int').style.display='grid'; document.getElementById('form-mag').style.display='none';
-    document.getElementById('m-title').textContent = 'Nuovo Rapporto Intervento';
-    initCanvas();
+    initCanvas(); updateSelect();
   } else {
     document.getElementById('form-int').style.display='none'; document.getElementById('form-mag').style.display='grid';
-    document.getElementById('m-title').textContent = 'Nuovo Articolo Magazzino';
   }
 }
 function closeModal() { document.getElementById('modalApp').classList.remove('open'); }
-
-async function getWeather() {
-  const city = document.getElementById('f-citta').value; if(!city) return;
-  try {
-    const gR = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${city}`);
-    const g = await gR.json();
-    const wR = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${g[0].lat}&longitude=${g[0].lon}&current_weather=true&hourly=precipitation`);
-    const w = await wR.json();
-    const c = w.current_weather; const p = w.hourly.precipitation[0]===0?"Assenti":"Attive";
-    document.getElementById('f-meteo').value = `${city.toUpperCase()} | Temp: ${c.temperature}°C | Piogge: ${p} | Vento: ${c.windspeed}km/h`;
-  } catch(e) { document.getElementById('f-meteo').value = "Meteo non disponibile"; }
-}
-
-function processFile(input, type) {
-  const reader = new FileReader(); reader.onload = (e) => {
-    const i = new Image(); i.onload = () => {
-      const cv = document.createElement('canvas'); const MAX = 600; const s = MAX / i.width;
-      cv.width = MAX; cv.height = i.height * s;
-      const ctx = cv.getContext('2d'); ctx.drawImage(i, 0, 0, cv.width, cv.height);
-      const res = cv.toDataURL('image/jpeg', 0.5);
-      if(type==='p'){ imgP=res; document.getElementById('v-p').innerHTML=`<img src="${res}" class="img-prev">`; }
-      else { imgD=res; document.getElementById('v-d').innerHTML=`<img src="${res}" class="img-prev">`; }
-    }; i.src = e.target.result;
-  }; reader.readAsDataURL(input.files[0]);
-}
-
-let ctx, drw=false;
-function initCanvas() {
-  const c = document.getElementById('canvasF'); ctx = c.getContext('2d');
-  const pos = (e) => { const r = c.getBoundingClientRect(); return { x: (e.clientX || (e.touches && e.touches[0].clientX)) - r.left, y: (e.clientY || (e.touches && e.touches[0].clientY)) - r.top }; };
-  const s=(e)=>{drw=true; ctx.beginPath(); const p=pos(e); ctx.moveTo(p.x,p.y);};
-  const w=(e)=>{if(!drw)return; e.preventDefault(); const p=pos(e); ctx.lineTo(p.x,p.y); ctx.stroke();};
-  c.onmousedown=s; c.ontouchstart=s; c.onmousemove=w; c.ontouchmove=w;
-  window.onmouseup = window.ontouchend = () => { if(drw){drw=false; imgF=c.toDataURL();} };
-}
 
 async function salvaIntervento() {
   const row = {
@@ -235,48 +193,72 @@ async function salvaIntervento() {
     const art = materiali.find(m => m.nome === row.mat);
     await db.from('materiali').update({ qty: Math.max(0, art.qty - row.qty) }).eq('id', art.id);
   }
-  closeModal(); pdf_gen(row); sync();
+  closeModal(); sync();
 }
 
 async function salvaMagazzino() {
   const art = { id: 'M-'+Date.now(), nome: document.getElementById('m-nome').value, qty: parseInt(document.getElementById('m-qty').value), unita: document.getElementById('m-unita').value };
-  await db.from('materiali').insert([art]); closeModal(); sync();
+  await db.from('materiali').insert([art]);
+  closeModal(); sync();
 }
 
-function pdf_gen(r) {
+async function getWeather() {
+  const city = document.getElementById('f-citta').value; if(!city) return;
+  try {
+    const gR = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${city}`);
+    const g = await gR.json();
+    const wR = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${g[0].lat}&longitude=${g[0].lon}&current_weather=true&hourly=precipitation`);
+    const w = await wR.json();
+    document.getElementById('f-meteo').value = `${city.toUpperCase()} | Temp: ${w.current_weather.temperature}°C | Vento: ${w.current_weather.windspeed}km/h`;
+  } catch(e) {}
+}
+
+function processFile(input, type) {
+  const reader = new FileReader(); reader.onload = (e) => {
+    const i = new Image(); i.onload = () => {
+      const cv=document.createElement('canvas'); const s=600/i.width; cv.width=600; cv.height=i.height*s;
+      cv.getContext('2d').drawImage(i,0,0,600,cv.height);
+      const res=cv.toDataURL('image/jpeg',0.5);
+      if(type==='p'){ imgP=res; document.getElementById('v-p').innerHTML=`<img src="${res}" class="img-prev">`; }
+      else { imgD=res; document.getElementById('v-d').innerHTML=`<img src="${res}" class="img-prev">`; }
+    }; i.src=e.target.result;
+  }; reader.readAsDataURL(input.files[0]);
+}
+
+let ctx, drw=false;
+function initCanvas() {
+  const c = document.getElementById('canvasF'); ctx = c.getContext('2d');
+  const pos=(e)=>{ const r=c.getBoundingClientRect(); return { x:(e.clientX||(e.touches&&e.touches[0].clientX))-r.left, y:(e.clientY||(e.touches&&e.touches[0].clientY))-r.top }; };
+  c.onmousedown=(e)=>{drw=true; ctx.beginPath(); const p=pos(e); ctx.moveTo(p.x,p.y);};
+  c.onmousemove=(e)=>{if(!drw)return; e.preventDefault(); const p=pos(e); ctx.lineTo(p.x,p.y); ctx.stroke();};
+  window.onmouseup=()=>{drw=false; imgF=c.toDataURL();};
+}
+
+function pdf(id) {
+  const r = interventi.find(x => x.id === id);
   const { jsPDF } = window.jspdf; const doc = new jsPDF();
-  doc.setFontSize(22); doc.text("TECHNICAL WORK REPORT", 15, 20);
+  doc.text("REPORT INTERVENTO", 15, 20);
   doc.setFontSize(10);
-  doc.text(`DATA: ${r.data} | BUNGALOW: ${r.casetta || '-'} | AREA: ${r.area || '-'}`, 15, 30);
-  doc.text(`RESPONSABILE: ${r.responsabile} | OPERATORE: ${r.operaio}`, 15, 36);
-  doc.text(`METEO: ${r.meteo}`, 15, 42);
-  doc.line(15, 45, 195, 45);
-  doc.text("LAVORO ESEGUITO:", 15, 52); doc.text(r.desc || "-", 15, 58, { maxWidth: 170 });
-  doc.text(`MATERIALI USATI: ${r.mat || "-"} (Qtà: ${r.qty || 0})`, 15, 80);
-  
-  doc.text(`NOTA FOTO PRIMA: ${r.descPrima || "-"}`, 15, 95);
-  if(r.fotoPrima) doc.addImage(r.fotoPrima, 'JPEG', 15, 100, 80, 55);
-  
-  doc.text(`NOTA FOTO DOPO: ${r.descDopo || "-"}`, 110, 95);
-  if(r.fotoDopo) doc.addImage(r.fotoDopo, 'JPEG', 110, 100, 80, 55);
-  
-  if(r.firma) doc.addImage(r.firma, 'PNG', 140, 165, 45, 15);
-  doc.save(`report_${r.casetta}_${r.data}.pdf`);
+  doc.text(`Data: ${r.data} | Bungalow: ${r.casetta}`, 15, 30);
+  doc.text(`Resp: ${r.responsabile} | Op: ${r.operaio}`, 15, 36);
+  if(r.fotoPrima) doc.addImage(r.fotoPrima, 'JPEG', 15, 45, 80, 50);
+  if(r.fotoDopo) doc.addImage(r.fotoDopo, 'JPEG', 110, 45, 80, 50);
+  doc.save(`intervento_${r.casetta}.pdf`);
 }
 
-function pdf(id) { pdf_gen(interventi.find(x => x.id === id)); }
-async function delMat(id) { if(confirm("Eliminare?")) { await db.from('materiali').delete().eq('id', id); sync(); } }
 function toggleAll(cb) { document.querySelectorAll('.sel-row').forEach(x => x.checked = cb.checked); }
 
 function exportBulk() {
   const ids = Array.from(document.querySelectorAll('.sel-row:checked')).map(x => x.value);
-  if(!ids.length) return alert("Seleziona almeno un intervento!");
+  if(!ids.length) return alert("Seleziona righe!");
   const { jsPDF } = window.jspdf; const doc = new jsPDF();
-  doc.text("RIEPILOGO INTERVENTI SELEZIONATI", 15, 20);
-  let rows = interventi.filter(x => ids.includes(x.id)).map(x => [x.data, x.casetta, x.responsabile, x.desc.substring(0, 50)+'...']);
-  doc.autoTable({ head: [['Data', 'Bungalow', 'Responsabile', 'Descrizione']], body: rows, startY: 30 });
+  doc.text("REPORT SETTIMANALE SELEZIONATO", 15, 20);
+  let rows = interventi.filter(x => ids.includes(x.id)).map(x => [x.data, x.casetta, x.responsabile, x.desc.substring(0,40)]);
+  doc.autoTable({ head: [['Data', 'Bungalow', 'Respon.', 'Lavoro']], body: rows, startY: 30 });
   doc.save("report_settimanale.pdf");
 }
+
+async function delMat(id) { if(confirm("Elimina?")) { await db.from('materiali').delete().eq('id', id); sync(); } }
 
 if (db) sync();
 </script>
