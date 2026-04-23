@@ -1,0 +1,1378 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CellaTesto — Gestione Interventi</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root {
+  --bg: #f4f3ef;
+  --surface: #ffffff;
+  --surface2: #f9f8f5;
+  --border: #e2e0d8;
+  --border2: #ccc9be;
+  --text: #1a1916;
+  --text2: #5c5a54;
+  --text3: #9c9a94;
+  --accent: #2a5c45;
+  --accent2: #1e4433;
+  --accent-light: #e8f2ed;
+  --accent-mid: #4a9470;
+  --warn: #b84a00;
+  --warn-light: #fff0e6;
+  --info: #1a4a7a;
+  --info-light: #e8f0fa;
+  --danger: #8b1a1a;
+  --danger-light: #faeaea;
+  --success: #1a5c2a;
+  --success-light: #eaf5ec;
+  --radius: 10px;
+  --radius-sm: 6px;
+  --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.04);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  min-height: 100vh;
+}
+
+/* ── HEADER ── */
+.app-header {
+  background: var(--accent);
+  color: #fff;
+  padding: 0 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 56px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+.app-logo {
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.app-logo span {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  background: rgba(255,255,255,0.18);
+  padding: 2px 7px;
+  border-radius: 4px;
+  letter-spacing: 0.05em;
+}
+.header-actions { display: flex; gap: 8px; }
+.btn-header {
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.25);
+  color: #fff;
+  padding: 6px 14px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 12px;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 500;
+  transition: background 0.15s;
+  display: flex; align-items: center; gap: 6px;
+}
+.btn-header:hover { background: rgba(255,255,255,0.25); }
+
+/* ── TABS ── */
+.tabs-bar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0 1.5rem;
+  display: flex;
+  gap: 0;
+}
+.tab-btn {
+  padding: 12px 20px;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: 'DM Sans', sans-serif;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: var(--text2);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: all 0.15s;
+  display: flex; align-items: center; gap: 7px;
+}
+.tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+.tab-btn:hover { color: var(--text); }
+.badge-count {
+  background: var(--accent-light);
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 1px 7px;
+  border-radius: 10px;
+  font-family: 'DM Mono', monospace;
+}
+
+/* ── MAIN LAYOUT ── */
+.main-content { padding: 1.5rem; max-width: 1400px; margin: 0 auto; }
+
+/* ── TOOLBAR ── */
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.toolbar-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.search-box {
+  position: relative;
+  display: flex; align-items: center;
+}
+.search-box input {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 7px 12px 7px 32px;
+  font-size: 13px;
+  font-family: 'DM Sans', sans-serif;
+  color: var(--text);
+  width: 220px;
+  transition: border 0.15s;
+}
+.search-box input:focus { outline: none; border-color: var(--accent-mid); }
+.search-icon {
+  position: absolute; left: 10px;
+  color: var(--text3); font-size: 13px; pointer-events: none;
+}
+
+.btn {
+  padding: 7px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.btn:hover { background: var(--surface2); border-color: var(--border2); }
+.btn-primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+.btn-primary:hover { background: var(--accent2); border-color: var(--accent2); }
+.btn-danger { background: var(--danger-light); border-color: #e0a0a0; color: var(--danger); }
+.btn-danger:hover { background: #f5d0d0; }
+.btn-export { background: var(--info-light); border-color: #9ab5d8; color: var(--info); }
+.btn-export:hover { background: #d5e4f5; }
+
+/* ── TABLE ── */
+.table-wrapper {
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.table-scroll { overflow-x: auto; }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+thead th {
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 12px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text2);
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+}
+thead th:hover { color: var(--text); }
+tbody tr {
+  border-bottom: 1px solid var(--border);
+  transition: background 0.1s;
+}
+tbody tr:last-child { border-bottom: none; }
+tbody tr:hover { background: var(--surface2); }
+tbody td {
+  padding: 10px 12px;
+  vertical-align: middle;
+  color: var(--text);
+}
+.cell-mono {
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  color: var(--text2);
+}
+.cell-img {
+  width: 44px; height: 44px;
+  border-radius: 6px;
+  object-fit: cover;
+  border: 1px solid var(--border);
+  cursor: pointer;
+}
+.cell-img-placeholder {
+  width: 44px; height: 44px;
+  border-radius: 6px;
+  background: var(--surface2);
+  border: 1px dashed var(--border2);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text3); font-size: 16px;
+}
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: 'DM Mono', monospace;
+}
+.badge-green { background: var(--success-light); color: var(--success); }
+.badge-orange { background: var(--warn-light); color: var(--warn); }
+.badge-blue { background: var(--info-light); color: var(--info); }
+.action-btns { display: flex; gap: 6px; }
+.btn-icon {
+  width: 30px; height: 30px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px;
+  transition: all 0.15s;
+}
+.btn-icon:hover { background: var(--surface2); border-color: var(--border2); }
+.btn-icon.del:hover { background: var(--danger-light); border-color: #e0a0a0; }
+
+.empty-state {
+  padding: 3rem;
+  text-align: center;
+  color: var(--text3);
+}
+.empty-state .empty-icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
+.empty-state p { font-size: 14px; }
+
+/* ── MODAL ── */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 200;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 1.5rem;
+  overflow-y: auto;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--surface);
+  border-radius: 14px;
+  width: 100%;
+  max-width: 860px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.18);
+  margin: auto;
+}
+.modal-header {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.modal-header h2 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+  display: flex; align-items: center; gap: 8px;
+}
+.modal-body { padding: 1.5rem; }
+.modal-footer {
+  padding: 1.25rem 1.5rem;
+  border-top: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: flex-end;
+  gap: 10px;
+}
+
+/* ── FORM ── */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+.form-group { display: flex; flex-direction: column; gap: 5px; }
+.form-group.full { grid-column: 1 / -1; }
+.form-group label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text2);
+}
+.form-group input,
+.form-group textarea,
+.form-group select {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  font-size: 13px;
+  font-family: 'DM Sans', sans-serif;
+  color: var(--text);
+  transition: border 0.15s;
+  width: 100%;
+}
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: var(--accent-mid);
+  background: #fff;
+}
+.form-group textarea { resize: vertical; min-height: 70px; }
+
+.photo-upload-zone {
+  border: 2px dashed var(--border2);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.15s;
+  background: var(--surface2);
+  position: relative;
+}
+.photo-upload-zone:hover { border-color: var(--accent-mid); background: var(--accent-light); }
+.photo-upload-zone input[type=file] {
+  position: absolute; inset: 0;
+  opacity: 0; cursor: pointer;
+  width: 100%; height: 100%;
+}
+.photo-preview {
+  width: 100%;
+  max-height: 180px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+.upload-hint { font-size: 12px; color: var(--text3); margin-top: 4px; }
+
+.section-divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 1.25rem 0;
+}
+.section-label {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  margin-bottom: 1rem;
+  display: flex; align-items: center; gap: 8px;
+}
+.section-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--accent-light);
+}
+
+/* ── FIRMA ── */
+.firma-canvas-wrap {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: #fff;
+  overflow: hidden;
+}
+canvas#firmaCanvas { display: block; touch-action: none; }
+.firma-actions { display: flex; gap: 8px; margin-top: 6px; }
+
+/* ── LIGHTBOX ── */
+.lightbox {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.85);
+  z-index: 300;
+  align-items: center;
+  justify-content: center;
+}
+.lightbox.open { display: flex; }
+.lightbox img { max-width: 90vw; max-height: 88vh; border-radius: 8px; }
+.lightbox-close {
+  position: fixed; top: 16px; right: 16px;
+  background: rgba(255,255,255,0.15);
+  border: none; color: #fff;
+  width: 40px; height: 40px; border-radius: 50%;
+  font-size: 20px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* ── STATS BAR ── */
+.stats-bar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+  margin-bottom: 1.25rem;
+}
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 16px;
+  box-shadow: var(--shadow);
+}
+.stat-label { font-size: 11px; color: var(--text3); font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+.stat-value { font-size: 22px; font-weight: 600; font-family: 'DM Mono', monospace; color: var(--text); }
+.stat-value.accent { color: var(--accent); }
+.stat-value.warn { color: var(--warn); }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 640px) {
+  .app-header { padding: 0 1rem; }
+  .main-content { padding: 1rem; }
+  .toolbar { flex-direction: column; align-items: flex-start; }
+  .search-box input { width: 100%; }
+  .modal { border-radius: 0; min-height: 100vh; }
+  .modal-overlay { padding: 0; }
+  table { font-size: 12px; }
+  thead th, tbody td { padding: 8px; }
+}
+
+.text-truncate { max-width: 140px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.confirm-check { color: var(--success); font-size: 16px; }
+.no-confirm { color: var(--text3); font-size: 14px; }
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="app-logo">
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="2" y="2" width="7" height="7" rx="2" fill="rgba(255,255,255,0.9)"/><rect x="11" y="2" width="7" height="7" rx="2" fill="rgba(255,255,255,0.55)"/><rect x="2" y="11" width="7" height="7" rx="2" fill="rgba(255,255,255,0.55)"/><rect x="11" y="11" width="7" height="7" rx="2" fill="rgba(255,255,255,0.75)"/></svg>
+    CellaTesto
+    <span>v1.0</span>
+    <span id="sync-status" style="font-size:10px; margin-left:10px; padding:2px 6px; border-radius:4px; background:rgba(255,255,255,0.1);">☁️ Locale</span>
+  </div>
+  <div class="header-actions">
+    <button class="btn-header" onclick="exportCSV('interventi')">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1v8M4 6l3 3 3-3M2 11h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Export CSV
+    </button>
+  </div>
+</header>
+
+<nav class="tabs-bar">
+  <button class="tab-btn active" onclick="switchTab('interventi', this)">
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="1" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.3"/><path d="M4 5h6M4 8h4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+    Registro Interventi
+    <span class="badge-count" id="badge-interventi">0</span>
+  </button>
+  <button class="tab-btn" onclick="switchTab('materiali', this)">
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 4l5-3 5 3v6l-5 3-5-3V4z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+    Magazzino Materiali
+    <span class="badge-count" id="badge-materiali">0</span>
+  </button>
+</nav>
+
+<!-- ═══════════════ INTERVENTI TAB ═══════════════ -->
+<div id="tab-interventi" class="main-content">
+
+  <div class="stats-bar">
+    <div class="stat-card">
+      <div class="stat-label">Interventi totali</div>
+      <div class="stat-value accent" id="stat-tot">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Confermati</div>
+      <div class="stat-value" id="stat-conf">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">In attesa</div>
+      <div class="stat-value warn" id="stat-pend">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Operatori unici</div>
+      <div class="stat-value" id="stat-ops">0</div>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <div class="toolbar-left">
+      <div class="search-box">
+        <span class="search-icon">⌕</span>
+        <input type="text" id="searchInterventi" placeholder="Cerca interventi..." oninput="renderInterventi()">
+      </div>
+      <button class="btn btn-export" onclick="exportCSV('interventi')">
+        ↓ CSV Interventi
+      </button>
+      <button class="btn btn-export" onclick="exportWeeklyReport()" style="background:#fcf3cf; border-color:#f1c40f; color:#9a7d0a;">
+        📅 Report Settimanale
+      </button>
+    </div>
+    <button class="btn btn-primary" onclick="openModal('intervento')">
+      + Nuovo Intervento
+    </button>
+  </div>
+
+  <div class="table-wrapper">
+    <div class="table-scroll">
+      <table id="tableInterventi">
+        <thead>
+          <tr>
+            <th onclick="sortTable('interventi','id')">ID</th>
+            <th onclick="sortTable('interventi','data')">Data</th>
+            <th onclick="sortTable('interventi','meteo')">Meteo</th>
+            <th>N.Op</th>
+            <th onclick="sortTable('interventi','operatore')">Operatore</th>
+            <th>Casa/Bung.</th>
+            <th>Area</th>
+            <th>Descrizione</th>
+            <th>Foto Prima</th>
+            <th>Foto Dopo</th>
+            <th>Materiale</th>
+            <th>Qtà</th>
+            <th>Firma</th>
+            <th>Conf.</th>
+            <th>Azioni</th>
+          </tr>
+        </thead>
+        <tbody id="bodyInterventi"></tbody>
+      </table>
+    </div>
+    <div id="emptyInterventi" class="empty-state">
+      <div class="empty-icon">📋</div>
+      <p>Nessun intervento registrato. Clicca <strong>+ Nuovo Intervento</strong> per iniziare.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ MATERIALI TAB ═══════════════ -->
+<div id="tab-materiali" class="main-content" style="display:none">
+
+  <div class="stats-bar">
+    <div class="stat-card">
+      <div class="stat-label">Prodotti totali</div>
+      <div class="stat-value accent" id="stat-mat-tot">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Valore magazzino</div>
+      <div class="stat-value" id="stat-mat-val">€ 0,00</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Scorte basse (&lt;5)</div>
+      <div class="stat-value warn" id="stat-mat-low">0</div>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <div class="toolbar-left">
+      <div class="search-box">
+        <span class="search-icon">⌕</span>
+        <input type="text" id="searchMateriali" placeholder="Cerca materiali..." oninput="renderMateriali()">
+      </div>
+      <button class="btn btn-export" onclick="exportCSV('materiali')">
+        ↓ CSV Materiali
+      </button>
+    </div>
+    <button class="btn btn-primary" onclick="openModal('materiale')">
+      + Nuovo Materiale
+    </button>
+  </div>
+
+  <div class="table-wrapper">
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th onclick="sortTable('materiali','id')">ID Materiale</th>
+            <th onclick="sortTable('materiali','nome')">Nome Prodotto</th>
+            <th onclick="sortTable('materiali','giacenza')">Giacenza Attuale</th>
+            <th onclick="sortTable('materiali','prezzo')">Prezzo Unitario</th>
+            <th>Valore Stock</th>
+            <th>Stato</th>
+            <th>Azioni</th>
+          </tr>
+        </thead>
+        <tbody id="bodyMateriali"></tbody>
+      </table>
+    </div>
+    <div id="emptyMateriali" class="empty-state">
+      <div class="empty-icon">📦</div>
+      <p>Nessun materiale in magazzino. Clicca <strong>+ Nuovo Materiale</strong> per aggiungerne uno.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ MODAL INTERVENTO ═══════════════ -->
+<div class="modal-overlay" id="modalIntervento">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="14" height="14" rx="3" stroke="var(--accent)" stroke-width="1.5"/><path d="M5 6h6M5 9h4" stroke="var(--accent)" stroke-width="1.4" stroke-linecap="round"/></svg>
+        <span id="modalIntTitle">Nuovo Intervento</span>
+      </h2>
+      <button class="btn-icon" onclick="closeModal('modalIntervento')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>ID Intervento</label>
+          <input type="text" id="f-id" placeholder="Auto-generato" readonly style="background:#f0f0ec; color:var(--text3)">
+        </div>
+        <div class="form-group">
+          <label>Data</label>
+          <input type="date" id="f-data">
+        </div>
+        <div class="form-group">
+          <label>Meteo</label>
+          <select id="f-meteo">
+            <option value="">— Seleziona —</option>
+            <option>☀️ Soleggiato</option>
+            <option>⛅ Parzialmente nuvoloso</option>
+            <option>☁️ Nuvoloso</option>
+            <option>🌧️ Pioggia</option>
+            <option>⛈️ Temporale</option>
+            <option>🌬️ Vento</option>
+            <option>❄️ Neve</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>N. Operai</label>
+          <input type="number" id="f-nop" min="0" placeholder="0">
+        </div>
+        <div class="form-group">
+          <label>Nome Operatore</label>
+          <input type="text" id="f-operatore" placeholder="Nome e cognome">
+        </div>
+        <div class="form-group">
+          <label>N. Casa / Bungalow</label>
+          <input type="text" id="f-casa" placeholder="es. B12">
+        </div>
+        <div class="form-group">
+          <label>Area</label>
+          <input type="text" id="f-area" placeholder="es. Zona Nord">
+        </div>
+        <div class="form-group full">
+          <label>Descrizione Lavoro</label>
+          <textarea id="f-desc" rows="3" placeholder="Descrivi il lavoro svolto..."></textarea>
+        </div>
+      </div>
+
+      <hr class="section-divider">
+      <div class="section-label">📷 Documentazione fotografica</div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Foto Prima</label>
+          <div class="photo-upload-zone" id="zone-prima">
+            <input type="file" accept="image/*" onchange="handlePhoto(this,'prima')">
+            <div id="preview-prima-wrap">
+              <div style="font-size:1.8rem">📷</div>
+              <div style="font-size:12px; color:var(--text2); margin-top:4px">Carica foto PRIMA</div>
+              <div class="upload-hint">JPG, PNG, HEIC</div>
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Foto Dopo</label>
+          <div class="photo-upload-zone" id="zone-dopo">
+            <input type="file" accept="image/*" onchange="handlePhoto(this,'dopo')">
+            <div id="preview-dopo-wrap">
+              <div style="font-size:1.8rem">📸</div>
+              <div style="font-size:12px; color:var(--text2); margin-top:4px">Carica foto DOPO</div>
+              <div class="upload-hint">JPG, PNG, HEIC</div>
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Descrizione Foto Prima</label>
+          <textarea id="f-desc-prima" rows="2" placeholder="Descrivi la situazione prima..."></textarea>
+        </div>
+        <div class="form-group">
+          <label>Descrizione Foto Dopo</label>
+          <textarea id="f-desc-dopo" rows="2" placeholder="Descrivi il risultato ottenuto..."></textarea>
+        </div>
+      </div>
+
+      <hr class="section-divider">
+      <div class="section-label">🔧 Materiale utilizzato</div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Materiale Usato</label>
+          <input type="text" id="f-mat" placeholder="es. Silicone, Cemento...">
+        </div>
+        <div class="form-group">
+          <label>Quantità Usata</label>
+          <input type="text" id="f-qty" placeholder="es. 2 kg, 5 m²">
+        </div>
+      </div>
+
+      <hr class="section-divider">
+      <div class="section-label">✍️ Firma Operatore</div>
+
+      <div style="display:flex; flex-direction:column; gap:6px;">
+        <div class="firma-canvas-wrap">
+          <canvas id="firmaCanvas" width="800" height="140" style="width:100%; height:140px; cursor:crosshair;"></canvas>
+        </div>
+        <div class="firma-actions">
+          <button class="btn btn-danger" onclick="clearFirma()" style="font-size:12px; padding:5px 12px">✕ Cancella</button>
+          <span style="font-size:11px; color:var(--text3); align-self:center; margin-left:4px;">Firma con mouse o dito</span>
+        </div>
+      </div>
+
+      <hr class="section-divider">
+      <div class="form-group" style="flex-direction:row; align-items:center; gap:10px;">
+        <input type="checkbox" id="f-conferma" style="width:18px; height:18px; accent-color:var(--accent); cursor:pointer;">
+        <label for="f-conferma" style="font-size:13px; font-weight:500; cursor:pointer; text-transform:none; letter-spacing:0;">Intervento confermato e approvato</label>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('modalIntervento')">Annulla</button>
+      <button class="btn btn-primary" onclick="saveIntervento()">💾 Salva Intervento</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ MODAL MATERIALE ═══════════════ -->
+<div class="modal-overlay" id="modalMateriale">
+  <div class="modal" style="max-width:480px;">
+    <div class="modal-header">
+      <h2>
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 5l6-3 6 3v6l-6 3-6-3V5z" stroke="var(--accent)" stroke-width="1.5" stroke-linejoin="round"/></svg>
+        <span id="modalMatTitle">Nuovo Materiale</span>
+      </h2>
+      <button class="btn-icon" onclick="closeModal('modalMateriale')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid" style="grid-template-columns:1fr;">
+        <div class="form-group">
+          <label>ID Materiale</label>
+          <input type="text" id="m-id" placeholder="Auto-generato" readonly style="background:#f0f0ec; color:var(--text3)">
+        </div>
+        <div class="form-group">
+          <label>Nome Prodotto</label>
+          <input type="text" id="m-nome" placeholder="Nome del prodotto">
+        </div>
+        <div class="form-group">
+          <label>Giacenza Attuale</label>
+          <input type="number" id="m-giacenza" min="0" step="0.01" placeholder="0">
+        </div>
+        <div class="form-group">
+          <label>Prezzo Unitario (€)</label>
+          <input type="number" id="m-prezzo" min="0" step="0.01" placeholder="0.00">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('modalMateriale')">Annulla</button>
+      <button class="btn btn-primary" onclick="saveMateriale()">💾 Salva Materiale</button>
+    </div>
+  </div>
+</div>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+  <img id="lightboxImg" src="" alt="Anteprima">
+</div>
+
+<script>
+// ═══ DATA STORE ═══
+let interventi = JSON.parse(localStorage.getItem('ct_interventi') || '[]');
+let materiali = JSON.parse(localStorage.getItem('ct_materiali') || '[]');
+let editingId = null;
+let editingMatId = null;
+let fotoPrima = null;
+let fotoDopo = null;
+let firmaData = null;
+let sortState = { field: null, dir: 1 };
+
+// ═══ SUPABASE CONFIG ═══
+// Sostituisci con le tue credenziali Supabase
+const SUPABASE_URL = 'https://YOUR_PROJECT_ID.supabase.co';
+const SUPABASE_KEY = 'YOUR_ANON_KEY';
+let supabase = null;
+
+if (SUPABASE_URL !== 'https://YOUR_PROJECT_ID.supabase.co') {
+  supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+}
+
+async function syncWithCloud() {
+  if (!supabase) return;
+  document.getElementById('sync-status').textContent = '🔄 Sincronizzazione...';
+  
+  try {
+    // Carica Interventi
+    const { data: intv, error: errI } = await supabase.from('interventi').select('*').order('data', { ascending: false });
+    if (!errI) {
+      interventi = intv;
+      renderInterventi();
+      updateStats();
+    }
+
+    // Carica Materiali
+    const { data: mat, error: errM } = await supabase.from('materiali').select('*');
+    if (!errM) {
+      materiali = mat;
+      renderMateriali();
+      updateStatsMat();
+    }
+
+    document.getElementById('sync-status').textContent = '✅ Cloud Sincronizzato';
+    document.getElementById('sync-status').style.background = 'rgba(74, 148, 112, 0.4)';
+  } catch (e) {
+    console.error("Errore Sync:", e);
+    document.getElementById('sync-status').textContent = '❌ Errore Sync';
+  }
+}
+
+// Realtime listener
+if (supabase) {
+  supabase.channel('cloud-db-changes')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'interventi' }, payload => {
+      console.log('Cambio rilevato in Interventi:', payload);
+      syncWithCloud();
+    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'materiali' }, payload => {
+      syncWithCloud();
+    })
+    .subscribe();
+}
+
+function save() {
+  localStorage.setItem('ct_interventi', JSON.stringify(interventi));
+  localStorage.setItem('ct_materiali', JSON.stringify(materiali));
+  
+  // Se supabase è attivo, salva anche sul cloud
+  if (supabase) {
+    // Nota: in un'app reale questo andrebbe ottimizzato salvando solo il record cambiato
+    // Per ora facciamo un upsert di massa o per singolo record durante saveIntervento
+  }
+}
+
+function genId(prefix, list) {
+  const max = list.reduce((m,x) => {
+    const n = parseInt((x.id||'').replace(prefix,'')) || 0;
+    return n > m ? n : m;
+  }, 0);
+  return prefix + String(max + 1).padStart(4, '0');
+}
+
+// ═══ TABS ═══
+function switchTab(tab, btn) {
+  document.getElementById('tab-interventi').style.display = tab === 'interventi' ? '' : 'none';
+  document.getElementById('tab-materiali').style.display = tab === 'materiali' ? '' : 'none';
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+// ═══ MODAL ═══
+function openModal(type, id) {
+  if (type === 'intervento') {
+    editingId = id || null;
+    fotoPrima = null; fotoDopo = null; firmaData = null;
+    document.getElementById('modalIntTitle').textContent = id ? 'Modifica Intervento' : 'Nuovo Intervento';
+    const form = { id:'', data:'', meteo:'', nop:'', operatore:'', casa:'', area:'', desc:'', descPrima:'', descDopo:'', mat:'', qty:'', conferma:false };
+    if (id) {
+      const r = interventi.find(x => x.id === id);
+      if (r) {
+        Object.assign(form, r);
+        fotoPrima = r.fotoPrima || null;
+        fotoDopo = r.fotoDopo || null;
+        firmaData = r.firma || null;
+      }
+    }
+    document.getElementById('f-id').value = id ? form.id : '(auto)';
+    document.getElementById('f-data').value = form.data || todayISO();
+    document.getElementById('f-meteo').value = form.meteo || '';
+    document.getElementById('f-nop').value = form.nop || '';
+    document.getElementById('f-operatore').value = form.operatore || '';
+    document.getElementById('f-casa').value = form.casa || '';
+    document.getElementById('f-area').value = form.area || '';
+    document.getElementById('f-desc').value = form.desc || '';
+    document.getElementById('f-desc-prima').value = form.descPrima || '';
+    document.getElementById('f-desc-dopo').value = form.descDopo || '';
+    document.getElementById('f-mat').value = form.mat || '';
+    document.getElementById('f-qty').value = form.qty || '';
+    document.getElementById('f-conferma').checked = form.conferma || false;
+    updatePhotoPreview('prima', fotoPrima);
+    updatePhotoPreview('dopo', fotoDopo);
+    initFirma();
+    if (firmaData) loadFirma(firmaData);
+    document.getElementById('modalIntervento').classList.add('open');
+  } else {
+    editingMatId = id || null;
+    document.getElementById('modalMatTitle').textContent = id ? 'Modifica Materiale' : 'Nuovo Materiale';
+    const form = { id:'', nome:'', giacenza:'', prezzo:'' };
+    if (id) {
+      const r = materiali.find(x => x.id === id);
+      if (r) Object.assign(form, r);
+    }
+    document.getElementById('m-id').value = id ? form.id : '(auto)';
+    document.getElementById('m-nome').value = form.nome || '';
+    document.getElementById('m-giacenza').value = form.giacenza || '';
+    document.getElementById('m-prezzo').value = form.prezzo || '';
+    document.getElementById('modalMateriale').classList.add('open');
+  }
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+
+// ═══ PHOTOS ═══
+function handlePhoto(input, type) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    if (type === 'prima') fotoPrima = e.target.result;
+    else fotoDopo = e.target.result;
+    updatePhotoPreview(type, e.target.result);
+  };
+  reader.readAsDataURL(file);
+}
+
+function updatePhotoPreview(type, src) {
+  const wrap = document.getElementById(`preview-${type}-wrap`);
+  if (src) {
+    wrap.innerHTML = `<img src="${src}" class="photo-preview" onclick="openLightbox('${src}')">
+      <div class="upload-hint" style="margin-top:4px">Clicca per cambiare • Tocca immagine per ingrandire</div>`;
+  } else {
+    const label = type === 'prima' ? 'Carica foto PRIMA' : 'Carica foto DOPO';
+    const icon = type === 'prima' ? '📷' : '📸';
+    wrap.innerHTML = `<div style="font-size:1.8rem">${icon}</div><div style="font-size:12px;color:var(--text2);margin-top:4px">${label}</div><div class="upload-hint">JPG, PNG, HEIC</div>`;
+  }
+}
+
+// ═══ FIRMA ═══
+let firmaCtx, isDrawing = false, lastX, lastY;
+
+function initFirma() {
+  const canvas = document.getElementById('firmaCanvas');
+  firmaCtx = canvas.getContext('2d');
+  firmaCtx.clearRect(0, 0, canvas.width, canvas.height);
+  firmaCtx.strokeStyle = '#1a1916';
+  firmaCtx.lineWidth = 2;
+  firmaCtx.lineCap = 'round';
+  firmaCtx.lineJoin = 'round';
+
+  canvas.onmousedown = e => { isDrawing = true; [lastX, lastY] = getPos(canvas, e); };
+  canvas.onmousemove = e => { if (!isDrawing) return; draw(canvas, e); };
+  canvas.onmouseup = canvas.onmouseleave = () => { isDrawing = false; firmaData = canvas.toDataURL(); };
+  canvas.ontouchstart = e => { e.preventDefault(); isDrawing = true; [lastX, lastY] = getPos(canvas, e.touches[0]); };
+  canvas.ontouchmove = e => { e.preventDefault(); if (!isDrawing) return; draw(canvas, e.touches[0]); };
+  canvas.ontouchend = () => { isDrawing = false; firmaData = canvas.toDataURL(); };
+}
+
+function getPos(canvas, e) {
+  const rect = canvas.getBoundingClientRect();
+  const scaleX = canvas.width / rect.width;
+  const scaleY = canvas.height / rect.height;
+  return [(e.clientX - rect.left) * scaleX, (e.clientY - rect.top) * scaleY];
+}
+
+function draw(canvas, e) {
+  const [x, y] = getPos(canvas, e);
+  firmaCtx.beginPath();
+  firmaCtx.moveTo(lastX, lastY);
+  firmaCtx.lineTo(x, y);
+  firmaCtx.stroke();
+  [lastX, lastY] = [x, y];
+  firmaData = canvas.toDataURL();
+}
+
+function clearFirma() {
+  const canvas = document.getElementById('firmaCanvas');
+  if (firmaCtx) firmaCtx.clearRect(0, 0, canvas.width, canvas.height);
+  firmaData = null;
+}
+
+function loadFirma(dataUrl) {
+  const canvas = document.getElementById('firmaCanvas');
+  const img = new Image();
+  img.onload = () => { if (firmaCtx) firmaCtx.drawImage(img, 0, 0, canvas.width, canvas.height); };
+  img.src = dataUrl;
+}
+
+// ═══ SAVE INTERVENTO ═══
+function saveIntervento() {
+  const id = editingId || genId('INT-', interventi);
+  const row = {
+    id, data: document.getElementById('f-data').value,
+    meteo: document.getElementById('f-meteo').value,
+    nop: document.getElementById('f-nop').value,
+    operatore: document.getElementById('f-operatore').value,
+    casa: document.getElementById('f-casa').value,
+    area: document.getElementById('f-area').value,
+    desc: document.getElementById('f-desc').value,
+    descPrima: document.getElementById('f-desc-prima').value,
+    descDopo: document.getElementById('f-desc-dopo').value,
+    fotoPrima, fotoDopo,
+    mat: document.getElementById('f-mat').value,
+    qty: document.getElementById('f-qty').value,
+    firma: firmaData,
+    conferma: document.getElementById('f-conferma').checked,
+  };
+  if (editingId) {
+    const idx = interventi.findIndex(x => x.id === editingId);
+    if (idx > -1) interventi[idx] = row;
+  } else {
+    interventi.push(row);
+  }
+  save();
+  if (supabase) {
+     supabase.from('interventi').upsert([row]).then(() => {
+       console.log("Sincronizzato su Cloud");
+       document.getElementById('sync-status').textContent = '✅ Cloud Sincronizzato';
+     });
+  }
+  closeModal('modalIntervento');
+  renderInterventi();
+  updateStats();
+}
+
+// ═══ SAVE MATERIALE ═══
+function saveMateriale() {
+  const nome = document.getElementById('m-nome').value.trim();
+  if (!nome) { alert('Inserisci il nome del prodotto.'); return; }
+  const id = editingMatId || genId('MAT-', materiali);
+  const row = {
+    id, nome,
+    giacenza: parseFloat(document.getElementById('m-giacenza').value) || 0,
+    prezzo: parseFloat(document.getElementById('m-prezzo').value) || 0,
+  };
+  if (editingMatId) {
+    const idx = materiali.findIndex(x => x.id === editingMatId);
+    if (idx > -1) materiali[idx] = row;
+  } else {
+    materiali.push(row);
+  }
+  save();
+  if (supabase) {
+    supabase.from('materiali').upsert([row]).then(() => syncWithCloud());
+  }
+  closeModal('modalMateriale');
+  renderMateriali();
+  updateStatsMat();
+}
+
+// ═══ DELETE ═══
+function deleteIntervento(id) {
+  if (!confirm('Eliminare questo intervento?')) return;
+  interventi = interventi.filter(x => x.id !== id);
+  save(); renderInterventi(); updateStats();
+}
+
+function deleteMateriale(id) {
+  if (!confirm('Eliminare questo materiale?')) return;
+  materiali = materiali.filter(x => x.id !== id);
+  save(); renderMateriali(); updateStatsMat();
+}
+
+// ═══ RENDER INTERVENTI ═══
+function renderInterventi() {
+  const q = document.getElementById('searchInterventi').value.toLowerCase();
+  let list = interventi.filter(r =>
+    !q || Object.values(r).some(v => String(v).toLowerCase().includes(q))
+  );
+  if (sortState.field) {
+    list.sort((a, b) => String(a[sortState.field] || '').localeCompare(String(b[sortState.field] || '')) * sortState.dir);
+  }
+  const tbody = document.getElementById('bodyInterventi');
+  const empty = document.getElementById('emptyInterventi');
+  if (!list.length) {
+    tbody.innerHTML = '';
+    empty.style.display = '';
+    return;
+  }
+  empty.style.display = 'none';
+  tbody.innerHTML = list.map(r => `
+    <tr>
+      <td class="cell-mono">${esc(r.id)}</td>
+      <td class="cell-mono">${esc(r.data)}</td>
+      <td>${esc(r.meteo)}</td>
+      <td style="text-align:center">${esc(r.nop)}</td>
+      <td>${esc(r.operatore)}</td>
+      <td class="cell-mono">${esc(r.casa)}</td>
+      <td>${esc(r.area)}</td>
+      <td><div class="text-truncate" title="${esc(r.desc)}">${esc(r.desc)}</div></td>
+      <td>${r.fotoPrima ? `<img class="cell-img" src="${r.fotoPrima}" onclick="openLightbox('${r.fotoPrima}')" title="${esc(r.descPrima)}">` : '<div class="cell-img-placeholder">📷</div>'}</td>
+      <td>${r.fotoDopo ? `<img class="cell-img" src="${r.fotoDopo}" onclick="openLightbox('${r.fotoDopo}')" title="${esc(r.descDopo)}">` : '<div class="cell-img-placeholder">📸</div>'}</td>
+      <td><div class="text-truncate">${esc(r.mat)}</div></td>
+      <td class="cell-mono">${esc(r.qty)}</td>
+      <td>${r.firma ? `<img class="cell-img" src="${r.firma}" onclick="openLightbox('${r.firma}')">` : '<span style="color:var(--text3)">—</span>'}</td>
+      <td style="text-align:center">${r.conferma ? '<span class="confirm-check">✔</span>' : '<span class="no-confirm">○</span>'}</td>
+      <td>
+        <div class="action-btns">
+          <button class="btn-icon" onclick="exportPDF('${r.id}')" title="Scarica PDF">📄</button>
+          <button class="btn-icon" onclick="openModal('intervento','${r.id}')" title="Modifica">✏️</button>
+          <button class="btn-icon del" onclick="deleteIntervento('${r.id}')" title="Elimina">🗑</button>
+        </div>
+      </td>
+    </tr>`).join('');
+  document.getElementById('badge-interventi').textContent = interventi.length;
+}
+
+// ═══ RENDER MATERIALI ═══
+function renderMateriali() {
+  const q = document.getElementById('searchMateriali').value.toLowerCase();
+  let list = materiali.filter(r => !q || r.nome.toLowerCase().includes(q) || r.id.toLowerCase().includes(q));
+  const tbody = document.getElementById('bodyMateriali');
+  const empty = document.getElementById('emptyMateriali');
+  if (!list.length) {
+    tbody.innerHTML = '';
+    empty.style.display = '';
+    return;
+  }
+  empty.style.display = 'none';
+  tbody.innerHTML = list.map(r => {
+    const val = (r.giacenza * r.prezzo).toFixed(2);
+    const stato = r.giacenza < 5 ? `<span class="badge badge-orange">Scorta bassa</span>` :
+                  r.giacenza < 20 ? `<span class="badge badge-blue">Normale</span>` :
+                  `<span class="badge badge-green">OK</span>`;
+    return `<tr>
+      <td class="cell-mono">${esc(r.id)}</td>
+      <td><strong>${esc(r.nome)}</strong></td>
+      <td class="cell-mono">${r.giacenza}</td>
+      <td class="cell-mono">€ ${Number(r.prezzo).toFixed(2)}</td>
+      <td class="cell-mono">€ ${val}</td>
+      <td>${stato}</td>
+      <td>
+        <div class="action-btns">
+          <button class="btn-icon" onclick="openModal('materiale','${r.id}')" title="Modifica">✏️</button>
+          <button class="btn-icon del" onclick="deleteMateriale('${r.id}')" title="Elimina">🗑</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+  document.getElementById('badge-materiali').textContent = materiali.length;
+}
+
+// ═══ STATS ═══
+function updateStats() {
+  const tot = interventi.length;
+  const conf = interventi.filter(x => x.conferma).length;
+  const ops = new Set(interventi.map(x => x.operatore).filter(Boolean)).size;
+  document.getElementById('stat-tot').textContent = tot;
+  document.getElementById('stat-conf').textContent = conf;
+  document.getElementById('stat-pend').textContent = tot - conf;
+  document.getElementById('stat-ops').textContent = ops;
+  document.getElementById('badge-interventi').textContent = tot;
+}
+
+function updateStatsMat() {
+  const tot = materiali.length;
+  const val = materiali.reduce((s, r) => s + r.giacenza * r.prezzo, 0);
+  const low = materiali.filter(r => r.giacenza < 5).length;
+  document.getElementById('stat-mat-tot').textContent = tot;
+  document.getElementById('stat-mat-val').textContent = '€ ' + val.toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  document.getElementById('stat-mat-low').textContent = low;
+  document.getElementById('badge-materiali').textContent = tot;
+}
+
+// ═══ SORT ═══
+function sortTable(type, field) {
+  if (sortState.field === field) sortState.dir *= -1;
+  else { sortState.field = field; sortState.dir = 1; }
+  if (type === 'interventi') renderInterventi();
+  else renderMateriali();
+}
+
+// ═══ EXPORT CSV ═══
+function exportCSV(type) {
+  if (type === 'interventi') {
+    const headers = ['ID Intervento','Data','Meteo','N. Operai','Nome Operatore','N. Casa/Bungalow','Area','Descrizione Lavoro','Descrizione Foto Prima','Descrizione Foto Dopo','Materiale Usato','Quantità Usata','Conferma'];
+    const rows = interventi.map(r => [r.id,r.data,r.meteo,r.nop,r.operatore,r.casa,r.area,r.desc,r.descPrima,r.descDopo,r.mat,r.qty,r.conferma?'Sì':'No']);
+    downloadCSV('interventi_' + todayISO() + '.csv', headers, rows);
+  } else {
+    const headers = ['ID Materiale','Nome Prodotto','Giacenza Attuale','Prezzo Unitario'];
+    const rows = materiali.map(r => [r.id, r.nome, r.giacenza, r.prezzo]);
+    downloadCSV('materiali_' + todayISO() + '.csv', headers, rows);
+  }
+}
+
+function downloadCSV(filename, headers, rows) {
+  const bom = '\uFEFF';
+  const lines = [headers, ...rows].map(r => r.map(v => `"${String(v||'').replace(/"/g,'""')}"`).join(';')).join('\n');
+  const blob = new Blob([bom + lines], { type: 'text/csv;charset=utf-8;' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+}
+
+// ═══ PDF GENERATION ═══
+async function exportPDF(id) {
+  const r = interventi.find(x => x.id === id);
+  if (!r) return;
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  const primaryColor = [42, 92, 69]; // --accent
+
+  // Header
+  doc.setFillColor(...primaryColor);
+  doc.rect(0, 0, 210, 40, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(22);
+  doc.text("REPORT INTERVENTO", 15, 20);
+  doc.setFontSize(10);
+  doc.text(`ID: ${r.id} | Data: ${r.data}`, 15, 30);
+  doc.text("CellaTesto v1.0", 170, 20);
+
+  // Dettagli in tabella
+  doc.autoTable({
+    startY: 45,
+    theme: 'grid',
+    head: [['Campo', 'Dettaglio']],
+    body: [
+      ['Operatore', r.operatore || '-'],
+      ['Numero Operai', r.nop || '0'],
+      ['Meteo', r.meteo || '-'],
+      ['Casa / Bungalow', r.casa || '-'],
+      ['Area', r.area || '-'],
+      ['Descrizione Lavoro', r.desc || '-'],
+      ['Materiale Usato', r.mat || '-'],
+      ['Quantità', r.qty || '-'],
+      ['Stato', r.conferma ? 'CONFERMATO' : 'IN ATTESA']
+    ],
+    headStyles: { fillColor: primaryColor },
+    columnStyles: { 0: { fontStyle: 'bold', cellWidth: 40 } }
+  });
+
+  let currentY = doc.lastAutoTable.finalY + 15;
+
+  // Foto (se presenti)
+  const addImageToDoc = (dataUrl, label, x, y, w, h) => {
+    if (!dataUrl) return;
+    try {
+      doc.setFontSize(10);
+      doc.setTextColor(100);
+      doc.text(label, x, y - 2);
+      doc.addImage(dataUrl, 'JPEG', x, y, w, h);
+    } catch(e) { console.error("Errore aggiunta immagine PDF", e); }
+  };
+
+  if (r.fotoPrima || r.fotoDopo) {
+    if (currentY + 60 > 280) { doc.addPage(); currentY = 20; }
+    if (r.fotoPrima) addImageToDoc(r.fotoPrima, "FOTO PRIMA", 15, currentY, 85, 60);
+    if (r.fotoDopo) addImageToDoc(r.fotoDopo, "FOTO DOPO", 110, currentY, 85, 60);
+    currentY += 75;
+  }
+
+  // Descrizioni Foto
+  if (r.descPrima || r.descDopo) {
+    if (currentY + 20 > 280) { doc.addPage(); currentY = 20; }
+    doc.setFontSize(9);
+    doc.setTextColor(50);
+    if (r.descPrima) doc.text("Note Prima: " + r.descPrima, 15, currentY, { maxWidth: 85 });
+    if (r.descDopo) doc.text("Note Dopo: " + r.descDopo, 110, currentY, { maxWidth: 85 });
+    currentY += 25;
+  }
+
+  // Firma
+  if (r.firma) {
+    if (currentY + 40 > 280) { doc.addPage(); currentY = 20; }
+    doc.setFontSize(11);
+    doc.setTextColor(0);
+    doc.text("Firma Operatore:", 15, currentY);
+    doc.addImage(r.firma, 'PNG', 15, currentY + 5, 80, 25);
+  }
+
+  doc.save(`intervento_${r.id}_${r.data}.pdf`);
+}
+
+async function exportWeeklyReport() {
+  const today = new Date();
+  const lastWeek = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+  const list = interventi.filter(r => new Date(r.data) >= lastWeek);
+
+  if (!list.length) { alert("Nessun intervento negli ultimi 7 giorni."); return; }
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  const primaryColor = [42, 92, 69];
+
+  doc.setFillColor(...primaryColor);
+  doc.rect(0, 0, 210, 30, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(18);
+  doc.text("REPORT SETTIMANALE INTERVENTI", 15, 20);
+
+  const tableBody = list.map(r => [
+    r.id,
+    r.data,
+    r.operatore,
+    r.casa,
+    r.area,
+    r.mat || '-',
+    r.conferma ? 'SI' : 'NO'
+  ]);
+
+  doc.autoTable({
+    startY: 40,
+    head: [['ID', 'Data', 'Operatore', 'Casa', 'Area', 'Materiale', 'Conf.']],
+    body: tableBody,
+    headStyles: { fillColor: primaryColor },
+    styles: { fontSize: 8 }
+  });
+
+  const totalInterventi = list.length;
+  const totalConfermati = list.filter(x => x.conferma).length;
+
+  doc.setFontSize(10);
+  doc.setTextColor(0);
+  doc.text(`Totale interventi: ${totalInterventi}`, 15, doc.lastAutoTable.finalY + 15);
+  doc.text(`Confermati: ${totalConfermati}`, 15, doc.lastAutoTable.finalY + 22);
+
+  doc.save(`report_settimanale_${todayISO()}.pdf`);
+}
+
+// ═══ LIGHTBOX ═══
+function openLightbox(src) {
+  document.getElementById('lightboxImg').src = src;
+  document.getElementById('lightbox').classList.add('open');
+}
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('open');
+}
+
+// ═══ UTIL ═══
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function todayISO() { return new Date().toISOString().split('T')[0]; }
+
+// ═══ INIT ═══
+renderInterventi();
+renderMateriali();
+updateStats();
+updateStatsMat();
+initFirma();
+if (supabase) syncWithCloud();
+</script>
+</body>
+</html>
