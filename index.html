@@ -1,207 +1,271 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CellaTesto PRO — Cantiere & Magazzino</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<style>
-:root { --accent: #2a5c45; --bg: #f4f3ef; --border: #e2e0d8; --radius: 12px; }
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: #1a1916; }
-header { background: var(--accent); color: #fff; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top:0; z-index:100; }
-.tabs { background: #fff; display: flex; border-bottom: 1px solid var(--border); padding: 0 2rem; gap: 2rem; }
-.tab { padding: 1rem 0; cursor: pointer; font-weight: 600; color: #888; border-bottom: 3px solid transparent; }
-.tab.active { color: var(--accent); border-bottom-color: var(--accent); }
-.container { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
-.view { display: none; } .view.active { display: block; }
-.toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
-.btn { padding: 10px 20px; border-radius: 8px; border: 1px solid var(--border); background: #fff; cursor: pointer; font-weight: 600; }
-.btn-primary { background: var(--accent); color: #fff; border: none; }
-.card { background: #fff; border-radius: var(--radius); border: 1px solid var(--border); overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-table { width: 100%; border-collapse: collapse; }
-th { background: #f9f8f5; padding: 15px; text-align: left; font-size: 11px; text-transform: uppercase; color: #777; }
-td { padding: 15px; border-bottom: 1px solid var(--border); }
-.modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 200; align-items: flex-start; justify-content: center; padding: 1rem; overflow-y: auto; }
-.modal.open { display: flex; }
-.modal-content { background: #fff; border-radius: 16px; width: 100%; max-width: 800px; padding: 2rem; }
-.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; }
-.full { grid-column: 1 / -1; }
-input, textarea, select { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; }
-.stock-low { color: #b84a00; font-weight: bold; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CellaTesto PRO — Cantiere & Magazzino</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root { --accent: #2a5c45; --bg: #f4f3ef; --border: #e2e0d8; --radius: 12px; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: #1a1916; line-height: 1.5; }
+        header { background: var(--accent); color: #fff; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top:0; z-index:100; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .tabs { background: #fff; display: flex; border-bottom: 1px solid var(--border); padding: 0 2rem; gap: 2rem; }
+        .tab { padding: 1rem 0; cursor: pointer; font-weight: 600; color: #888; border-bottom: 3px solid transparent; transition: 0.3s; }
+        .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+        .container { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
+        .view { display: none; } .view.active { display: block; }
+        .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+        .btn { padding: 10px 20px; border-radius: 8px; border: 1px solid var(--border); background: #fff; cursor: pointer; font-weight: 600; transition: 0.2s; }
+        .btn:hover { background: #f9f9f9; }
+        .btn-primary { background: var(--accent); color: #fff; border: none; }
+        .btn-primary:hover { opacity: 0.9; }
+        .card { background: #fff; border-radius: var(--radius); border: 1px solid var(--border); overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        table { width: 100%; border-collapse: collapse; }
+        th { background: #f9f8f5; padding: 15px; text-align: left; font-size: 11px; text-transform: uppercase; color: #777; letter-spacing: 1px; }
+        td { padding: 15px; border-bottom: 1px solid var(--border); }
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 200; align-items: flex-start; justify-content: center; padding: 1rem; overflow-y: auto; backdrop-filter: blur(4px); }
+        .modal.open { display: flex; }
+        .modal-content { background: #fff; border-radius: 16px; width: 100%; max-width: 800px; padding: 2rem; margin-top: 50px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; }
+        .full { grid-column: 1 / -1; }
+        label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 5px; color: #555; }
+        input, textarea, select { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; outline: none; }
+        input:focus { border-color: var(--accent); }
+        .stock-low { color: #d32f2f; font-weight: bold; }
+    </style>
 </head>
 <body>
 
 <header>
-  <div style="font-weight:600;">CellaTesto <span>PRO</span></div>
-  <div id="sync-status" style="font-size:11px;">☁️ Sincronizzazione...</div>
+    <div style="font-size:1.2rem; font-weight:600;">CellaTesto <span style="font-weight:400; opacity:0.8;">PRO</span></div>
+    <div id="sync-status" style="font-size:11px; background: rgba(255,255,255,0.1); padding: 5px 10px; border-radius: 20px;">☁️ In attesa...</div>
 </header>
 
 <div class="tabs">
-  <div class="tab active" onclick="switchView('interventi', this)">Interventi</div>
-  <div class="tab" onclick="switchView('magazzino', this)">Magazzino</div>
+    <div class="tab active" onclick="switchView('interventi', this)">Interventi</div>
+    <div class="tab" onclick="switchView('magazzino', this)">Magazzino</div>
 </div>
 
 <div class="container">
-  <!-- VISTA INTERVENTI -->
-  <div id="view-interventi" class="view active">
-    <div class="toolbar">
-      <h1>Registro Interventi</h1>
-      <button class="btn btn-primary" onclick="openModal('interventi')">+ Nuovo Intervento</button>
+    <div id="view-interventi" class="view active">
+        <div class="toolbar">
+            <h1>Registro Interventi</h1>
+            <button class="btn btn-primary" onclick="openModal('interventi')">+ Nuovo Intervento</button>
+        </div>
+        <div class="card">
+            <table>
+                <thead><tr><th>Data</th><th>Bungalow/Casa</th><th>Responsabile</th><th>Materiali</th><th>Azioni</th></tr></thead>
+                <tbody id="interventi-body"></tbody>
+            </table>
+        </div>
     </div>
-    <div class="card">
-      <table>
-        <thead><tr><th>Data</th><th>Casa</th><th>Operatore</th><th>Materiali Usati</th><th>Azioni</th></tr></thead>
-        <tbody id="interventi-body"></tbody>
-      </table>
-    </div>
-  </div>
 
-  <!-- VISTA MAGAZZINO -->
-  <div id="view-magazzino" class="view">
-    <div class="toolbar">
-      <h1>Inventario Magazzino</h1>
-      <button class="btn btn-primary" onclick="openModal('magazzino')">+ Aggiungi Articolo</button>
+    <div id="view-magazzino" class="view">
+        <div class="toolbar">
+            <h1>Inventario Magazzino</h1>
+            <button class="btn btn-primary" onclick="openModal('magazzino')">+ Aggiungi Articolo</button>
+        </div>
+        <div class="card">
+            <table>
+                <thead><tr><th>Nome Articolo</th><th>Giacenza</th><th>Unità</th><th>Azioni</th></tr></thead>
+                <tbody id="magazzino-body"></tbody>
+            </table>
+        </div>
     </div>
-    <div class="card">
-      <table>
-        <thead><tr><th>Nome Materiale</th><th>Quantità Disponibile</th><th>Unità</th><th>Azioni</th></tr></thead>
-        <tbody id="magazzino-body"></tbody>
-      </table>
-    </div>
-  </div>
 </div>
 
-<!-- MODALE INTERVENTO -->
 <div class="modal" id="modalInv">
-  <div class="modal-content">
-    <h2 id="modal-title">Nuovo Intervento</h2>
-    <div id="form-interventi" class="grid" style="margin-top:1.5rem;">
-      <div><label>Data</label><input type="date" id="f-data"></div>
-      <div><label>Bungalow/Casa</label><input type="text" id="f-casa"></div>
-      <div><label>Responsabile</label><input type="text" id="f-operatore"></div>
-      <div>
-        <label>Materiale dal Magazzino</label>
-        <select id="f-mat-select"></select>
-      </div>
-      <div><label>Quantità da scaricare</label><input type="number" id="f-mat-qty" value="0"></div>
-      <div class="full"><label>Descrizione Lavoro</label><textarea id="f-desc"></textarea></div>
-      <div class="full">
-        <button class="btn btn-primary" onclick="salvaIntervento()">💾 Salva e Scarica Magazzino</button>
-      </div>
-    </div>
+    <div class="modal-content">
+        <h2 id="modal-title">Nuovo Intervento</h2>
+        
+        <div id="form-interventi" class="grid" style="margin-top:1.5rem;">
+            <div><label>Data</label><input type="date" id="f-data"></div>
+            <div><label>Bungalow/Casa</label><input type="text" id="f-casa" placeholder="es. Villino 4"></div>
+            <div><label>Operatore</label><input type="text" id="f-operatore" placeholder="Nome tecnico"></div>
+            <div>
+                <label>Preleva dal Magazzino</label>
+                <select id="f-mat-select"></select>
+            </div>
+            <div><label>Quantità utilizzata</label><input type="number" id="f-mat-qty" value="0" min="0"></div>
+            <div class="full"><label>Descrizione Lavoro</label><textarea id="f-desc" rows="3" placeholder="Descrivi l'intervento..."></textarea></div>
+            <div class="full">
+                <button class="btn btn-primary" style="width:100%" onclick="salvaIntervento()">💾 Salva Intervento e Scarica Stock</button>
+            </div>
+        </div>
 
-    <!-- FORM AGGIUNTA MAGAZZINO -->
-    <div id="form-magazzino" class="grid" style="display:none; margin-top:1.5rem;">
-      <div class="full"><label>Nome Articolo</label><input type="text" id="m-nome"></div>
-      <div><label>Quantità Iniziale</label><input type="number" id="m-qty"></div>
-      <div><label>Unità (pz, metri, sacchi)</label><input type="text" id="m-unita" value="pz"></div>
-      <div class="full">
-        <button class="btn btn-primary" onclick="salvaArticolo()">📦 Aggiungi al Magazzino</button>
-      </div>
+        <div id="form-magazzino" class="grid" style="display:none; margin-top:1.5rem;">
+            <div class="full"><label>Nome Articolo</label><input type="text" id="m-nome" placeholder="es. Lampadina LED E27"></div>
+            <div><label>Quantità Iniziale</label><input type="number" id="m-qty" value="0"></div>
+            <div><label>Unità di misura</label><input type="text" id="m-unita" value="pz" placeholder="pz, metri, rotoli..."></div>
+            <div class="full">
+                <button class="btn btn-primary" style="width:100%" onclick="salvaArticolo()">📦 Aggiungi al Magazzino</button>
+            </div>
+        </div>
+        
+        <button class="btn" style="margin-top:1rem; width:100%; color: #888;" onclick="closeModal()">Annulla</button>
     </div>
-    <button class="btn" style="margin-top:1rem; width:100%;" onclick="closeModal()">Chiudi</button>
-  </div>
 </div>
 
 <script>
-// --- CHIAVI SUPABASE ---
+// --- CONFIGURAZIONE SUPABASE ---
+// INSERISCI QUI I TUOI DATI
 const S_URL = 'https://ukzconegwpoaculadefx.supabase.co/rest/v1/.supabase.co'; 
-const S_KEY = 'sb_publishable_dS8SzPIks90Yd1ISjsXQFQ_T8VtusA1'; // <--- CONTINUA TU
+const S_KEY = 'sb_publishable_dS8SzPIks90Yd1ISjsXQFQ_T8VtusA1'; 
+
 let db = null;
-if (window.supabase) db = window.supabase.createClient(S_URL, S_KEY);
+if (window.supabase) {
+    db = window.supabase.createClient(S_URL, S_KEY);
+}
 
 let interventi = [], materiali = [];
 
+// Cambia Tab
 function switchView(view, el) {
-  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.getElementById('view-' + view).classList.add('active');
-  el.classList.add('active');
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('view-' + view).classList.add('active');
+    el.classList.add('active');
 }
 
+// Sincronizzazione Dati
 async function sync() {
-  if (!db) return;
-  const { data: m } = await db.from('materiali').select('*');
-  const { data: i } = await db.from('interventi').select('*').order('data', {ascending:false});
-  materiali = m || []; interventi = i || [];
-  render();
-  updateSelect();
+    if (!db) return;
+    document.getElementById('sync-status').textContent = '☁️ Sincronizzazione...';
+    
+    try {
+        const { data: m, error: errM } = await db.from('materiali').select('*').order('nome');
+        const { data: i, error: errI } = await db.from('interventi').select('*').order('data', {ascending:false});
+        
+        if (errM || errI) throw (errM || errI);
+
+        materiali = m || []; 
+        interventi = i || [];
+        
+        render();
+        updateSelect();
+        document.getElementById('sync-status').textContent = '☁️ Sincronizzato';
+    } catch (error) {
+        console.error("Errore sync:", error);
+        document.getElementById('sync-status').textContent = '❌ Errore connessione';
+    }
 }
 
 function render() {
-  document.getElementById('interventi-body').innerHTML = interventi.map(r => `<tr>
-    <td>${r.data}</td><td>${r.casa}</td><td>${r.operatore}</td><td>${r.mat || '-'} (${r.qty || 0})</td>
-    <td><button class="btn" onclick="deleteIntervento('${r.id}')">🗑️</button></td>
-  </tr>`).join('');
+    document.getElementById('interventi-body').innerHTML = interventi.map(r => `
+        <tr>
+            <td>${r.data}</td>
+            <td><b>${r.casa}</b></td>
+            <td>${r.operatore}</td>
+            <td>${r.mat ? r.mat + ' (' + r.qty + ')' : '-'}</td>
+            <td><button class="btn" onclick="deleteIntervento('${r.id}')">🗑️</button></td>
+        </tr>`).join('');
 
-  document.getElementById('magazzino-body').innerHTML = materiali.map(m => `<tr>
-    <td><b>${m.nome}</b></td>
-    <td class="${m.qty < 5 ? 'stock-low' : ''}">${m.qty}</td>
-    <td>${m.unita}</td>
-    <td><button class="btn" onclick="deleteMateriale('${m.id}')">🗑️</button></td>
-  </tr>`).join('');
+    document.getElementById('magazzino-body').innerHTML = materiali.map(m => `
+        <tr>
+            <td><b>${m.nome}</b></td>
+            <td class="${m.qty < 5 ? 'stock-low' : ''}">${m.qty}</td>
+            <td>${m.unita}</td>
+            <td><button class="btn" onclick="deleteMateriale('${m.id}')">🗑️</button></td>
+        </tr>`).join('');
 }
 
 function updateSelect() {
-  const sel = document.getElementById('f-mat-select');
-  sel.innerHTML = '<option value="">-- Nessuno --</option>' + materiali.map(m => `<option value="${m.nome}">${m.nome} (Disponibili: ${m.qty})</option>`).join('');
+    const sel = document.getElementById('f-mat-select');
+    sel.innerHTML = '<option value="">-- Nessuno --</option>' + 
+        materiali.map(m => `<option value="${m.nome}">${m.nome} (Disp: ${m.qty})</option>`).join('');
 }
 
 function openModal(type) {
-  document.getElementById('modalInv').classList.add('open');
-  if (type === 'interventi') {
-    document.getElementById('form-interventi').style.display = 'grid';
-    document.getElementById('form-magazzino').style.display = 'none';
-    document.getElementById('modal-title').textContent = 'Nuovo Intervento';
-  } else {
-    document.getElementById('form-interventi').style.display = 'none';
-    document.getElementById('form-magazzino').style.display = 'grid';
-    document.getElementById('modal-title').textContent = 'Nuovo Articolo Magazzino';
-  }
+    const m = document.getElementById('modalInv');
+    m.classList.add('open');
+    if (type === 'interventi') {
+        document.getElementById('form-interventi').style.display = 'grid';
+        document.getElementById('form-magazzino').style.display = 'none';
+        document.getElementById('modal-title').textContent = 'Nuovo Intervento';
+        document.getElementById('f-data').valueAsDate = new Date();
+    } else {
+        document.getElementById('form-interventi').style.display = 'none';
+        document.getElementById('form-magazzino').style.display = 'grid';
+        document.getElementById('modal-title').textContent = 'Nuovo Articolo Magazzino';
+    }
 }
+
 function closeModal() { document.getElementById('modalInv').classList.remove('open'); }
 
-// SALVATAGGIO INTERVENTO + SCARICO MAGAZZINO
+// Salvataggio Intervento e Aggiornamento Quantità
 async function salvaIntervento() {
-  const nomeMat = document.getElementById('f-mat-select').value;
-  const qtyUsata = parseInt(document.getElementById('f-mat-qty').value);
-  
-  const row = {
-    id: 'I-'+Date.now(), data: document.getElementById('f-data').value,
-    casa: document.getElementById('f-casa').value, operatore: document.getElementById('f-operatore').value,
-    desc: document.getElementById('f-desc').value, mat: nomeMat, qty: qtyUsata
-  };
+    const nomeMat = document.getElementById('f-mat-select').value;
+    const qtyUsata = parseInt(document.getElementById('f-mat-qty').value) || 0;
+    
+    const row = {
+        id: 'I-' + Date.now(), 
+        data: document.getElementById('f-data').value,
+        casa: document.getElementById('f-casa').value, 
+        operatore: document.getElementById('f-operatore').value,
+        desc: document.getElementById('f-desc').value, 
+        mat: nomeMat, 
+        qty: qtyUsata
+    };
 
-  // 1. Salva Intervento
-  await db.from('interventi').insert([row]);
+    if (!row.casa) { alert("Inserire bungalow o casa"); return; }
 
-  // 2. Se è stato usato un materiale, scala dal magazzino
-  if (nomeMat && qtyUsata > 0) {
-    const art = materiali.find(m => m.nome === nomeMat);
-    const nuovaQty = Math.max(0, art.qty - qtyUsata);
-    await db.from('materiali').update({ qty: nuovaQty }).eq('id', art.id);
-  }
-  
-  closeModal(); sync();
+    // 1. Salva Intervento
+    await db.from('interventi').insert([row]);
+
+    // 2. Scarica dal magazzino se necessario
+    if (nomeMat && qtyUsata > 0) {
+        const art = materiali.find(m => m.nome === nomeMat);
+        if (art) {
+            const nuovaQty = Math.max(0, art.qty - qtyUsata);
+            await db.from('materiali').update({ qty: nuovaQty }).eq('id', art.id);
+        }
+    }
+    
+    closeModal(); 
+    sync();
 }
 
 async function salvaArticolo() {
-  const art = {
-    id: 'M-'+Date.now(), nome: document.getElementById('m-nome').value,
-    qty: parseInt(document.getElementById('m-qty').value), unita: document.getElementById('m-unita').value
-  };
-  await db.from('materiali').insert([art]);
-  closeModal(); sync();
+    const nome = document.getElementById('m-nome').value;
+    const qty = parseInt(document.getElementById('m-qty').value) || 0;
+    
+    if (!nome) { alert("Inserire nome articolo"); return; }
+
+    const art = {
+        id: 'M-' + Date.now(), 
+        nome: nome,
+        qty: qty, 
+        unita: document.getElementById('m-unita').value
+    };
+    
+    await db.from('materiali').insert([art]);
+    closeModal(); 
+    sync();
 }
 
-async function deleteIntervento(id) { if(confirm("Eliminare?")) { await db.from('interventi').delete().eq('id', id); sync(); } }
-async function deleteMateriale(id) { if(confirm("Eliminare dal magazzino?")) { await db.from('materiali').delete().eq('id', id); sync(); } }
+async function deleteIntervento(id) { 
+    if(confirm("Vuoi eliminare questo intervento dal registro?")) { 
+        await db.from('interventi').delete().eq('id', id); 
+        sync(); 
+    } 
+}
 
-if (db) sync();
+async function deleteMateriale(id) { 
+    if(confirm("Vuoi eliminare definitivamente l'articolo dal magazzino?")) { 
+        await db.from('materiali').delete().eq('id', id); 
+        sync(); 
+    } 
+}
+
+// Avvio
+if (db) {
+    sync();
+} else {
+    alert("Errore: Caricamento Supabase fallito. Controlla la connessione o la configurazione.");
+}
 </script>
 </body>
 </html>
