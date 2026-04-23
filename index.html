@@ -4,176 +4,164 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CellaTesto — Gestione Interventi</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-:root {
-  --bg: #f4f3ef; --surface: #ffffff; --surface2: #f9f8f5; --border: #e2e0d8; --border2: #ccc9be;
-  --text: #1a1916; --text2: #5c5a54; --text3: #9c9a94; --accent: #2a5c45; --accent2: #1e4433;
-  --accent-light: #e8f2ed; --accent-mid: #4a9470; --warn: #b84a00; --warn-light: #fff0e6;
-  --info: #1a4a7a; --info-light: #e8f0fa; --danger: #8b1a1a; --danger-light: #faeaea;
-  --success: #1a5c2a; --success-light: #eaf5ec; --radius: 10px; --radius-sm: 6px;
-  --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.04);
-}
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); font-size: 14px; min-height: 100vh; }
-.app-header { background: var(--accent); color: #fff; padding: 0 1.5rem; display: flex; align-items: center; justify-content: space-between; height: 56px; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
-.app-logo { font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
-.tabs-bar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 1.5rem; display: flex; }
-.tab-btn { padding: 12px 20px; font-size: 13px; font-weight: 500; border: none; background: none; cursor: pointer; color: var(--text2); border-bottom: 2px solid transparent; transition: all 0.15s; display: flex; align-items: center; gap: 7px; }
-.tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
-.main-content { padding: 1.5rem; max-width: 1400px; margin: 0 auto; }
-.btn { padding: 7px 14px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--surface); color: var(--text); font-size: 13px; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
-.btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
-.btn-export { background: var(--info-light); border-color: #9ab5d8; color: var(--info); }
-.table-wrapper { background: var(--surface); border-radius: var(--radius); border: 1px solid var(--border); overflow: hidden; box-shadow: var(--shadow); }
-.table-scroll { overflow-x: auto; }
-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-thead th { background: var(--surface2); border-bottom: 1px solid var(--border); padding: 10px 12px; text-align: left; font-weight: 600; font-size: 11px; text-transform: uppercase; color: var(--text2); }
-tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; }
-tbody tr:hover { background: var(--surface2); }
-tbody td { padding: 10px 12px; vertical-align: middle; }
-.cell-img { width: 44px; height: 44px; border-radius: 6px; object-fit: cover; border: 1px solid var(--border); cursor: pointer; }
-.action-btns { display: flex; gap: 6px; }
-.btn-icon { width: 30px; height: 30px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--surface); cursor: pointer; display: flex; align-items: center; justify-content: center; }
-.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 200; align-items: flex-start; justify-content: center; padding: 1.5rem; overflow-y: auto; }
-.modal-overlay.open { display: flex; }
-.modal { background: var(--surface); border-radius: 14px; width: 100%; max-width: 860px; margin: auto; }
-.modal-header { padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
-.form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; padding: 1.5rem; }
-.form-group { display: flex; flex-direction: column; gap: 5px; }
-.form-group.full { grid-column: 1 / -1; }
-.form-group input, .form-group textarea, .form-group select { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 10px; font-size: 13px; width: 100%; }
-.photo-upload-zone { border: 2px dashed var(--border2); border-radius: var(--radius); padding: 1.25rem; text-align: center; cursor: pointer; position: relative; }
-.photo-upload-zone input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
-.foto-preview-img { width: 100%; max-height: 150px; object-fit: cover; border-radius: 8px; }
-.lightbox { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 300; align-items: center; justify-content: center; }
-.lightbox.open { display: flex; }
-.lightbox img { max-width: 90vw; max-height: 85vh; border-radius: 8px; }
+:root { --accent: #2a5c45; --bg: #f4f3ef; --text: #1a1916; }
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); padding: 0; margin: 0; }
+header { background: var(--accent); color: #fff; padding: 1rem; display: flex; justify-content: space-between; align-items: center; }
+.content { padding: 1rem; }
+.card { background: #fff; padding: 1rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 1rem; }
+table { width: 100%; border-collapse: collapse; margin-top: 1rem; background: #fff; }
+th, td { padding: 12px; border-bottom: 1px solid #ddd; text-align: left; }
+.btn { padding: 8px 16px; border-radius: 4px; border: none; cursor: pointer; font-weight: 600; }
+.btn-primary { background: var(--accent); color: #fff; }
+.modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; align-items: center; justify-content: center; }
+.modal-content { background: #fff; padding: 2rem; border-radius: 12px; width: 90%; max-width: 500px; }
+input, textarea { width: 100%; padding: 8px; margin: 8px 0; border: 1px solid #ccc; border-radius: 4px; }
 </style>
 </head>
 <body>
 
-<header class="app-header">
-  <div class="app-logo">CellaTesto <span>v1.0</span> <span id="sync-status" style="font-size:10px; background:rgba(0,0,0,0.2); padding:2px 6px; border-radius:4px; margin-left:10px;">☁️ Locale</span></div>
+<header>
+  <div>CellaTesto v1.1</div>
+  <div id="sync-indicator">☁️ Collegamento in corso...</div>
 </header>
 
-<nav class="tabs-bar">
-  <button class="tab-btn active" id="tab-btn-int" onclick="switchTab('interventi')">Interventi <span id="badge-interventi" style="background:#eee; padding:1px 5px; border-radius:10px; font-size:10px;">0</span></button>
-  <button class="tab-btn" id="tab-btn-mat" onclick="switchTab('materiali')">Magazzino</button>
-</nav>
-
-<div id="tab-interventi" class="main-content">
-  <div style="display:flex; justify-content:space-between; margin-bottom:1rem;">
-    <div>
-      <button class="btn btn-export" onclick="exportCSV()">↓ CSV</button>
-      <button class="btn btn-export" onclick="exportWeeklyReport()" style="background:#fcf3cf; color:#9a7d0a;">📅 Report Settimanale</button>
-    </div>
-    <button class="btn btn-primary" onclick="openModal('intervento')">+ Nuovo Intervento</button>
+<div class="content">
+  <div style="margin-bottom: 1rem; display: flex; justify-content: space-between;">
+    <h1>Registro Interventi</h1>
+    <button class="btn btn-primary" onclick="showModal()">+ Nuovo Intervento</button>
   </div>
-  <div class="table-wrapper"><div class="table-scroll"><table><thead><tr><th>ID</th><th>Data</th><th>Operatore</th><th>Casa</th><th>Descrizione</th><th>Foto</th><th>Firma</th><th>Conf.</th><th>Azioni</th></tr></thead><tbody id="bodyInterventi"></tbody></table></div></div>
-</div>
 
-<!-- MODALE INTERVENTO -->
-<div class="modal-overlay" id="modalIntervento">
-  <div class="modal">
-    <div class="modal-header"><h2>Nuovo Intervento</h2><button class="btn-icon" onclick="closeModal('modalIntervento')">✕</button></div>
-    <div class="form-grid">
-      <div class="form-group"><label>Data</label><input type="date" id="f-data"></div>
-      <div class="form-group"><label>Operatore</label><input type="text" id="f-operatore"></div>
-      <div class="form-group"><label>Casa</label><input type="text" id="f-casa"></div>
-      <div class="form-group full"><label>Descrizione</label><textarea id="f-desc" rows="3"></textarea></div>
-      <div class="form-group"><label>Foto Prima</label><div class="photo-upload-zone"><input type="file" onchange="handlePhoto(this,'prima')"><div id="pre-prima">Scegli Foto</div></div></div>
-      <div class="form-group"><label>Foto Dopo</label><div class="photo-upload-zone"><input type="file" onchange="handlePhoto(this,'dopo')"><div id="pre-dopo">Scegli Foto</div></div></div>
-      <div class="form-group full"><label>Firma</label><canvas id="firmaCanvas" width="500" height="150" style="width:100%; border:1px solid #ccc;"></canvas><button class="btn" onclick="clearFirma()">Cancella Firma</button></div>
-    </div>
-    <div style="padding:1.5rem; text-align:right;"><button class="btn" onclick="closeModal('modalIntervento')">Annulla</button> <button class="btn btn-primary" onclick="saveIntervento()">Salva</button></div>
+  <div class="card">
+    <table>
+      <thead>
+        <tr><th>ID</th><th>Data</th><th>Operatore</th><th>Casa</th><th>Azioni</th></tr>
+      </thead>
+      <tbody id="table-body">
+        <tr><td colspan="5" style="text-align:center;">Caricamento dati...</td></tr>
+      </tbody>
+    </table>
   </div>
 </div>
 
-<div class="lightbox" id="lightbox" onclick="this.classList.remove('open')"><img id="lightboxImg"></div>
+<div class="modal" id="myModal">
+  <div class="modal-content">
+    <h2>Nuovo Intervento</h2>
+    <input type="date" id="f-data">
+    <input type="text" id="f-operatore" placeholder="Nome Operatore">
+    <input type="text" id="f-casa" placeholder="N. Casa / Bungalow">
+    <textarea id="f-desc" placeholder="Descrizione del lavoro" rows="3"></textarea>
+    <div style="margin-top: 1rem; display: flex; gap: 10px; justify-content: flex-end;">
+      <button class="btn" onclick="hideModal()">Annulla</button>
+      <button class="btn btn-primary" onclick="salva()">Salva Intervento</button>
+    </div>
+  </div>
+</div>
 
 <script>
-// ═══ CONFIGURAZIONE ═══
-const SUPABASE_URL = 'https://IL_TUO_ID.supabase.co'; // <--- METTI QUI
-const SUPABASE_KEY = 'LA_TUA_CHIAVE_ANON';           // <--- METTI QUI
-let supabase = null;
-if (window.supabase && SUPABASE_URL.includes('supabase.co')) supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+// ⚠️ INSERISCI QUI LE TUE CHIAVI ⚠️
+const S_URL = 'https://YOUR_PROJECT_ID.supabase.co';
+const S_KEY = 'YOUR_ANON_KEY';
 
-let interventi = JSON.parse(localStorage.getItem('ct_interventi') || '[]');
-let fotoPrima = null, fotoDopo = null, firmaData = null;
+let db = null;
+let dati = [];
 
-// ═══ SYNC ═══
-async function sync() {
-  if (!supabase) return;
-  document.getElementById('sync-status').textContent = '🔄...';
-  const { data } = await supabase.from('interventi').select('*').order('data', {ascending: false});
-  if (data) { interventi = data; render(); }
-  document.getElementById('sync-status').textContent = '✅ Cloud';
+// 1. Inizializzazione
+try {
+  if (S_URL.includes('supabase.co')) {
+    db = window.supabase.createClient(S_URL, S_KEY);
+    console.log("Database collegato");
+  } else {
+    document.getElementById('sync-indicator').textContent = '⚠️ Errore Chiavi';
+  }
+} catch (err) {
+  alert("Errore inizializzazione: " + err.message);
 }
 
-function render() {
-  const b = document.getElementById('bodyInterventi');
-  b.innerHTML = interventi.map(r => `<tr>
-    <td>${r.id}</td><td>${r.data}</td><td>${r.operatore}</td><td>${r.casa}</td><td>${r.desc}</td>
-    <td>${r.fotoPrima ? `<img src="${r.fotoPrima}" class="cell-img" onclick="openLight('${r.fotoPrima}')">` : '-'}</td>
-    <td>${r.firma ? '✅' : '-'}</td><td>${r.conferma ? '✔' : '○'}</td>
-    <td><button class="btn-icon" onclick="exportPDF('${r.id}')">📄</button><button class="btn-icon" onclick="del('${r.id}')">🗑</button></td>
-  </tr>`).join('');
-  document.getElementById('badge-interventi').textContent = interventi.length;
+// 2. Funzione per caricare i dati
+async function caricaDati() {
+  if (!db) return;
+  try {
+    const { data, error } = await db.from('interventi').select('id, data, operatore, casa').order('data', { ascending: false });
+    if (error) throw error;
+    dati = data || [];
+    mostraTabella();
+    document.getElementById('sync-indicator').textContent = '✅ Sincronizzato';
+  } catch (err) {
+    document.getElementById('sync-indicator').textContent = '❌ Errore Dati';
+    console.error(err);
+  }
 }
 
-// ═══ LOGICA MODALE ═══
-function openModal(id) { document.getElementById('modalIntervento').classList.add('open'); initFirma(); }
-function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+// 3. Mostra i dati nella tabella
+function mostraTabella() {
+  const tbody = document.getElementById('table-body');
+  if (dati.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Nessun intervento trovato.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = dati.map(item => `
+    <tr>
+      <td>${item.id.substring(0,8)}</td>
+      <td>${item.data}</td>
+      <td>${item.operatore}</td>
+      <td>${item.casa}</td>
+      <td>
+        <button class="btn" onclick="scaricaPDF('${item.id}')">📄 PDF</button>
+      </td>
+    </tr>
+  `).join('');
+}
 
-function handlePhoto(input, type) {
-  const reader = new FileReader();
-  reader.onload = e => {
-    if (type === 'prima') { fotoPrima = e.target.result; document.getElementById('pre-prima').innerHTML = `<img src="${fotoPrima}" class="foto-preview-img">`; }
-    else { fotoDopo = e.target.result; document.getElementById('pre-dopo').innerHTML = `<img src="${fotoDopo}" class="foto-preview-img">`; }
+// 4. Modal
+function showModal() { document.getElementById('myModal').style.display = 'flex'; }
+function hideModal() { document.getElementById('myModal').style.display = 'none'; }
+
+// 5. Salvataggio
+async function salva() {
+  const nuovo = {
+    id: 'ID-' + Math.random().toString(36).substr(2, 9),
+    data: document.getElementById('f-data').value,
+    operatore: document.getElementById('f-operatore').value,
+    casa: document.getElementById('f-casa').value,
+    desc: document.getElementById('f-desc').value,
+    conferma: true
   };
-  reader.readAsDataURL(input.files[0]);
+
+  if (!nuovo.data || !nuovo.operatore) {
+    alert("Per favore compila Data e Operatore");
+    return;
+  }
+
+  try {
+    const { error } = await db.from('interventi').insert([nuovo]);
+    if (error) throw error;
+    alert("Intervento salvato!");
+    hideModal();
+    caricaDati();
+  } catch (err) {
+    alert("Errore salvataggio: " + err.message);
+  }
 }
 
-async function saveIntervento() {
-  const row = {
-    id: 'INT-' + Date.now(), data: document.getElementById('f-data').value,
-    operatore: document.getElementById('f-operatore').value, casa: document.getElementById('f-casa').value,
-    desc: document.getElementById('f-desc').value, fotoPrima, fotoDopo, firma: firmaData, conferma: true
-  };
-  interventi.push(row);
-  localStorage.setItem('ct_interventi', JSON.stringify(interventi));
-  if (supabase) await supabase.from('interventi').insert([row]);
-  render(); closeModal('modalIntervento');
-}
-
-// ═══ FIRMA ═══
-let ctx, drawing = false;
-function initFirma() {
-  const c = document.getElementById('firmaCanvas'); ctx = c.getContext('2d');
-  c.onmousedown = () => drawing = true; 
-  window.onmouseup = () => { drawing = false; firmaData = c.toDataURL(); };
-  c.onmousemove = (e) => { if(!drawing) return; ctx.lineTo(e.offsetX, e.offsetY); ctx.stroke(); };
-  ctx.beginPath();
-}
-function clearFirma() { ctx.clearRect(0,0,500,150); ctx.beginPath(); firmaData=null; }
-
-// ═══ PDF ═══
-function exportPDF(id) {
-  const r = interventi.find(x => x.id === id);
-  const { jsPDF } = window.jspdf; const doc = new jsPDF();
+// 6. Esportazione PDF
+function scaricaPDF(id) {
+  const r = dati.find(x => x.id === id);
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
   doc.text("REPORT INTERVENTO", 10, 10);
-  doc.autoTable({ startY: 20, body: [['ID', r.id], ['Data', r.data], ['Operatore', r.operatore], ['Desc', r.desc]] });
+  doc.text("ID: " + r.id, 10, 20);
+  doc.text("Data: " + r.data, 10, 30);
+  doc.text("Operatore: " + r.operatore, 10, 40);
   doc.save(`report_${r.id}.pdf`);
 }
 
-function openLight(src) { document.getElementById('lightboxImg').src = src; document.getElementById('lightbox').classList.add('open'); }
-
-render();
-if (supabase) { sync(); supabase.channel('obs').on('postgres_changes',{event:'*',schema:'public',table:'interventi'},sync).subscribe(); }
+// Avvio automatico
+if (db) caricaDati();
 </script>
 </body>
 </html>
