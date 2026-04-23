@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CellaTesto PRO — Suite Cantiere</title>
+<title>CellaTesto PRO — Suite Completa</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
@@ -40,12 +40,12 @@ input, textarea, select { width: 100%; padding: 12px; border: 1px solid var(--bo
 
 <header>
   <div style="font-weight:600; font-size:1.2rem;">CellaTesto <span>PRO</span></div>
-  <div id="sync-status" style="font-size:11px; background:rgba(0,0,0,0.2); padding:4px 12px; border-radius:20px;">☁️ Caricamento Cloud...</div>
+  <div id="sync-status" style="font-size:11px; background:rgba(0,0,0,0.2); padding:4px 12px; border-radius:20px;">☁️ Caricamento...</div>
 </header>
 
 <div class="tabs">
   <div class="tab active" onclick="switchView('interventi', this)">Registro Lavori</div>
-  <div class="tab" onclick="switchView('magazzino', this)">Magazzino Inventario</div>
+  <div class="tab" onclick="switchView('magazzino', this)">Gestione Inventario</div>
 </div>
 
 <div class="container">
@@ -53,7 +53,7 @@ input, textarea, select { width: 100%; padding: 12px; border: 1px solid var(--bo
     <div class="toolbar">
       <h1>Registro Giornaliero</h1>
       <div style="display:flex; gap:10px;">
-        <button class="btn" style="background:#b84a00; color:#fff; border:none;" onclick="exportBulk()">📄 Report Selezionati</button>
+        <button class="btn" style="background:#b84a00; color:#fff;" onclick="exportBulk()">📄 Report Selezionati</button>
         <button class="btn btn-primary" onclick="openModal('int')">+ Nuovo Intervento</button>
       </div>
     </div>
@@ -67,7 +67,7 @@ input, textarea, select { width: 100%; padding: 12px; border: 1px solid var(--bo
 
   <div id="view-magazzino" class="view">
     <div class="toolbar">
-      <h1>Inventario</h1>
+      <h1>Magazzino</h1>
       <button class="btn btn-primary" onclick="openModal('mag')">+ Aggiungi Articolo</button>
     </div>
     <div class="card">
@@ -85,41 +85,41 @@ input, textarea, select { width: 100%; padding: 12px; border: 1px solid var(--bo
     <div id="form-int" class="grid">
       <div><label>Data</label><input type="date" id="f-data"></div>
       <div><label>Città (Meteo)</label><div style="display:flex; gap:5px;"><input type="text" id="f-citta"><button class="btn" onclick="getWeather()">☁️</button></div></div>
-      <div class="full"><label>Meteo e Condizioni</label><input type="text" id="f-meteo" readonly style="background:#f0f7f3; font-weight:600;"></div>
+      <div class="full"><label>Condizioni Meteo Live</label><input type="text" id="f-meteo" readonly style="background:#f0f7f3; font-weight:600;"></div>
       
       <div><label>Responsabile</label><input type="text" id="f-responsabile"></div>
       <div><label>Operaio / Operatore</label><input type="text" id="f-operaio"></div>
       <div><label>Area</label><input type="text" id="f-area"></div>
       <div><label>Bungalow / Casetta</label><input type="text" id="f-casetta"></div>
       
-      <div><label>Materiale</label><select id="f-mat-sel"></select></div>
-      <div><label>Qtà Usata</label><input type="number" id="f-mat-qty" value="0"></div>
+      <div><label>Scarica Materiale</label><select id="f-mat-sel"></select></div>
+      <div><label>Quantità Usata</label><input type="number" id="f-mat-qty" value="0"></div>
       
       <div class="full"><label>Descrizione</label><textarea id="f-desc" rows="2"></textarea></div>
       
-      <div><label>Foto PRIMA</label><div class="photo-zone" onclick="document.getElementById('i-p').click()"><input type="file" id="i-p" hidden onchange="processFile(this,'p')"><div id="v-p">Carica</div></div><textarea id="f-n-p" placeholder="Nota prima"></textarea></div>
-      <div><label>Foto DOPO</label><div class="photo-zone" onclick="document.getElementById('i-d').click()"><input type="file" id="i-d" hidden onchange="processFile(this,'d')"><div id="v-d">Carica</div></div><textarea id="f-n-d" placeholder="Nota dopo"></textarea></div>
+      <div><label>Foto PRIMA</label><div class="photo-zone" onclick="document.getElementById('i-p').click()"><input type="file" id="i-p" hidden onchange="processFile(this,'p')"><div id="v-p">Carica</div></div><textarea id="f-n-p" placeholder="Nota foto prima"></textarea></div>
+      <div><label>Foto DOPO</label><div class="photo-zone" onclick="document.getElementById('i-d').click()"><input type="file" id="i-d" hidden onchange="processFile(this,'d')"><div id="v-d">Carica</div></div><textarea id="f-n-d" placeholder="Nota foto dopo"></textarea></div>
       
-      <div class="full"><label>Firma</label><canvas id="canvasF" width="800" height="150" style="width:100%; border:1px solid #ddd; touch-action:none;"></canvas></div>
+      <div class="full"><label>Firma Tecnico</label><canvas id="canvasF" width="800" height="150" style="width:100%; border:1px solid #ddd; touch-action:none;"></canvas></div>
       
       <div class="full" style="display:flex; justify-content:flex-end; gap:10px;"><button class="btn" onclick="closeModal()">Annulla</button><button class="btn btn-primary" onclick="salvaIntervento()">💾 Salva Intervento</button></div>
     </div>
 
     <div id="form-mag" class="grid" style="display:none;">
-      <div class="full"><label>Nome Materiale</label><input type="text" id="m-nome"></div>
-      <div><label>Giacenza</label><input type="number" id="m-qty"></div>
+      <div class="full"><label>Nome Articolo</label><input type="text" id="m-nome"></div>
+      <div><label>Quantità</label><input type="number" id="m-qty"></div>
       <div><label>Unità</label><input type="text" id="m-unita" value="pz"></div>
-      <div class="full" style="display:flex; justify-content:flex-end;"><button class="btn btn-primary" onclick="salvaMagazzino()">📦 Salva Inventario</button></div>
+      <div class="full" style="display:flex; justify-content:flex-end;"><button class="btn btn-primary" onclick="salvaMagazzino()">📦 Salva Articolo</button></div>
     </div>
   </div>
 </div>
 
 <script>
-// --- CHIAVI ---
-const S_URL = 'https://ukzconegwpoaculadefx.supabase.co/rest/v1/.supabase.co'; 
-const S_KEY = 'sb_publishable_dS8SzPIks90Yd1ISjsXQFQ_T8VtusA1';
+// --- CHIAVI PULITE ---
+let U = 'https://ukzconegwpoaculadefx.supabase.co/rest/v1/.supabase.co'; 
+const K = 'sb_publishable_dS8SzPIks90Yd1ISjsXQFQ_T8VtusA1'; 
 let db = null;
-if (window.supabase) db = window.supabase.createClient(S_URL, S_KEY);
+if (window.supabase) db = window.supabase.createClient(U, K);
 
 let interventi = [], materiali = [];
 let imgP = null, imgD = null, imgF = null;
@@ -130,7 +130,7 @@ async function sync() {
   const { data: i } = await db.from('interventi').select('*').order('data', {ascending:false});
   materiali = m || []; interventi = i || [];
   render(); updateSelect();
-  document.getElementById('sync-status').textContent = '✅ Cloud Sincronizzato';
+  document.getElementById('sync-status').textContent = '✅ Cloud Pronto';
 }
 
 function render() {
@@ -196,9 +196,12 @@ async function getWeather() {
     const wR = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${g[0].lat}&longitude=${g[0].lon}&current_weather=true&hourly=precipitation`);
     const w = await wR.json();
     const code = w.current_weather.weathercode;
-    const cond = { 0:"Soleggiato", 1:"Poco Nuvoloso", 2:"Parzialmente Nuvoloso", 3:"Nuvoloso", 45:"Nebbia", 51:"Pioviggine", 61:"Pioggia", 80:"Acquazzoni", 95:"Temporale" };
-    const rain = w.hourly.precipitation[0] === 0 ? "Assente" : (w.hourly.precipitation[0] < 2 ? "Debole" : "Forte");
-    document.getElementById('f-meteo').value = `${city.toUpperCase()} | ${cond[code] || "Variabile"} | Pioggia: ${rain} | Temp: ${w.current_weather.temperature}°C`;
+    const icons = { 
+        0:"☀️ Soleggiato", 1:"⛅ Poco Nuvoloso", 2:"⛅ Parz. Nuvoloso", 3:"☁️ Nuvoloso", 
+        45:"🌫️ Nebbia", 51:"🌦️ Pioviggine", 61:"🌧️ Piovoso", 80:"🏥 Temporale", 95:"⛈️ Tempesta" 
+    };
+    const rain = w.hourly.precipitation[0] === 0 ? "Assente" : (w.hourly.precipitation[0] < 2 ? "Debole" : "Forte 🌧️");
+    document.getElementById('f-meteo').value = `${icons[code] || "⛅ Variabile"} | Pioggia: ${rain} | Temp: ${w.current_weather.temperature}°C`;
   } catch(e) {}
 }
 
@@ -228,10 +231,10 @@ function pdf(id) {
   const { jsPDF } = window.jspdf; const doc = new jsPDF();
   doc.text("REPORT INTERVENTO", 15, 20);
   doc.setFontSize(10);
-  doc.text(`Data: ${r.data} | Bungalow: ${r.casetta}`, 15, 30);
+  doc.text(`Data: ${r.data} | Bungalow: ${r.casetta} | Meteo: ${r.meteo}`, 15, 30);
   if(r.fotoPrima) doc.addImage(r.fotoPrima, 'JPEG', 15, 45, 80, 50);
   if(r.fotoDopo) doc.addImage(r.fotoDopo, 'JPEG', 110, 45, 80, 50);
-  doc.save(`intervento_${r.casetta}.pdf`);
+  doc.save(`report_${r.casetta}.pdf`);
 }
 
 function switchView(v, el) {
@@ -241,7 +244,6 @@ function switchView(v, el) {
 }
 function toggleAll(cb) { document.querySelectorAll('.sel-row').forEach(x => x.checked = cb.checked); }
 async function delMat(id) { if(confirm("Elimina?")) { await db.from('materiali').delete().eq('id', id); sync(); } }
-
 function exportBulk() {
   const ids = Array.from(document.querySelectorAll('.sel-row:checked')).map(x => x.value);
   if(!ids.length) return alert("Seleziona righe!");
