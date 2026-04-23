@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CellaTesto PRO — Suite Gestionale</title>
+<title>CellaTesto PRO — Suite Gestionale Avanzata</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
@@ -16,10 +16,10 @@ header { background: var(--accent); color: #fff; padding: 1rem 2rem; display: fl
 .tabs { background: #fff; display: flex; padding: 0 2rem; gap: 2rem; border-bottom: 1px solid var(--border); }
 .tab { padding: 1rem 0; cursor: pointer; font-weight: 600; color: #888; border-bottom: 3px solid transparent; }
 .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
-.container { max-width: 1250px; margin: 2rem auto; padding: 0 1rem; }
+.container { max-width: 1300px; margin: 2rem auto; padding: 0 1rem; }
 .view { display: none; } .view.active { display: block; }
-.toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 10px; }
-.btn { padding: 11px 22px; border-radius: 8px; border: 1px solid var(--border); background: #fff; cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; }
+.toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; gap: 10px; }
+.btn { padding: 11px 22px; border-radius: 8px; border: 1px solid var(--border); background: #fff; cursor: pointer; font-weight: 600; font-size: 13px; }
 .btn-primary { background: var(--accent); color: #fff; border: none; }
 .card { background: #fff; border-radius: var(--radius); border: 1px solid var(--border); overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
 table { width: 100%; border-collapse: collapse; font-size: 13px; }
@@ -32,35 +32,38 @@ td { padding: 15px; border-bottom: 1px solid var(--border); }
 .full { grid-column: 1 / -1; }
 label { display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #777; margin-bottom: 6px; }
 input, textarea, select { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; background: #fafafa; }
-.photo-zone { border: 2px dashed var(--border); border-radius: 10px; padding: 1.5rem; text-align: center; cursor: pointer; }
-.img-prev { max-height: 80px; margin-top: 10px; border-radius: 5px; }
+.photo-zone { border: 2px dashed var(--border); border-radius: 10px; padding: 1rem; text-align: center; cursor: pointer; background: #fbfbfb; }
+.img-prev { max-height: 80px; margin-top: 5px; border-radius: 4px; border: 1px solid #ddd; }
 </style>
 </head>
 <body>
 
 <header>
   <div style="font-weight:600; font-size:1.2rem;">CellaTesto <span>PRO</span></div>
-  <div id="sync-status" style="font-size:11px; background:rgba(0,0,0,0.2); padding:4px 12px; border-radius:20px;">☁️ Sincronizzazione...</div>
+  <div id="sync-status" style="font-size:11px; background:rgba(0,0,0,0.2); padding:4px 12px; border-radius:20px;">☁️ Caricamento...</div>
 </header>
 
 <div class="tabs">
-  <div class="tab active" onclick="switchView('interventi', this)">Registro Lavori</div>
-  <div class="tab" onclick="switchView('magazzino', this)">Gestione Magazzino</div>
+  <div class="tab active" onclick="switchView('interventi', this)">Registro Giornaliero</div>
+  <div class="tab" onclick="switchView('magazzino', this)">Inventario Magazzino</div>
 </div>
 
 <div class="container">
-  <!-- INTERVENTI -->
+  <!-- REGISTRO INTERVENTI -->
   <div id="view-interventi" class="view active">
     <div class="toolbar">
-      <h1>Registro Interventi</h1>
+      <h1>Registro Giornaliero Interventi</h1>
       <div style="display:flex; gap:10px;">
         <button class="btn" style="background:#b84a00; color:#fff; border:none;" onclick="exportBulk()">📄 Report Selezionati</button>
         <button class="btn btn-primary" onclick="openModal('int')">+ Nuovo Intervento</button>
       </div>
     </div>
     <div class="card">
-      <table>
-        <thead><tr><th><input type="checkbox" onclick="toggleAll(this)"></th><th>Data</th><th>Area</th><th>Casa</th><th>Operatore</th><th>Foto</th><th>Azioni</th></tr></thead>
+      <table id="tbl-int">
+        <thead><tr>
+          <th><input type="checkbox" onclick="toggleAll(this)"></th>
+          <th>Data</th><th>Bungalow</th><th>Responsabile</th><th>Operaio</th><th>Foto</th><th>Azioni</th>
+        </tr></thead>
         <tbody id="tb-interventi"></tbody>
       </table>
     </div>
@@ -69,7 +72,7 @@ input, textarea, select { width: 100%; padding: 12px; border: 1px solid var(--bo
   <!-- MAGAZZINO -->
   <div id="view-magazzino" class="view">
     <div class="toolbar">
-      <h1>Inventario Magazzino</h1>
+      <h1>Giacenze Magazzino</h1>
       <button class="btn btn-primary" onclick="openModal('mag')">+ Aggiungi Materiale</button>
     </div>
     <div class="card">
@@ -81,32 +84,31 @@ input, textarea, select { width: 100%; padding: 12px; border: 1px solid var(--bo
   </div>
 </div>
 
-<!-- MODALE UNICA -->
+<!-- MODALE -->
 <div class="modal" id="modalApp">
   <div class="modal-content">
-    <h2 id="m-title" style="margin-bottom:2rem; color:var(--accent);">Nuovo Intervento</h2>
+    <h2 id="m-title" style="margin-bottom:2rem; color:var(--accent);">Nuovo Rapporto Intervento</h2>
     
-    <!-- FORM INTERVENTO -->
     <div id="form-int" class="grid">
       <div><label>Data</label><input type="date" id="f-data"></div>
       <div><label>Città (Meteo)</label><div style="display:flex; gap:5px;"><input type="text" id="f-citta" placeholder="Roma"><button class="btn" onclick="getWeather()">☁️</button></div></div>
-      <div class="full"><label>Condizioni Meteo</label><input type="text" id="f-meteo" readonly style="background:#f0f7f3; font-weight:600;"></div>
+      <div class="full"><label>Meteo e Vento (Aggiornato)</label><input type="text" id="f-meteo" readonly style="background:#f0f7f3; font-weight:600;"></div>
       
       <div><label>N. Operatori</label><input type="number" id="f-nop" value="1"></div>
-      <div><label>Responsabile</label><input type="text" id="f-operatore"></div>
-      <div><label>Area</label><input type="text" id="f-area"></div>
-      <div><label>Casa</label><input type="text" id="f-casa"></div>
+      <div><label>Responsabile</label><input type="text" id="f-responsabile" placeholder="Capo Cantiere"></div>
+      <div><label>Operaio / Operatore</label><input type="text" id="f-operaio" placeholder="Esecutore"></div>
+      <div><label>Area Lavoro</label><input type="text" id="f-area" placeholder="Es: Area Sport"></div>
+      <div><label>Bungalow / Casetta</label><input type="text" id="f-casetta" placeholder="N. 195"></div>
       
-      <!-- MAGAZZINO NELL'INTERVENTO -->
-      <div><label>Scarica Materiale</label><select id="f-mat-sel"></select></div>
-      <div><label>Quantità Usata</label><input type="number" id="f-mat-qty" value="0"></div>
+      <div><label>Materiale Magazzino</label><select id="f-mat-sel"></select></div>
+      <div><label>Qtà Scaricata</label><input type="number" id="f-mat-qty" value="0"></div>
       
-      <div class="full"><label>Descrizione Lavoro</label><textarea id="f-desc" rows="2"></textarea></div>
+      <div class="full"><label>Descrizione Dettagliata Lavoro</label><textarea id="f-desc" rows="3"></textarea></div>
       
-      <div><label>Foto PRIMA</label><div class="photo-zone" onclick="document.getElementById('i-p').click()"><input type="file" id="i-p" hidden onchange="processFile(this,'p')"><div id="v-p">Carica</div></div><textarea id="f-n-p" placeholder="Nota foto prima"></textarea></div>
-      <div><label>Foto DOPO</label><div class="photo-zone" onclick="document.getElementById('i-d').click()"><input type="file" id="i-d" hidden onchange="processFile(this,'d')"><div id="v-d">Carica</div></div><textarea id="f-n-d" placeholder="Nota foto dopo"></textarea></div>
+      <div><label>Foto PRIMA</label><div class="photo-zone" onclick="document.getElementById('i-p').click()"><input type="file" id="i-p" hidden onchange="processFile(this,'p')"><div id="v-p">Carica / Scatta</div></div><textarea id="f-n-p" placeholder="Commento Stato Iniziale"></textarea></div>
+      <div><label>Foto DOPO</label><div class="photo-zone" onclick="document.getElementById('i-d').click()"><input type="file" id="i-d" hidden onchange="processFile(this,'d')"><div id="v-d">Carica / Scatta</div></div><textarea id="f-n-d" placeholder="Commento Stato Finale"></textarea></div>
       
-      <div class="full"><label>Firma</label><canvas id="canvasF" width="800" height="180" style="width:100%; border:1px solid #ddd; border-radius:8px; touch-action:none;"></canvas></div>
+      <div class="full"><label>Firma per Chiusura Lavoro</label><canvas id="canvasF" width="800" height="180" style="width:100%; border:1px solid #ddd; border-radius:8px; touch-action:none;"></canvas></div>
       
       <div class="full" style="display:flex; justify-content:flex-end; gap:10px; margin-top:1rem;">
         <button class="btn" onclick="closeModal()">Annulla</button>
@@ -114,12 +116,12 @@ input, textarea, select { width: 100%; padding: 12px; border: 1px solid var(--bo
       </div>
     </div>
 
-    <!-- FORM MAGAZZINO -->
+    <!-- MAGAZZINO -->
     <div id="form-mag" class="grid" style="display:none;">
-      <div class="full"><label>Nome Materiale</label><input type="text" id="m-nome" placeholder="Es: Vernice Bianca"></div>
-      <div><label>Quantità Iniziale</label><input type="number" id="m-qty" value="0"></div>
+      <div class="full"><label>Nome Materiale</label><input type="text" id="m-nome"></div>
+      <div><label>Giacenza Iniziale</label><input type="number" id="m-qty"></div>
       <div><label>Unità</label><input type="text" id="m-unita" value="pz"></div>
-      <div class="full" style="display:flex; justify-content:flex-end; gap:10px; margin-top:1rem;">
+      <div class="full" style="display:flex; justify-content:flex-end; gap:10px;">
         <button class="btn" onclick="closeModal()">Annulla</button>
         <button class="btn btn-primary" onclick="salvaMagazzino()">📦 Aggiungi Materiale</button>
       </div>
@@ -128,7 +130,7 @@ input, textarea, select { width: 100%; padding: 12px; border: 1px solid var(--bo
 </div>
 
 <script>
-// --- CHIAVI ---
+// --- CHIAVI SUPABASE ---
 const S_URL = 'https://ukzconegwpoaculadefx.supabase.co/rest/v1/.supabase.co'; 
 const S_KEY = 'sb_publishable_dS8SzPIks90Yd1ISjsXQFQ_T8VtusA1';
 let db = null;
@@ -155,121 +157,124 @@ async function sync() {
 function render() {
   document.getElementById('tb-interventi').innerHTML = interventi.map(r => `<tr>
     <td><input type="checkbox" class="sel-row" value="${r.id}"></td>
-    <td>${r.data}</td><td>${r.area || ''}</td><td><b>${r.casa}</b></td><td>${r.operatore}</td>
+    <td>${r.data}</td><td><b>${r.casa || r.casetta || '-'}</b></td><td>${r.operatore || r.responsabile || '-'}</td><td>${r.operaio || '-'}</td>
     <td>${r.fotoPrima ? '📸' : '-'}</td>
     <td><button class="btn" style="padding:4px 8px;" onclick="pdf('${r.id}')">📄 PDF</button></td>
   </tr>`).join('');
   document.getElementById('tb-magazzino').innerHTML = materiali.map(m => `<tr>
-    <td><b>${m.nome}</b></td><td style="color:${m.qty < 5 ? 'orange' : 'inherit'}">${m.qty}</td><td>${m.unita}</td>
+    <td><b>${m.nome}</b></td><td style="color:${m.qty < 5 ? '#b84a00' : 'inherit'}">${m.qty}</td><td>${m.unita}</td>
     <td><button class="btn" onclick="delMat('${m.id}')">🗑️</button></td>
   </tr>`).join('');
 }
 
 function updateSelect() {
   const sel = document.getElementById('f-mat-sel');
-  sel.innerHTML = '<option value="">-- Nessuno --</option>' + materiali.map(m => `<option value="${m.nome}">${m.nome} (Disponibili: ${m.qty})</option>`).join('');
+  sel.innerHTML = '<option value="">-- Nessuno --</option>' + materiali.map(m => `<option value="${m.nome}">${m.nome} (Disp: ${m.qty})</option>`).join('');
 }
 
-function openModal(type) {
+function openModal(t) {
   document.getElementById('modalApp').classList.add('open');
-  if (type === 'int') {
-    document.getElementById('form-int').style.display = 'grid';
-    document.getElementById('form-mag').style.display = 'none';
-    document.getElementById('m-title').textContent = 'Nuovo Intervento Professionale';
-    initFirma();
+  if(t==='int'){
+    document.getElementById('form-int').style.display='grid'; document.getElementById('form-mag').style.display='none';
+    document.getElementById('m-title').textContent = 'Nuovo Rapporto Intervento';
+    initCanvas();
   } else {
-    document.getElementById('form-int').style.display = 'none';
-    document.getElementById('form-mag').style.display = 'grid';
-    document.getElementById('m-title').textContent = 'Aggiungi Materiale a Magazzino';
+    document.getElementById('form-int').style.display='none'; document.getElementById('form-mag').style.display='grid';
+    document.getElementById('m-title').textContent = 'Nuovo Articolo Magazzino';
   }
 }
 function closeModal() { document.getElementById('modalApp').classList.remove('open'); }
 
 async function getWeather() {
-  const city = document.getElementById('f-citta').value;
-  if (!city) return;
+  const city = document.getElementById('f-citta').value; if(!city) return;
   try {
     const gR = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${city}`);
     const g = await gR.json();
     const wR = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${g[0].lat}&longitude=${g[0].lon}&current_weather=true&hourly=precipitation`);
     const w = await wR.json();
-    const c = w.current_weather;
-    const p = w.hourly.precipitation[0] === 0 ? "Assente" : "Presente";
-    document.getElementById('f-meteo').value = `${city.toUpperCase()} | Temp: ${c.temperature}°C | Pioggia: ${p} | Vento: ${c.windspeed}km/h`;
-  } catch (e) { document.getElementById('f-meteo').value = "Meteo non disponibile"; }
+    const c = w.current_weather; const p = w.hourly.precipitation[0]===0?"Assenti":"Attive";
+    document.getElementById('f-meteo').value = `${city.toUpperCase()} | Temp: ${c.temperature}°C | Piogge: ${p} | Vento: ${c.windspeed}km/h`;
+  } catch(e) { document.getElementById('f-meteo').value = "Meteo non disponibile"; }
 }
 
 function processFile(input, type) {
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    const i = new Image();
-    i.onload = () => {
-      const c = document.createElement('canvas'); const MAX = 600; const s = MAX / i.width;
-      c.width = MAX; c.height = i.height * s;
-      const ctx = c.getContext('2d'); ctx.drawImage(i, 0, 0, c.width, c.height);
-      const res = c.toDataURL('image/jpeg', 0.5);
-      if (type === 'p') { imgP = res; document.getElementById('v-p').innerHTML = `<img src="${res}" class="img-prev">`; }
-      else { imgD = res; document.getElementById('v-d').innerHTML = `<img src="${res}" class="img-prev">`; }
-    };
-    i.src = e.target.result;
-  };
-  reader.readAsDataURL(input.files[0]);
+  const reader = new FileReader(); reader.onload = (e) => {
+    const i = new Image(); i.onload = () => {
+      const cv = document.createElement('canvas'); const MAX = 600; const s = MAX / i.width;
+      cv.width = MAX; cv.height = i.height * s;
+      const ctx = cv.getContext('2d'); ctx.drawImage(i, 0, 0, cv.width, cv.height);
+      const res = cv.toDataURL('image/jpeg', 0.5);
+      if(type==='p'){ imgP=res; document.getElementById('v-p').innerHTML=`<img src="${res}" class="img-prev">`; }
+      else { imgD=res; document.getElementById('v-d').innerHTML=`<img src="${res}" class="img-prev">`; }
+    }; i.src = e.target.result;
+  }; reader.readAsDataURL(input.files[0]);
 }
 
-let ctx, drw = false;
-function initFirma() {
+let ctx, drw=false;
+function initCanvas() {
   const c = document.getElementById('canvasF'); ctx = c.getContext('2d');
   const pos = (e) => { const r = c.getBoundingClientRect(); return { x: (e.clientX || (e.touches && e.touches[0].clientX)) - r.left, y: (e.clientY || (e.touches && e.touches[0].clientY)) - r.top }; };
-  const s = (e) => { drw = true; ctx.beginPath(); const p = pos(e); ctx.moveTo(p.x, p.y); };
-  const w = (e) => { if(!drw) return; e.preventDefault(); const p = pos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); };
-  c.onmousedown = s; c.ontouchstart = s; c.onmousemove = w; c.ontouchmove = w;
-  window.onmouseup = window.ontouchend = () => { drw = false; imgF = c.toDataURL(); };
+  const s=(e)=>{drw=true; ctx.beginPath(); const p=pos(e); ctx.moveTo(p.x,p.y);};
+  const w=(e)=>{if(!drw)return; e.preventDefault(); const p=pos(e); ctx.lineTo(p.x,p.y); ctx.stroke();};
+  c.onmousedown=s; c.ontouchstart=s; c.onmousemove=w; c.ontouchmove=w;
+  window.onmouseup = window.ontouchend = () => { if(drw){drw=false; imgF=c.toDataURL();} };
 }
 
 async function salvaIntervento() {
-  const mNome = document.getElementById('f-mat-sel').value;
-  const mQty = parseInt(document.getElementById('f-mat-qty').value);
   const row = {
     id: 'I-'+Date.now(), data: document.getElementById('f-data').value,
-    meteo: document.getElementById('f-meteo').value, operatore: document.getElementById('f-operatore').value,
-    casa: document.getElementById('f-casa').value, area: document.getElementById('f-area').value,
-    desc: document.getElementById('f-desc').value, mat: mNome, qty: mQty,
+    meteo: document.getElementById('f-meteo').value, responsabile: document.getElementById('f-responsabile').value,
+    operaio: document.getElementById('f-operaio').value, area: document.getElementById('f-area').value,
+    casetta: document.getElementById('f-casetta').value, desc: document.getElementById('f-desc').value,
+    mat: document.getElementById('f-mat-sel').value, qty: parseInt(document.getElementById('f-mat-qty').value),
     fotoPrima: imgP, fotoDopo: imgD, descPrima: document.getElementById('f-n-p').value,
     descDopo: document.getElementById('f-n-d').value, firma: imgF, conferma: true
   };
   await db.from('interventi').insert([row]);
-  if (mNome && mQty > 0) {
-    const art = materiali.find(m => m.nome === mNome);
-    await db.from('materiali').update({ qty: Math.max(0, art.qty - mQty) }).eq('id', art.id);
+  if(row.mat && row.qty > 0){
+    const art = materiali.find(m => m.nome === row.mat);
+    await db.from('materiali').update({ qty: Math.max(0, art.qty - row.qty) }).eq('id', art.id);
   }
   closeModal(); pdf_gen(row); sync();
 }
 
 async function salvaMagazzino() {
   const art = { id: 'M-'+Date.now(), nome: document.getElementById('m-nome').value, qty: parseInt(document.getElementById('m-qty').value), unita: document.getElementById('m-unita').value };
-  await db.from('materiali').insert([art]);
-  closeModal(); sync();
+  await db.from('materiali').insert([art]); closeModal(); sync();
 }
 
 function pdf_gen(r) {
   const { jsPDF } = window.jspdf; const doc = new jsPDF();
-  doc.setFontSize(22); doc.text("RAPPORTO INTERVENTO", 15, 20);
-  doc.setFontSize(10); doc.text(`DATA: ${r.data} | CASA: ${r.casa} | OPERATORE: ${r.operatore}`, 15, 30);
-  if (r.fotoPrima) doc.addImage(r.fotoPrima, 'JPEG', 15, 40, 85, 60);
-  if (r.fotoDopo) doc.addImage(r.fotoDopo, 'JPEG', 110, 40, 85, 60);
-  if (r.firma) doc.addImage(r.firma, 'PNG', 140, 110, 50, 15);
-  doc.save(`intervento_${r.casa}.pdf`);
+  doc.setFontSize(22); doc.text("TECHNICAL WORK REPORT", 15, 20);
+  doc.setFontSize(10);
+  doc.text(`DATA: ${r.data} | BUNGALOW: ${r.casetta || '-'} | AREA: ${r.area || '-'}`, 15, 30);
+  doc.text(`RESPONSABILE: ${r.responsabile} | OPERATORE: ${r.operaio}`, 15, 36);
+  doc.text(`METEO: ${r.meteo}`, 15, 42);
+  doc.line(15, 45, 195, 45);
+  doc.text("LAVORO ESEGUITO:", 15, 52); doc.text(r.desc || "-", 15, 58, { maxWidth: 170 });
+  doc.text(`MATERIALI USATI: ${r.mat || "-"} (Qtà: ${r.qty || 0})`, 15, 80);
+  
+  doc.text(`NOTA FOTO PRIMA: ${r.descPrima || "-"}`, 15, 95);
+  if(r.fotoPrima) doc.addImage(r.fotoPrima, 'JPEG', 15, 100, 80, 55);
+  
+  doc.text(`NOTA FOTO DOPO: ${r.descDopo || "-"}`, 110, 95);
+  if(r.fotoDopo) doc.addImage(r.fotoDopo, 'JPEG', 110, 100, 80, 55);
+  
+  if(r.firma) doc.addImage(r.firma, 'PNG', 140, 165, 45, 15);
+  doc.save(`report_${r.casetta}_${r.data}.pdf`);
 }
+
 function pdf(id) { pdf_gen(interventi.find(x => x.id === id)); }
 async function delMat(id) { if(confirm("Eliminare?")) { await db.from('materiali').delete().eq('id', id); sync(); } }
 function toggleAll(cb) { document.querySelectorAll('.sel-row').forEach(x => x.checked = cb.checked); }
+
 function exportBulk() {
   const ids = Array.from(document.querySelectorAll('.sel-row:checked')).map(x => x.value);
   if(!ids.length) return alert("Seleziona almeno un intervento!");
   const { jsPDF } = window.jspdf; const doc = new jsPDF();
-  doc.text("RIEPILOGO SETTIMANALE", 15, 20);
-  let rows = interventi.filter(x => ids.includes(x.id)).map(x => [x.data, x.casa, x.operatore, x.desc]);
-  doc.autoTable({ head: [['Data', 'Casa', 'Operatore', 'Descrizione']], body: rows, startY: 30 });
+  doc.text("RIEPILOGO INTERVENTI SELEZIONATI", 15, 20);
+  let rows = interventi.filter(x => ids.includes(x.id)).map(x => [x.data, x.casetta, x.responsabile, x.desc.substring(0, 50)+'...']);
+  doc.autoTable({ head: [['Data', 'Bungalow', 'Responsabile', 'Descrizione']], body: rows, startY: 30 });
   doc.save("report_settimanale.pdf");
 }
 
