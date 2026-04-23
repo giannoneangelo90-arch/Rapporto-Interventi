@@ -3,151 +3,147 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CellaTesto — Meteo & Cloud</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<title>CellaTesto Suite — Italiano</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root { --accent: #2a5c45; --bg: #f4f3ef; --border: #e2e0d8; --radius: 12px; }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: #1a1916; padding-bottom: 40px; }
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: #1a1916; padding-bottom: 50px; }
 header { background: var(--accent); color: #fff; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top:0; z-index:100; }
 .container { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
 .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
-.btn { padding: 10px 18px; border-radius: 8px; border: 1px solid var(--border); background: #fff; cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; }
+.btn { padding: 10px 20px; border-radius: 8px; border: 1px solid var(--border); background: #fff; cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; transition: 0.2s; }
 .btn-primary { background: var(--accent); color: #fff; border: none; }
-.card { background: #fff; border-radius: var(--radius); border: 1px solid var(--border); overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+.card { background: #fff; border-radius: var(--radius); border: 1px solid var(--border); overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
 table { width: 100%; border-collapse: collapse; font-size: 13px; }
-th { background: #f9f8f5; padding: 12px; text-align: left; color: #666; font-size: 11px; text-transform: uppercase; }
-td { padding: 12px; border-bottom: 1px solid var(--border); }
+th { background: #f9f8f5; padding: 15px; text-align: left; font-size: 11px; text-transform: uppercase; color: #777; border-bottom: 1px solid var(--border); }
+td { padding: 15px; border-bottom: 1px solid var(--border); }
 .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 200; align-items: flex-start; justify-content: center; padding: 1rem; overflow-y: auto; }
 .modal.open { display: flex; }
-.modal-content { background: #fff; border-radius: 16px; width: 100%; max-width: 900px; padding: 2rem; margin-top: 10px; }
-.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
+.modal-content { background: #fff; border-radius: 16px; width: 100%; max-width: 900px; padding: 2.5rem; margin-top: 10px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; }
 .full { grid-column: 1 / -1; }
-label { display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #777; margin-bottom: 4px; }
-input, textarea, select { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px; background: #fafafa; }
-.weather-badge { background: #eef5f0; padding: 10px; border-radius: 6px; border: 1px solid #d4e4d8; font-size: 12px; margin-top: 5px; }
-.photo-zone { border: 2px dashed var(--border); border-radius: 8px; padding: 1rem; text-align: center; cursor: pointer; }
-.photo-preview { max-width: 100%; max-height: 100px; margin-top: 5px; border-radius: 4px; }
+label { display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #777; margin-bottom: 6px; }
+input, textarea, select { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; background: #fafafa; }
+.weather-box { background: #f0f7f3; border: 1px solid #d4e4d8; padding: 12px; border-radius: 8px; font-size: 12px; margin-top: 5px; color: var(--accent); font-weight: 500; }
+.photo-zone { border: 2px dashed var(--border); border-radius: 10px; padding: 1.5rem; text-align: center; cursor: pointer; transition: 0.2s; }
+.photo-zone:hover { border-color: var(--accent); background: #f9fbf9; }
+.signature-box { border: 1px solid var(--border); border-radius: 10px; background: #fff; margin-top: 10px; }
 </style>
 </head>
 <body>
 
 <header>
-  <div style="font-weight:600;">CellaTesto PRO</div>
-  <div id="sync-status" style="font-size:11px;">☁️ In attesa...</div>
+  <div style="font-weight:600; font-size:1.2rem;">CellaTesto <span>PRO</span></div>
+  <div id="sync-status" style="font-size:11px; background:rgba(0,0,0,0.2); padding:4px 12px; border-radius:20px; font-family:'DM Mono', monospace;">☁️ In attesa...</div>
 </header>
 
 <div class="container">
   <div class="toolbar">
-    <h1>Registro Interventi</h1>
-    <button class="btn btn-primary" onclick="showModal()">+ Nuovo Intervento</button>
+    <h1>Registro Lavori</h1>
+    <div style="display:flex; gap:10px;">
+      <button class="btn btn-primary" onclick="showModal()">+ Nuovo Intervento</button>
+    </div>
   </div>
   <div class="card">
     <table>
-      <thead><tr><th>Data</th><th>Città</th><th>Casa</th><th>Operatore</th><th>Meteo</th><th>Azioni</th></tr></thead>
-      <tbody id="table-body"></tbody>
+      <thead><tr><th>Data</th><th>Città / Area</th><th>Casa</th><th>Operatore</th><th>Meteo</th><th>Foto</th><th>Azioni</th></tr></thead>
+      <tbody id="table-body">
+        <tr><td colspan="7" style="text-align:center; padding:3rem; color:#888;">Caricamento dati dal cloud...</td></tr>
+      </tbody>
     </table>
   </div>
 </div>
 
-<!-- MODALE AGGIORNATA -->
+<!-- MODALE -->
 <div class="modal" id="modalFull">
   <div class="modal-content">
-    <h2 style="margin-bottom:1.5rem; color:var(--accent);">Nuovo Intervento con Meteo</h2>
+    <h2 style="margin-bottom:2rem; color:var(--accent);">Dettagli Rapporto Tecnico</h2>
     <div class="grid">
       <div><label>Data</label><input type="date" id="f-data"></div>
       <div>
-        <label>Città (per Meteo)</label>
-        <div style="display:flex; gap:5px;">
-          <input type="text" id="f-citta" placeholder="Es: Roma">
-          <button class="btn" onclick="getWeather()" title="Aggiorna Meteo">☁️</button>
-        </div>
+        <label>Città (per Meteo Auto)</label>
+        <div style="display:flex; gap:5px;"><input type="text" id="f-citta" placeholder="Es: Roma"><button class="btn" style="padding:10px;" onclick="getWeather()">☁️</button></div>
       </div>
       <div class="full">
-        <label>Dettagli Meteo Automatici</label>
-        <input type="text" id="f-meteo" placeholder="Meteo, Pioggia, Vento..." readonly style="background:#eef5f0; font-weight:500;">
+        <label>Meteo e Condizioni (Auto)</label>
+        <input type="text" id="f-meteo" readonly style="background:#f0f7f3; font-weight:600;" placeholder="Clicca la nuvola per aggiornare">
       </div>
       
       <div><label>N. Operatori</label><input type="number" id="f-nop" value="1"></div>
-      <div><label>Responsabile</label><input type="text" id="f-operatore" placeholder="Nome"></div>
-      <div><label>Area / Posizione</label><input type="text" id="f-area" placeholder="Posizione"></div>
-      <div><label>N. Casa / Bungalow</label><input type="text" id="f-casa" placeholder="N. Casa"></div>
+      <div><label>Responsabile / Tecnico</label><input type="text" id="f-operatore" placeholder="Nome"></div>
+      <div><label>Area / Posizione</label><input type="text" id="f-area" placeholder="Es: Area Piscina"></div>
+      <div><label>Bungalow / Casa</label><input type="text" id="f-casa" placeholder="N. Casa"></div>
       
-      <div class="full"><label>Descrizione Lavoro</label><textarea id="f-desc" rows="2"></textarea></div>
+      <div class="full"><label>Analisi del Lavoro</label><textarea id="f-desc" rows="3" placeholder="Descrivi cosa è stato fatto..."></textarea></div>
       
-      <div><label>Foto PRIMA</label><div class="photo-zone" onclick="document.getElementById('in-p').click()"><input type="file" id="in-p" hidden onchange="processFile(this,'p')"><div id="v-p">Carica</div></div></div>
-      <div><label>Foto DOPO</label><div class="photo-zone" onclick="document.getElementById('in-d').click()"><input type="file" id="in-d" hidden onchange="processFile(this,'d')"><div id="v-d">Carica</div></div></div>
+      <div><label>Foto PRIMA</label><div class="photo-zone" onclick="document.getElementById('in-p').click()"><input type="file" id="in-p" hidden onchange="processFile(this,'p')"><div id="v-p">Carica / Scatta</div></div></div>
+      <div><label>Foto DOPO</label><div class="photo-zone" onclick="document.getElementById('in-d').click()"><input type="file" id="in-d" hidden onchange="processFile(this,'d')"><div id="v-d">Carica / Scatta</div></div></div>
+      
+      <div><label>Materiali Utilizzati</label><input type="text" id="f-mat" placeholder="Es: Giunti, Valvole"></div>
+      <div><label>Quantità</label><input type="text" id="f-qty" placeholder="Es: 4 pz"></div>
       
       <div class="full">
-        <label>Firma</label>
-        <canvas id="canvasF" width="800" height="150" style="width:100%; border:1px solid #ddd; border-radius:8px; touch-action:none;"></canvas>
-        <button class="btn" style="margin-top:5px; font-size:10px;" onclick="clearF()">Pulisci</button>
+        <label>Firma Tecnico</label>
+        <canvas id="canvasF" width="800" height="180" class="signature-box" style="width:100%; border:1px solid #ddd; touch-action:none;"></canvas>
+        <button class="btn" style="margin-top:5px; font-size:10px;" onclick="clearF()">Pulisci Firma</button>
       </div>
     </div>
-    
-    <div style="margin-top:2rem; display:flex; justify-content:flex-end; gap:10px;">
+    <div style="margin-top:2.5rem; display:flex; justify-content:flex-end; gap:12px;">
       <button class="btn" onclick="hideModal()">Annulla</button>
-      <button class="btn btn-primary" onclick="salvaTutto()">💾 Salva e Sincronizza</button>
+      <button class="btn btn-primary" onclick="salva()">💾 Salva e Sincronizza</button>
     </div>
   </div>
 </div>
 
 <script>
-// CHIAVI (Sostituisci con le tue)
-const S_URL = 'https://IL_TUO_ID.supabase.co'; 
-const S_KEY = 'LA_TUA_CHIAVE_ANON';
+// --- CONFIGURAZIONE ---
+const S_URL = 'https://ukzconegwpoaculadefx.supabase.co/rest/v1/.supabase.co'; 
+const S_KEY = 'sb_publishable_dS8SzPIks90Yd1ISjsXQFQ_T8VtusA1';
 let db = null;
 if (window.supabase) db = window.supabase.createClient(S_URL, S_KEY);
 
 let dati = [];
 let imgP = null, imgD = null, imgF = null;
 
-// FUNZIONE METEO AUTOMATICA
+// METEO PROFESSIONALE
 async function getWeather() {
-  const citta = document.getElementById('f-citta').value;
-  if (!citta) return alert("Inserisci una città!");
-  
-  document.getElementById('f-meteo').value = "⏳ Recupero meteo...";
+  const city = document.getElementById('f-citta').value;
+  if (!city) return alert("Inserisci prima il nome della città!");
+  document.getElementById('f-meteo').value = "⏳ Recupero dati meteo...";
   try {
-    // 1. Ottieni coordinate
-    const geoR = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${citta}`);
-    const geo = await geoR.json();
-    if (!geo.length) throw "Città non trovata";
-    
-    // 2. Ottieni meteo da Open-Meteo
-    const lat = geo[0].lat, lon = geo[0].lon;
-    const metR = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&hourly=precipitation`);
-    const met = await metR.json();
-    
-    const w = met.current_weather;
-    const prec = met.hourly.precipitation[0];
-    let pioggia = "Assente";
-    if (prec > 0 && prec < 2) pioggia = "Debole";
-    else if (prec >= 2 && prec < 7) pioggia = "Moderata";
-    else if (prec >= 7) pioggia = "Forte";
-    
-    const desc = `Temp: ${w.temperature}°C | Pioggia: ${pioggia} (${prec}mm) | Vento: ${w.windspeed}km/h`;
-    document.getElementById('f-meteo').value = desc;
-  } catch (e) {
-    document.getElementById('f-meteo').value = "Personalizzato (Inserisci a mano)";
-    console.error(e);
-  }
+    const gR = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${city}`);
+    const g = await gR.json();
+    if (!g.length) throw "Città non trovata";
+    const wR = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${g[0].lat}&longitude=${g[0].lon}&current_weather=true&hourly=precipitation`);
+    const w = await wR.json();
+    const cur = w.current_weather;
+    const prec = w.hourly.precipitation[0];
+    let rain = "Assente";
+    if (prec > 0 && prec < 2) rain = "Debole";
+    else if (prec >= 2 && prec < 7) rain = "Moderata";
+    else if (prec >= 7) rain = "Forte";
+    document.getElementById('f-meteo').value = `${city.toUpperCase()} | Temp: ${cur.temperature}°C | Piogge: ${rain} | Vento: ${cur.windspeed} km/h`;
+  } catch (e) { document.getElementById('f-meteo').value = "Meteo non disponibile"; }
 }
 
 async function sync() {
   if (!db) return;
   const { data } = await db.from('interventi').select('*').order('data', {ascending: false});
-  if (data) { dati = data; render(); document.getElementById('sync-status').textContent = '✅ Cloud pronto'; }
+  if (data) { dati = data; render(); document.getElementById('sync-status').textContent = '✅ Cloud Aggiornato'; }
 }
 
 function render() {
   const tb = document.getElementById('table-body');
+  if (!dati.length) { tb.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:2rem;">Nessun intervento sincronizzato.</td></tr>'; return; }
   tb.innerHTML = dati.map(r => `<tr>
     <td>${r.data}</td><td>${r.area || '-'}</td><td><b>${r.casa}</b></td><td>${r.operatore}</td>
-    <td style="font-size:11px;">${r.meteo || '-'}</td>
-    <td><button class="btn" onclick="pdf('${r.id}')" style="padding:4px 8px;">📄 PDF</button></td>
+    <td style="font-size:11px; max-width:150px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${r.meteo || '-'}</td>
+    <td>${r.fotoPrima ? '📸' : '-'} ${r.fotoDopo ? '📸' : '-'}</td>
+    <td><button class="btn" style="padding:4px 8px; font-size:12px;" onclick="pdf('${r.id}')">📄 PDF</button></td>
   </tr>`).join('');
 }
 
@@ -155,61 +151,68 @@ function showModal() { document.getElementById('modalFull').classList.add('open'
 function hideModal() { document.getElementById('modalFull').classList.remove('open'); }
 
 function processFile(input, type) {
+  const file = input.files[0];
   const reader = new FileReader();
   reader.onload = (e) => {
-    const img = new Image();
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      const MAX_W = 800; const scale = MAX_W / img.width;
-      canvas.width = MAX_W; canvas.height = img.height * scale;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-      const res = canvas.toDataURL('image/jpeg', 0.6);
-      if (type === 'p') { imgP = res; document.getElementById('v-p').innerHTML = `<img src="${res}" class="photo-preview">`; }
-      else { imgD = res; document.getElementById('v-d').innerHTML = `<img src="${res}" class="photo-preview">`; }
+    const i = new Image();
+    i.onload = () => {
+      const c = document.createElement('canvas');
+      const MAX = 800; const s = MAX / i.width;
+      c.width = MAX; c.height = i.height * s;
+      const ctx = c.getContext('2d');
+      ctx.drawImage(i, 0, 0, c.width, c.height);
+      const res = c.toDataURL('image/jpeg', 0.6);
+      if (type === 'p') { imgP = res; document.getElementById('v-p').innerHTML = `<img src="${res}" style="max-height:80px; border-radius:5px;">`; }
+      else { imgD = res; document.getElementById('v-d').innerHTML = `<img src="${res}" style="max-height:80px; border-radius:5px;">`; }
     };
-    img.src = e.target.result;
+    i.src = e.target.result;
   };
-  reader.readAsDataURL(input.files[0]);
+  reader.readAsDataURL(file);
 }
 
-let ctx, draw = false;
+let ctx, drw = false;
 function initF() {
   const c = document.getElementById('canvasF'); ctx = c.getContext('2d');
   const pos = (e) => { const r = c.getBoundingClientRect(); return { x: (e.clientX || (e.touches && e.touches[0].clientX)) - r.left, y: (e.clientY || (e.touches && e.touches[0].clientY)) - r.top }; };
-  const start = (e) => { draw = true; ctx.beginPath(); const p = pos(e); ctx.moveTo(p.x, p.y); };
-  const move = (e) => { if(!draw) return; e.preventDefault(); const p = pos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); };
-  c.onmousedown = start; c.ontouchstart = start;
-  c.onmousemove = move; c.ontouchmove = move;
-  window.onmouseup = window.ontouchend = () => { draw = false; imgF = c.toDataURL(); };
+  const s = (e) => { drw = true; ctx.beginPath(); const p = pos(e); ctx.moveTo(p.x, p.y); };
+  const w = (e) => { if(!drw) return; e.preventDefault(); const p = pos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); };
+  c.onmousedown = s; c.ontouchstart = s;
+  c.onmousemove = w; c.ontouchmove = w;
+  window.onmouseup = window.ontouchend = () => { drw = false; imgF = c.toDataURL(); };
 }
-function clearF() { ctx.clearRect(0,0,800,150); imgF = null; }
+function clearF() { ctx.clearRect(0,0,800,180); imgF = null; }
 
-async function salvaTutto() {
+async function salva() {
   const row = {
     id: 'ID-' + Date.now(), data: document.getElementById('f-data').value,
     meteo: document.getElementById('f-meteo').value, operatore: document.getElementById('f-operatore').value,
     casa: document.getElementById('f-casa').value, desc: document.getElementById('f-desc').value,
     area: document.getElementById('f-area').value, nop: document.getElementById('f-nop').value,
-    fotoPrima: imgP, fotoDopo: imgD, firma: imgF, conferma: true
+    fotoPrima: imgP, fotoDopo: imgD, firma: imgF, mat: document.getElementById('f-mat').value,
+    qty: document.getElementById('f-qty').value, conferma: true
   };
-  document.getElementById('sync-status').textContent = '⏳ Salvataggio rapido...';
-  await db.from('interventi').insert([row]);
+  if(!row.data || !row.operatore) return alert("Inserisci Data e Tecnico!");
+  document.getElementById('sync-status').textContent = '⏳ Invio istantaneo...';
+  const { error } = await db.from('interventi').insert([row]);
+  if (error) alert("Errore Cloud: " + error.message);
   hideModal(); sync();
 }
 
 function pdf(id) {
   const r = dati.find(x => x.id === id);
   const { jsPDF } = window.jspdf; const doc = new jsPDF();
-  doc.setFontSize(22); doc.text("RAPPORTO INTERVENTO", 15, 20);
-  doc.setFontSize(10);
-  doc.text(`Città: ${r.area || ''} | Data: ${r.data} | Operatore: ${r.operatore}`, 15, 30);
-  doc.text(`METEO: ${r.meteo}`, 15, 36);
-  doc.text("LAVORO:", 15, 50); doc.text(r.desc || "", 15, 56);
-  if (r.fotoPrima) doc.addImage(r.fotoPrima, 'JPEG', 15, 70, 85, 60);
-  if (r.fotoDopo) doc.addImage(r.fotoDopo, 'JPEG', 110, 70, 85, 60);
-  if (r.firma) doc.addImage(r.firma, 'PNG', 140, 140, 50, 15);
-  doc.save(`report_${r.casa}.pdf`);
+  doc.setFont("helvetica", "bold"); doc.setFontSize(22); doc.text("TECHNICAL REPORT", 15, 20);
+  doc.setFontSize(10); doc.setFont("helvetica", "normal");
+  doc.text(`DATE: ${r.data} | AREA: ${r.area || ''} | CASA: ${r.casa}`, 15, 30);
+  doc.text(`METEO: ${r.meteo || '-'}`, 15, 35);
+  doc.text(`TECH: ${r.operatore} | STAFF: ${r.nop}`, 15, 40);
+  doc.line(15, 45, 195, 45);
+  doc.text("JOB DESCRIPTION:", 15, 52); doc.text(r.desc || "-", 15, 58);
+  doc.text(`MATERIALS: ${r.mat || "-"} | QUANTITY: ${r.qty || "-"}`, 15, 70);
+  if (r.fotoPrima) doc.addImage(r.fotoPrima, 'JPEG', 15, 80, 85, 60);
+  if (r.fotoDopo) doc.addImage(r.fotoDopo, 'JPEG', 110, 80, 85, 60);
+  if (r.firma) doc.addImage(r.firma, 'PNG', 140, 150, 50, 15);
+  doc.save(`report_${r.casa}_${r.data}.pdf`);
 }
 if (db) sync();
 </script>
