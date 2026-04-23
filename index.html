@@ -3,19 +3,21 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CellaTesto PRO — Versione Finale</title>
+<title>CellaTesto PRO — Automazione Totale</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root { --accent: #2a5c45; --bg: #f4f3ef; --border: #e2e0d8; --radius: 12px; }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: #1a1916; padding-bottom: 50px; }
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: #1a1916; padding-bottom: 60px; }
 header { background: var(--accent); color: #fff; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top:0; z-index:100; }
 .container { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
-.toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+.toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; gap: 10px; flex-wrap: wrap; }
 .btn { padding: 10px 20px; border-radius: 8px; border: 1px solid var(--border); background: #fff; cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; transition: 0.2s; }
 .btn-primary { background: var(--accent); color: #fff; border: none; }
+.btn-warn { background: #b84a00; color: #fff; border: none; }
 .card { background: #fff; border-radius: var(--radius); border: 1px solid var(--border); overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
 table { width: 100%; border-collapse: collapse; font-size: 13px; }
 th { background: #f9f8f5; padding: 15px; text-align: left; font-size: 11px; text-transform: uppercase; color: #777; border-bottom: 1px solid var(--border); }
@@ -28,80 +30,70 @@ td { padding: 15px; border-bottom: 1px solid var(--border); }
 label { display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #777; margin-bottom: 6px; }
 input, textarea, select { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; background: #fafafa; }
 .photo-zone { border: 2px dashed var(--border); border-radius: 10px; padding: 1rem; text-align: center; cursor: pointer; }
-.photo-note { font-size: 11px; color: #2a5c45; font-weight: 600; margin-top: 5px; }
+input[type="checkbox"] { width: 20px; height: 20px; cursor: pointer; }
 </style>
 </head>
 <body>
 
 <header>
   <div style="font-weight:600; font-size:1.2rem;">CellaTesto <span>PRO</span></div>
-  <div id="sync-status" style="font-size:11px; background:rgba(0,0,0,0.2); padding:4px 12px; border-radius:20px;">☁️ In attesa...</div>
+  <div id="sync-status" style="font-size:11px; background:rgba(0,0,0,0.2); padding:4px 12px; border-radius:20px;">☁️ Sincronizzazione...</div>
 </header>
 
 <div class="container">
   <div class="toolbar">
-    <h1>Registro Interventi</h1>
-    <button class="btn btn-primary" onclick="showModal()">+ Nuovo Intervento</button>
+    <h1>Dashboard Interventi</h1>
+    <div style="display:flex; gap:10px;">
+      <button class="btn btn-warn" onclick="exportBulk()">📄 Report Selezionati</button>
+      <button class="btn btn-primary" onclick="showModal()">+ Nuovo Intervento (Auto-PDF)</button>
+    </div>
   </div>
   <div class="card">
     <table>
-      <thead><tr><th>Data</th><th>Area</th><th>Casa</th><th>Operatore</th><th>Meteo</th><th>Foto</th><th>Azioni</th></tr></thead>
+      <thead><tr>
+        <th><input type="checkbox" onclick="toggleAll(this)"></th>
+        <th>Data</th><th>Casa</th><th>Operatore</th><th>Meteo</th><th>Foto</th><th>Azioni</th>
+      </tr></thead>
       <tbody id="table-body"></tbody>
     </table>
   </div>
 </div>
 
-<!-- MODALE AGGIORNATA CON DUE NOTE FOTO -->
+<!-- MODALE -->
 <div class="modal" id="modalFull">
   <div class="modal-content">
-    <h2 style="margin-bottom:2rem; color:var(--accent);">Nuovo Rapporto Tecnico</h2>
+    <h2 style="margin-bottom:2rem; color:var(--accent);">Nuovo Rapporto Automizzato</h2>
     <div class="grid">
       <div><label>Data</label><input type="date" id="f-data"></div>
-      <div><label>Città (Meteo Auto)</label><div style="display:flex; gap:5px;"><input type="text" id="f-citta" placeholder="Roma"><button class="btn" onclick="getWeather()">☁️</button></div></div>
-      <div class="full"><label>Meteo Sincronizzato</label><input type="text" id="f-meteo" readonly style="background:#f0f7f3; font-weight:600;"></div>
+      <div><label>Città (Meteo)</label><div style="display:flex; gap:5px;"><input type="text" id="f-citta" placeholder="Roma"><button class="btn" onclick="getWeather()">☁️</button></div></div>
+      <div class="full"><label>Meteo e Vento</label><input type="text" id="f-meteo" readonly style="background:#f0f7f3; font-weight:600;"></div>
       
       <div><label>N. Operatori</label><input type="number" id="f-nop" value="1"></div>
       <div><label>Responsabile</label><input type="text" id="f-operatore" placeholder="Nome"></div>
-      <div><label>Area / Posizione</label><input type="text" id="f-area" placeholder="Esempio: Giardino"></div>
+      <div><label>Area / Posizione</label><input type="text" id="f-area" placeholder="Esempio: Ingresso"></div>
       <div><label>N. Casa</label><input type="text" id="f-casa" placeholder="195"></div>
       
-      <div class="full"><label>Descrizione Generale Lavoro</label><textarea id="f-desc" rows="2"></textarea></div>
+      <div class="full"><label>Descrizione Lavoro</label><textarea id="f-desc" rows="2"></textarea></div>
       
-      <!-- FOTO 1 + NOTA -->
-      <div>
-        <label>Foto PRIMA</label>
-        <div class="photo-zone" onclick="document.getElementById('in-p').click()"><input type="file" id="in-p" hidden onchange="processFile(this,'p')"><div id="v-p">Carica / Scatta</div></div>
-        <textarea id="f-note-prima" rows="2" style="margin-top:10px;" placeholder="Nota Foto Prima (es: Stato del rubinetto)"></textarea>
-      </div>
-      
-      <!-- FOTO 2 + NOTA -->
-      <div>
-        <label>Foto DOPO</label>
-        <div class="photo-zone" onclick="document.getElementById('in-d').click()"><input type="file" id="in-d" hidden onchange="processFile(this,'d')"><div id="v-d">Carica / Scatta</div></div>
-        <textarea id="f-note-dopo" rows="2" style="margin-top:10px;" placeholder="Nota Foto Dopo (es: Lavoro terminato)"></textarea>
-      </div>
+      <div><label>Foto PRIMA</label><div class="photo-zone" onclick="document.getElementById('in-p').click()"><input type="file" id="in-p" hidden onchange="processFile(this,'p')"><div id="v-p">Carica</div></div><textarea id="f-n-p" placeholder="Nota foto prima"></textarea></div>
+      <div><label>Foto DOPO</label><div class="photo-zone" onclick="document.getElementById('in-d').click()"><input type="file" id="in-d" hidden onchange="processFile(this,'d')"><div id="v-d">Carica</div></div><textarea id="f-n-d" placeholder="Nota foto dopo"></textarea></div>
       
       <div class="full">
         <label>Firma Tecnico</label>
         <canvas id="canvasF" width="800" height="180" style="width:100%; border:1px solid #ddd; border-radius:8px; touch-action:none;"></canvas>
-        <button class="btn" style="margin-top:5px; font-size:10px;" onclick="clearF()">Pulisci Firma</button>
       </div>
     </div>
     <div style="margin-top:2.5rem; display:flex; justify-content:flex-end; gap:12px;">
       <button class="btn" onclick="hideModal()">Annulla</button>
-      <button class="btn btn-primary" onclick="salva()">💾 Salva e Sincronizza</button>
+      <button class="btn btn-primary" onclick="salva()">💾 Salva e Scarica PDF</button>
     </div>
   </div>
 </div>
 
 <script>
-// --- CONFIGURAZIONE PULITA ---
-let S_URL = 'https://ukzconegwpoaculadefx.supabase.co/rest/v1/.supabase.co'; 
+// --- CHIAVI SUPABASE ---
+const S_URL = 'https://IL_TUO_ID.supabase.co'.trim().replace(/\/$/, "https://ukzconegwpoaculadefx.supabase.co/rest/v1/.supabase.co");
 const S_KEY = 'sb_publishable_dS8SzPIks90Yd1ISjsXQFQ_T8VtusA1';
-
-// Pulizia automatica URL (Toglie spazi e sbarre finali)
-S_URL = S_URL.trim().replace(/\/$/, "");
-
 let db = null;
 if (window.supabase) db = window.supabase.createClient(S_URL, S_KEY);
 
@@ -110,7 +102,7 @@ let imgP = null, imgD = null, imgF = null;
 
 async function getWeather() {
   const city = document.getElementById('f-citta').value;
-  if (!city) return alert("Scrivi la città!");
+  if (!city) return;
   try {
     const gR = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${city}`);
     const g = await gR.json();
@@ -119,25 +111,28 @@ async function getWeather() {
     const cur = w.current_weather;
     const prec = w.hourly.precipitation[0];
     let rain = prec === 0 ? "Assente" : (prec < 2 ? "Debole" : "Forte");
-    document.getElementById('f-meteo').value = `${city.toUpperCase()} | ${cur.temperature}°C | Pioggia: ${rain} | Vento: ${cur.windspeed}km/h`;
+    document.getElementById('f-meteo').value = `${city.toUpperCase()} | Temp: ${cur.temperature}°C | Pioggia: ${rain} | Vento: ${cur.windspeed}km/h`;
   } catch (e) { document.getElementById('f-meteo').value = "Meteo non disponibile"; }
 }
 
 async function sync() {
   if (!db) return;
-  const { data, error } = await db.from('interventi').select('*').order('data', {ascending: false});
-  if (data) { dati = data; render(); document.getElementById('sync-status').textContent = '✅ Cloud Sincronizzato'; }
+  const { data } = await db.from('interventi').select('*').order('data', {ascending: false});
+  if (data) { dati = data; render(); document.getElementById('sync-status').textContent = '✅ Cloud pronto'; }
 }
 
 function render() {
   const tb = document.getElementById('table-body');
   tb.innerHTML = dati.map(r => `<tr>
-    <td>${r.data}</td><td>${r.area || ''}</td><td><b>${r.casa}</b></td><td>${r.operatore}</td>
+    <td><input type="checkbox" class="sel-row" value="${r.id}"></td>
+    <td>${r.data}</td><td><b>${r.casa}</b></td><td>${r.operatore}</td>
     <td style="font-size:11px;">${r.meteo || '-'}</td>
     <td>${r.fotoPrima ? '📸' : '-'} ${r.fotoDopo ? '📸' : '-'}</td>
     <td><button class="btn" style="padding:4px 8px;" onclick="pdf('${r.id}')">📄 PDF</button></td>
   </tr>`).join('');
 }
+
+function toggleAll(cb) { document.querySelectorAll('.sel-row').forEach(x => x.checked = cb.checked); }
 
 function showModal() { document.getElementById('modalFull').classList.add('open'); initF(); }
 function hideModal() { document.getElementById('modalFull').classList.remove('open'); }
@@ -150,11 +145,10 @@ function processFile(input, type) {
       const c = document.createElement('canvas');
       const MAX = 600; const s = MAX / i.width;
       c.width = MAX; c.height = i.height * s;
-      const ctx = c.getContext('2d');
-      ctx.drawImage(i, 0, 0, c.width, c.height);
+      const ctx = c.getContext('2d'); ctx.drawImage(i, 0, 0, c.width, c.height);
       const res = c.toDataURL('image/jpeg', 0.5);
-      if (type === 'p') { imgP = res; document.getElementById('v-p').innerHTML = `<img src="${res}" style="max-height:80px;">`; }
-      else { imgD = res; document.getElementById('v-d').innerHTML = `<img src="${res}" style="max-height:80px;">`; }
+      if (type === 'p') { imgP = res; document.getElementById('v-p').innerHTML = `<img src="${res}" height="60">`; }
+      else { imgD = res; document.getElementById('v-d').innerHTML = `<img src="${res}" height="60">`; }
     };
     i.src = e.target.result;
   };
@@ -170,7 +164,6 @@ function initF() {
   c.onmousedown = s; c.ontouchstart = s; c.onmousemove = w; c.ontouchmove = w;
   window.onmouseup = window.ontouchend = () => { drw = false; imgF = c.toDataURL(); };
 }
-function clearF() { ctx.clearRect(0,0,800,180); imgF = null; }
 
 async function salva() {
   const row = {
@@ -179,31 +172,40 @@ async function salva() {
     casa: document.getElementById('f-casa').value, desc: document.getElementById('f-desc').value,
     area: document.getElementById('f-area').value, nop: document.getElementById('f-nop').value,
     fotoPrima: imgP, fotoDopo: imgD, 
-    descPrima: document.getElementById('f-note-prima').value, // Nuova nota 1
-    descDopo: document.getElementById('f-note-dopo').value,  // Nuova nota 2
+    descPrima: document.getElementById('f-n-p').value, descDopo: document.getElementById('f-n-d').value,
     firma: imgF, conferma: true
   };
-  document.getElementById('sync-status').textContent = '⏳ Invio dati cloud...';
+  document.getElementById('sync-status').textContent = '⏳ Salvataggio e PDF...';
   const { error } = await db.from('interventi').insert([row]);
-  if (error) alert("Errore Cloud: " + error.message);
+  if (!error) {
+    pdf_from_row(row); // Scarica PDF automatico!!
+  }
   hideModal(); sync();
 }
 
-function pdf(id) {
-  const r = dati.find(x => x.id === id);
+function pdf_from_row(r) {
   const { jsPDF } = window.jspdf; const doc = new jsPDF();
-  doc.setFontSize(22); doc.text("REPORT INTERVENTO TECNICO", 15, 20);
-  doc.setFontSize(10);
-  doc.text(`DATA: ${r.data} | CASA: ${r.casa} | OPERATORE: ${r.operatore}`, 15, 30);
-  doc.text(`METEO: ${r.meteo}`, 15, 35);
-  doc.line(15, 40, 195, 40);
-  doc.text("NOTE FOTO PRIMA:", 15, 50); doc.text(r.descPrima || "-", 15, 55);
-  doc.text("NOTE FOTO DOPO:", 110, 50); doc.text(r.descDopo || "-", 110, 55);
-  if (r.fotoPrima) doc.addImage(r.fotoPrima, 'JPEG', 15, 65, 85, 60);
-  if (r.fotoDopo) doc.addImage(r.fotoDopo, 'JPEG', 110, 65, 85, 60);
-  if (r.firma) doc.addImage(r.firma, 'PNG', 140, 135, 50, 15);
-  doc.save(`report_${r.casa}.pdf`);
+  doc.setFontSize(22); doc.text("RAPPORTO TECNICO", 15, 20);
+  doc.setFontSize(10); doc.text(`DATA: ${r.data} | CASA: ${r.casa} | TECNICO: ${r.operatore}`, 15, 30);
+  if (r.fotoPrima) doc.addImage(r.fotoPrima, 'JPEG', 15, 45, 85, 60);
+  if (r.fotoDopo) doc.addImage(r.fotoDopo, 'JPEG', 110, 45, 85, 60);
+  if (r.firma) doc.addImage(r.firma, 'PNG', 140, 110, 50, 15);
+  doc.save(`intervento_${r.casa}.pdf`);
 }
+
+function pdf(id) { pdf_from_row(dati.find(x => x.id === id)); }
+
+// FUNZIONE REPORT SELEZIONATI
+function exportBulk() {
+  const ids = Array.from(document.querySelectorAll('.sel-row:checked')).map(x => x.value);
+  if(!ids.length) return alert("Seleziona almeno un intervento!");
+  const { jsPDF } = window.jspdf; const doc = new jsPDF();
+  doc.text("RIEPILOGO INTERVENTI SELEZIONATI", 15, 20);
+  let rows = dati.filter(x => ids.includes(x.id)).map(x => [x.data, x.casa, x.operatore, x.desc]);
+  doc.autoTable({ head: [['Data', 'Casa', 'Operatore', 'Descrizione']], body: rows, startY: 30 });
+  doc.save("report_settimanale.pdf");
+}
+
 if (db) sync();
 </script>
 </body>
