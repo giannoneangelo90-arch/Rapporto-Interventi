@@ -2,276 +2,118 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CellaTesto PRO 2.5 | Suite Gestionale</title>
-    <!-- Libreria Supabase Ultima Versione -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.42.0"></script>
+    <title>CellaTesto PRO 2.6 | Versione Blindata</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        :root { --p: #1e4d3a; --s: #2a5c45; --bg: #f8f9fa; --border: #e9ecef; --txt: #212529; --accent: #d4a373; }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Outfit', sans-serif; background: var(--bg); color: var(--txt); line-height: 1.5; }
-        header { background: var(--p); color: white; padding: 1.2rem 2rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .sync-badge { display: flex; align-items: center; gap: 8px; font-size: 12px; background: rgba(0,0,0,0.2); padding: 5px 12px; border-radius: 20px; }
-        .dot { width: 8px; height: 8px; border-radius: 50%; background: #ff4d4d; }
-        .dot.online { background: #00ff88; box-shadow: 0 0 8px #00ff88; }
-        nav.tabs { background: white; display: flex; gap: 30px; padding: 0 2rem; border-bottom: 1px solid var(--border); }
-        .tab { padding: 1rem 0; cursor: pointer; font-weight: 600; color: #6c757d; border-bottom: 3px solid transparent; transition: 0.3s; }
+        :root { --p: #1e4d3a; --s: #2a5c45; --bg: #f8f9fa; }
+        body { font-family: 'Outfit', sans-serif; background: var(--bg); margin: 0; }
+        header { background: var(--p); color: white; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+        .status-box { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+        .dot { width: 10px; height: 10px; border-radius: 50%; background: #ff4d4d; }
+        .dot.online { background: #00ff88; box-shadow: 0 0 10px #00ff88; }
+        .nav { background: white; display: flex; gap: 20px; padding: 0 2rem; border-bottom: 1px solid #ddd; }
+        .tab { padding: 15px 0; cursor: pointer; font-weight: 600; color: #666; border-bottom: 3px solid transparent; }
         .tab.active { color: var(--s); border-bottom-color: var(--s); }
-        .container { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
-        .card { background: white; border-radius: 15px; border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0,0,0,0.03); overflow: hidden; }
-        .toolbar { display: flex; justify-content: space-between; align-items: center; padding: 1.5rem; background: white; border-bottom: 1px solid var(--border); }
-        table { width: 100%; border-collapse: collapse; }
-        th { background: #fdfdfd; padding: 15px; text-align: left; font-size: 11px; text-transform: uppercase; color: #adb5bd; letter-spacing: 1px; }
-        td { padding: 15px; border-bottom: 1px solid var(--border); font-size: 14px; }
-        .btn { padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; transition: 0.2s; font-size: 13px; display: inline-flex; align-items: center; gap: 8px; }
-        .btn-p { background: var(--s); color: white; }
-        .btn-p:hover { background: var(--p); transform: translateY(-1px); }
-        .btn-ghost { background: #f1f3f5; color: var(--txt); }
-        .modal-ov { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: flex-start; padding: 20px; overflow-y: auto; backdrop-filter: blur(4px); }
-        .modal-ov.open { display: flex; }
-        .modal { background: white; border-radius: 20px; width: 100%; max-width: 850px; padding: 2.5rem; position: relative; animation: slideUp 0.4s ease; }
-        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; }
-        .fg label { display: block; font-size: 12px; font-weight: 700; margin-bottom: 6px; color: var(--s); text-transform: uppercase; }
-        .fg input, .fg select, .fg textarea { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 10px; font-family: inherit; font-size: 14px; background: #fafafa; }
-        .fg input:focus { outline: none; border-color: var(--s); background: white; }
-        .weather-box { background: #f0f7f4; padding: 15px; border-radius: 12px; border: 1px solid #d1e7dd; color: #0f5132; font-size: 13px; margin-bottom: 1rem; }
-        .photo-input { border: 2px dashed #dee2e6; border-radius: 12px; padding: 1.5rem; text-align: center; cursor: pointer; transition: 0.2s; }
-        .photo-input:hover { border-color: var(--s); background: #f8f9fa; }
+        .container { max-width: 1100px; margin: 20px auto; padding: 0 15px; }
+        .card { background: white; border-radius: 12px; border: 1px solid #eee; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .btn { padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; background: var(--s); color: white; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th { text-align: left; background: #f9f9f9; padding: 12px; font-size: 11px; text-transform: uppercase; color: #999; }
+        td { padding: 12px; border-bottom: 1px solid #eee; font-size: 14px; }
     </style>
 </head>
 <body>
 
 <header>
-    <div style="font-size: 20px; font-weight: 700;">CellaTesto <span style="font-weight: 300; opacity: 0.8;">PRO 2.5</span></div>
-    <div class="sync-badge">
+    <div style="font-size: 20px; font-weight: 700;">CellaTesto PRO 2.6</div>
+    <div class="status-box">
         <div id="dot" class="dot"></div>
-        <span id="syncText">Sincronizzazione...</span>
+        <span id="st-text">Verifica in corso...</span>
     </div>
 </header>
 
-<nav class="tabs">
-    <div class="tab active" onclick="swTab('reg', this)">Registro Lavori</div>
-    <div class="tab" onclick="swTab('mag', this)">Magazzino & Inventario</div>
-    <div class="tab" onclick="swTab('rep', this)">Report Archivio</div>
-</nav>
-
-<div class="container">
-    <div id="v-reg" class="view">
-        <div class="toolbar">
-            <h2 style="font-size: 18px;">Interventi Recenti</h2>
-            <div style="display:flex; gap: 10px;">
-                <button class="btn btn-ghost" onclick="exportBulk()">📂 Report Selezionati</button>
-                <button class="btn btn-p" onclick="openM()">+ Nuovo Intervento</button>
-            </div>
-        </div>
-        <div class="card">
-            <table id="tableI">
-                <thead><tr><th><input type="checkbox" onclick="selAll(this)"></th><th>Data</th><th>Bungalow</th><th>Responsabile</th><th>Area</th><th>Azioni</th></tr></thead>
-                <tbody id="tbodyI"></tbody>
-            </table>
-        </div>
-    </div>
-    
-    <div id="v-mag" class="view" style="display:none;">
-        <div class="toolbar"><h2>Gestione Magazzino</h2><button class="btn btn-p" onclick="openMM()">+ Aggiungi Articolo</button></div>
-        <div class="card"><table><thead><tr><th>Articolo</th><th>Giacenza</th><th>Unità</th><th>Prezzo</th><th>Azioni</th></tr></thead><tbody id="tbodyM"></tbody></table></div>
-    </div>
-
-    <div id="v-rep" class="view" style="display:none;">
-        <div class="card" style="padding: 3rem; text-align: center;">
-            <h3>Download Database Completo</h3>
-            <p style="color: #6c757d; margin: 10px 0 20px;">Esporta tutti gli interventi salvati in formato Excel.</p>
-            <button class="btn btn-p" onclick="esportaExcel()">📥 Scarica File Excel (.xlsx)</button>
-        </div>
-    </div>
+<div class="nav">
+    <div class="tab active">Registro Lavori</div>
 </div>
 
-<!-- MODALE INTERVENTO -->
-<div class="modal-ov" id="modalI">
-    <div class="modal">
-        <h2 style="margin-bottom: 1.5rem; color: var(--p);">Compilazione Intervento</h2>
-        <div class="form-grid">
-            <div class="fg"><label>Data</label><input type="date" id="f-data"></div>
-            <div class="fg"><label>Città (Meteo)</label>
-                <div style="display:flex; gap:8px;"><input type="text" id="f-citta" placeholder="es. Roma"><button class="btn btn-ghost" onclick="getWeather()">☁️</button></div>
-            </div>
-            <div id="wInfo" class="weather-box" style="display:none; grid-column: span 2;"></div>
-            <input type="hidden" id="f-meteo">
-
-            <div class="fg"><label>Responsabile</label><input type="text" id="f-assign"></div>
-            <div class="fg"><label>Operaio incaricato</label><input type="text" id="f-op"></div>
-            <div class="fg"><label>N. Bungalow / Casetta</label><input type="text" id="f-bung"></div>
-            <div class="fg"><label>Area / Settore</label><input type="text" id="f-area"></div>
-            
-            <div class="fg"><label>Materiale</label><select id="f-mat-sel"></select></div>
-            <div class="fg"><label>Qtà utilizzata</label><input type="number" id="f-qty" value="0"></div>
-
-            <div class="fg" style="grid-column: span 2;"><label>Descrizione dei lavori eseguiti</label><textarea id="f-desc" rows="3"></textarea></div>
-
-            <div class="fg">
-                <label>Foto PRIMA</label>
-                <div class="photo-input" onclick="document.getElementById('i-p').click()">
-                    <input type="file" id="i-p" hidden onchange="hPhoto(this,'p')"><div id="pr-p">📷 Clicca per caricare</div>
-                </div>
-                <textarea id="f-note-p" placeholder="Note luogo foto prima..." style="margin-top: 8px;"></textarea>
-            </div>
-            <div class="fg">
-                <label>Foto DOPO</label>
-                <div class="photo-input" onclick="document.getElementById('i-d').click()">
-                    <input type="file" id="i-d" hidden onchange="hPhoto(this,'d')"><div id="pr-d">📸 Clicca per caricare</div>
-                </div>
-                <textarea id="f-note-d" placeholder="Note luogo foto dopo..." style="margin-top: 8px;"></textarea>
-            </div>
-            
-            <div class="fg" style="grid-column: span 2;">
-                <label>Firma del Tecnico</label>
-                <canvas id="cvF" width="800" height="150" style="width:100%; border:1px solid var(--border); border-radius:10px; background:#fff; touch-action:none;"></canvas>
-            </div>
+<div class="container">
+    <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h2>Interventi Cloud</h2>
+            <button class="btn" onclick="sync()">🔄 Ricarica Dati</button>
         </div>
-        <div style="display:flex; justify-content:flex-end; gap:15px; margin-top:2rem;">
-            <button class="btn btn-ghost" onclick="closeM()">Annulla</button>
-            <button class="btn btn-p" onclick="saveI()">💾 SALVA E SINCRONIZZA</button>
-        </div>
+        <div id="error-display" style="display:none; color:red; background:#fee2e2; padding:10px; border-radius:8px; margin-top:10px;"></div>
+        <table id="tableI">
+            <thead><tr><th>Data</th><th>Bungalow</th><th>Operaio</th><th>Azioni</th></tr></thead>
+            <tbody id="tbodyI"><tr><td colspan="4" style="text-align:center;">Caricamento in corso...</td></tr></tbody>
+        </table>
     </div>
 </div>
 
 <script>
-// --- CONFIGURAZIONE ---
-const S_URL = ''https://ukzconegwpoaculadefx.supabase.co';';
-const S_KEY = 'sb_publishable_dS8SzPIks90Yd1ISjsXQFQ_T8VtusA1';
+// --- CHIAVI ---
+const URL_BASE = ''https://ukzconegwpoaculadefx.supabase.co';';
+const API_KEY = 'sb_publishable_dS8SzPIks90Yd1ISjsXQFQ_T8VtusA1';
 
-let db = null, listI = [], listM = [], fotoP=null, fotoD=null, firma=null;
-
-try {
-    db = supabase.createClient(S_URL, S_KEY);
-} catch(e) { console.error("Errore Libreria:", e); }
-
+// Motore di sincronizzazione diretto (FETCH)
 async function sync() {
-    if(!db) return;
+    console.log("Inizio sincronizzazione diretta...");
+    const dot = document.getElementById('dot');
+    const st = document.getElementById('st-text');
+    const errBox = document.getElementById('error-display');
+    
     try {
-        const { data: i } = await db.from('interventi').select('*').order('data', {ascending:false});
-        const { data: m } = await db.from('materiali').select('*').order('nome_articolo');
-        listI = i || []; listM = m || [];
-        render();
-        document.getElementById('dot').classList.add('online');
-        document.getElementById('syncText').textContent = 'Connessione Attiva';
-    } catch(e) { 
-        document.getElementById('syncText').textContent = 'Errore Database';
+        // Interrogo direttamente l'indirizzo internet del database
+        const response = await fetch(`${URL_BASE}/rest/v1/interventi?select=*&order=data.desc`, {
+            headers: {
+                'apikey': API_KEY,
+                'Authorization': `Bearer ${API_KEY}`
+            }
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || "Errore sconosciuto del server");
+        }
+
+        const data = await response.json();
+        render(data);
+
+        // Aggiorno interfaccia
+        dot.classList.add('online');
+        st.textContent = "DATABASE COLLEGATO";
+        errBox.style.display = "none";
+
+    } catch (e) {
+        console.error("Errore sincronizzazione:", e);
+        st.textContent = "ERRORE DI CONNESSIONE";
+        dot.classList.remove('online');
+        errBox.style.display = "block";
+        errBox.textContent = "DETTAGLIO ERRORE: " + e.message;
     }
 }
 
-function render() {
-    document.getElementById('tbodyI').innerHTML = listI.map(i => `<tr>
-        <td><input type="checkbox" class="sel-row" value="${i.id}"></td>
-        <td>${i.data}</td><td><b>${i.bungalow}</b></td><td>${i.responsabile_assegnazione}</td><td>${i.area}</td>
-        <td><button class="btn btn-ghost" style="padding:5px 10px;" onclick="genPDF('${i.id}')">📄</button></td>
-    </tr>`).join('');
-    
-    document.getElementById('tbodyM').innerHTML = listM.map(m => `<tr><td>${m.nome_articolo}</td><td>${m.giacenza_attuale}</td><td>${m.unita_misura}</td><td>€ ${m.prezzo_unitario}</td><td><button class="btn" onclick="delM('${m.id}')">🗑️</button></td></tr>`).join('');
-    
-    const sel = document.getElementById('f-mat-sel');
-    sel.innerHTML = '<option value="">-- Nessuno --</option>' + listM.map(m => `<option value="${m.nome_articolo}">${m.nome_articolo} (${m.giacenza_attuale})</option>`).join('');
-}
-
-async function saveI() {
-    const row = {
-        data: document.getElementById('f-data').value, citta: document.getElementById('f-citta').value, meteo: document.getElementById('f-meteo').value,
-        responsabile_assegnazione: document.getElementById('f-assign').value, operatore: document.getElementById('f-op').value,
-        bungalow: document.getElementById('f-bung').value, area: document.getElementById('f-area').value, descrizione: document.getElementById('f-desc').value,
-        materiale_usato: document.getElementById('f-mat-sel').value, quantita_usata: parseFloat(document.getElementById('f-qty').value)||0,
-        foto_prima_url: fotoP, foto_dopo_url: fotoD, foto_prima_note: document.getElementById('f-note-p').value, foto_dopo_note: document.getElementById('f-note-d').value,
-        firma_url: firma, confermato: true
-    };
-    
-    const { error } = await db.from('interventi').insert([row]);
-    if(error) return alert("Errore: " + error.message);
-    
-    if(row.materiale_usato) {
-        const item = listM.find(x => x.nome_articolo === row.materiale_usato);
-        if(item) await db.from('materiali').update({ giacenza_attuale: item.giacenza_attuale - row.quantita_usata }).eq('id', item.id);
+function render(interventi) {
+    const body = document.getElementById('tbodyI');
+    if (interventi.length === 0) {
+        body.innerHTML = '<tr><td colspan="4" style="text-align:center;">Nessun intervento trovato nel database.</td></tr>';
+        return;
     }
-    
-    alert("Salvataggio completato!"); closeM(); sync();
+    body.innerHTML = interventi.map(i => `
+        <tr>
+            <td>${i.data || '-'}</td>
+            <td><b>${i.bungalow || '-'}</b></td>
+            <td>${i.operatore || '-'}</td>
+            <td><button class="btn" style="padding:5px 10px;" onclick="alert('Usa Nuovo Intervento per testare il salvataggio')">Info</button></td>
+        </tr>
+    `).join('');
 }
 
-async function getWeather() {
-    const cit = document.getElementById('f-citta').value; if(!cit) return;
-    try {
-        const gR = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${cit}`);
-        const g = await gR.json();
-        const wR = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${g[0].lat}&longitude=${g[0].lon}&current_weather=true&daily=temperature_2m_max,temperature_2m_min&timezone=auto&hourly=precipitation`);
-        const w = await wR.json();
-        const tMax = w.daily.temperature_2m_max[0], tMin = w.daily.temperature_2m_min[0];
-        const res = `Cielo: ${w.current_weather.weathercode==0?'Soleggiato':'Variabile'} | Max: ${tMax}°C | Min: ${tMin}°C | Vento: ${w.current_weather.windspeed}km/h`;
-        document.getElementById('f-meteo').value = res;
-        const d = document.getElementById('wInfo'); d.style.display='block'; d.innerHTML=`☁️ <b>Meteo di oggi a ${cit.toUpperCase()}</b><br>${res}`;
-    } catch(e) { alert("Meteo non disponibile."); }
-}
-
-function hPhoto(input, tipo) {
-    const reader = new FileReader(); reader.onload = (e) => {
-        const img = new Image(); img.onload = () => {
-            const cv=document.createElement('canvas'); const s=600/img.width; cv.width=600; cv.height=img.height*s;
-            cv.getContext('2d').drawImage(img,0,0,600,cv.height); const res=cv.toDataURL('image/jpeg',0.6);
-            if(tipo==='p'){ fotoP=res; document.getElementById('pr-p').innerHTML=`<img src="${res}" style="max-height:80px">`; }
-            else { fotoD=res; document.getElementById('pr-d').innerHTML=`<img src="${res}" style="max-height:80px">`; }
-        }; img.src=e.target.result;
-    }; reader.readAsDataURL(input.files[0]);
-}
-
-let ctx, drw=false;
-function initCv() {
-    const c = document.getElementById('cvF'); ctx=c.getContext('2d');
-    const pos=(e)=>{ const r=c.getBoundingClientRect(); return { x:(e.clientX||(e.touches&&e.touches[0].clientX))-r.left, y:(e.clientY||(e.touches&&e.touches[0].clientY))-r.top }; };
-    c.onmousedown=(e)=>{ drw=true; ctx.beginPath(); const p=pos(e); ctx.moveTo(p.x,p.y); };
-    c.onmousemove=(e)=>{ if(!drw)return; e.preventDefault(); const p=pos(e); ctx.lineTo(p.x,p.y); ctx.stroke(); };
-    window.onmouseup=()=>{ drw=false; firma=c.toDataURL(); };
-}
-
-function swTab(v, b) {
-    document.querySelectorAll('.view').forEach(x => x.style.display='none');
-    document.getElementById('v-'+v).style.display='block';
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active')); b.classList.add('active');
-}
-function openM() { document.getElementById('modalI').classList.add('open'); initCv(); }
-function closeM() { document.getElementById('modalI').classList.remove('open'); }
-function selAll(cb) { document.querySelectorAll('.sel-row').forEach(x => x.checked = cb.checked); }
-
-async function delM(id) { if(confirm("Elimina articolo?")) { await db.from('materiali').delete().eq('id', id); sync(); } }
-
-function genPDF(id) {
-    const r = listI.find(x => x.id === id); const { jsPDF } = window.jspdf; const doc = new jsPDF();
-    doc.text("RAPPORTO INTERVENTO", 15, 15);
-    doc.setFontSize(10); doc.text(`Data: ${r.data} | Bungalow: ${r.bungalow}`, 15, 25);
-    doc.text(`Meteo: ${r.meteo}`, 15, 30);
-    doc.text(`Operaio: ${r.operatore} | Responsabile: ${r.responsabile_assegnazione}`, 15, 35);
-    doc.text(`Lavoro: ${r.descrizione}`, 15, 45, {maxWidth: 180});
-    if(r.foto_prima_url) { doc.addImage(r.foto_prima_url, 'JPEG', 15, 55, 80, 50); doc.text(`Note Prima: ${r.foto_prima_note}`, 15, 110); }
-    if(r.foto_dopo_url) { doc.addImage(r.foto_dopo_url, 'JPEG', 110, 55, 80, 50); doc.text(`Note Dopo: ${r.foto_dopo_note}`, 110, 110); }
-    if(r.firma_url) doc.addImage(r.firma_url, 'PNG', 15, 120, 40, 10);
-    doc.save(`Intervento_${r.bungalow}.pdf`);
-}
-
-function exportBulk() {
-    const ids = Array.from(document.querySelectorAll('.sel-row:checked')).map(x => x.value);
-    if(!ids.length) return alert("Seleziona almeno un intervento!");
-    const list = listI.filter(x => ids.includes(x.id));
-    const { jsPDF } = window.jspdf; const doc = new jsPDF();
-    doc.text("REPORT INTERVENTI SELEZIONATI", 15, 15);
-    doc.autoTable({ head:[['Data','Bung.','Operaio','Materiale']], body: list.map(x=>[x.data, x.bungalow, x.operatore, x.materiale_usato]), startY: 20 });
-    doc.save("Report_Personalizzato.pdf");
-}
-
-function esportaExcel() {
-    const ws = XLSX.utils.json_to_sheet(listI); const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Archivio"); XLSX.writeFile(wb, "Archivio_CellaTesto.xlsx");
-}
-
+// Avvio automatico
 sync();
 </script>
 </body>
