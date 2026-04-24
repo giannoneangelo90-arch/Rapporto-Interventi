@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CellaTesto PRO 2.2 — Gold Edition</title>
   
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.min.js"></script>
@@ -138,23 +138,28 @@
 </div>
 
 <script>
-// --- CHIAVI SUPABASE (Sistemate per evitare errori di Path) ---
-const URL_SB = 'https://ukzconegwpoaculadefx.supabase.co';
+// --- CHIAVI SUPABASE (Nuova Versione) ---
+const URL_SB = 'https://ukzconegwpoaculadefx.supabase.co'; 
 const KEY_SB = 'sb_publishable_dS8SzPIks90Yd1ISjsXQFQ_T8VtusA1';
 
 let db = null;
-if (window.supabase) db = window.supabase.createClient(URL_SB, KEY_SB);
+try {
+    db = window.supabase.createClient(URL_SB, KEY_SB);
+    console.log("Client creato con successo!");
+} catch (e) {
+    alert("Errore critico caricamento Supabase: " + e.message);
+}
 
-let listI = [], listM = [], fotoP=null, fotoD=null, firma=null;
-
-async function sync() {
-  if(!db) return;
-  const { data: i } = await db.from('interventi').select('*').order('data', {ascending:false});
-  const { data: m } = await db.from('materiali').select('*').order('nome_articolo');
-  listI = i || []; listM = m || [];
-  renderI(); renderM(); aggiornaSelect();
-  document.getElementById('syncDot').style.background='#4ade80';
-  document.getElementById('syncLabel').textContent='Cloud Collegato';
+// Funzione di test immediata
+async function testConnessione() {
+    const { data, error } = await db.from('interventi').select('count');
+    if (error) {
+        console.error("Test fallito:", error);
+        // Se esce ancora Invalid Path, ora vedremo il perché nei dettagli
+        alert("DIAGNOSI: Il database risponde con errore: " + error.message);
+    } else {
+        alert("CONNESSIONE RIUSCITA! Il database risponde correttamente.");
+    }
 }
 
 function renderI() {
