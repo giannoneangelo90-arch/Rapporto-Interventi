@@ -2,119 +2,101 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <title>CellaTesto PRO 2.6 | Versione Blindata</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <title>CellaTesto PRO 2.7 | Finale</title>
+    <!-- Usiamo la versione universale più stabile -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         :root { --p: #1e4d3a; --s: #2a5c45; --bg: #f8f9fa; }
-        body { font-family: 'Outfit', sans-serif; background: var(--bg); margin: 0; }
-        header { background: var(--p); color: white; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
-        .status-box { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+        body { font-family: 'Outfit', sans-serif; background: var(--bg); margin: 0; padding-bottom: 50px; }
+        header { background: var(--p); color: white; padding: 1.2rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+        .status-badge { display: flex; align-items: center; gap: 8px; font-size: 11px; background: rgba(0,0,0,0.3); padding: 5px 12px; border-radius: 20px; }
         .dot { width: 10px; height: 10px; border-radius: 50%; background: #ff4d4d; }
         .dot.online { background: #00ff88; box-shadow: 0 0 10px #00ff88; }
-        .nav { background: white; display: flex; gap: 20px; padding: 0 2rem; border-bottom: 1px solid #ddd; }
-        .tab { padding: 15px 0; cursor: pointer; font-weight: 600; color: #666; border-bottom: 3px solid transparent; }
-        .tab.active { color: var(--s); border-bottom-color: var(--s); }
-        .container { max-width: 1100px; margin: 20px auto; padding: 0 15px; }
-        .card { background: white; border-radius: 12px; border: 1px solid #eee; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-        .btn { padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; background: var(--s); color: white; }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th { text-align: left; background: #f9f9f9; padding: 12px; font-size: 11px; text-transform: uppercase; color: #999; }
-        td { padding: 12px; border-bottom: 1px solid #eee; font-size: 14px; }
+        .container { max-width: 1000px; margin: 30px auto; padding: 20px; background: white; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+        .btn-p { background: var(--s); color: white; border: none; padding: 12px 24px; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 14px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th { text-align: left; background: #fafafa; padding: 15px; color: #999; font-size: 11px; text-transform: uppercase; border-bottom: 2px solid #eee; }
+        td { padding: 15px; border-bottom: 1px solid #eee; font-size: 14px; }
+        #debug-log { display: none; background: #000; color: #0f0; padding: 15px; border-radius: 8px; font-family: monospace; margin-top: 20px; font-size: 12px; }
     </style>
 </head>
 <body>
 
 <header>
-    <div style="font-size: 20px; font-weight: 700;">CellaTesto PRO 2.6</div>
-    <div class="status-box">
+    <div style="font-size: 20px; font-weight: 700;">CellaTesto PRO 2.7</div>
+    <div class="status-badge">
         <div id="dot" class="dot"></div>
         <span id="st-text">Verifica in corso...</span>
     </div>
 </header>
 
-<div class="nav">
-    <div class="tab active">Registro Lavori</div>
-</div>
-
 <div class="container">
-    <div class="card">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-            <h2>Interventi Cloud</h2>
-            <button class="btn" onclick="sync()">🔄 Ricarica Dati</button>
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h2>Gestione Interventi</h2>
+        <div>
+            <button class="btn-p" onclick="apriNuovo()">+ Nuovo Intervento</button>
+            <button class="btn-p" style="background:#444;" onclick="mostraDebug()">Diagnosi</button>
         </div>
-        <div id="error-display" style="display:none; color:red; background:#fee2e2; padding:10px; border-radius:8px; margin-top:10px;"></div>
-        <table id="tableI">
-            <thead><tr><th>Data</th><th>Bungalow</th><th>Operaio</th><th>Azioni</th></tr></thead>
-            <tbody id="tbodyI"><tr><td colspan="4" style="text-align:center;">Caricamento in corso...</td></tr></tbody>
-        </table>
     </div>
+
+    <div id="debug-log"></div>
+
+    <table>
+        <thead><tr><th>Data</th><th>Bungalow</th><th>Operaio</th><th>Azioni</th></tr></thead>
+        <tbody id="lista"></tbody>
+    </table>
 </div>
 
 <script>
-// --- CHIAVI ---
-const URL_BASE = ''https://ukzconegwpoaculadefx.supabase.co';';
-const API_KEY = 'sb_publishable_dS8SzPIks90Yd1ISjsXQFQ_T8VtusA1';
+const URL_SB = 'https://ukzconegwpoaculadefx.supabase.co';
+const KEY_SB = 'sb_publishable_dS8SzPIks90Yd1ISjsXQFQ_T8VtusA1';
 
-// Motore di sincronizzazione diretto (FETCH)
-async function sync() {
-    console.log("Inizio sincronizzazione diretta...");
-    const dot = document.getElementById('dot');
-    const st = document.getElementById('st-text');
-    const errBox = document.getElementById('error-display');
-    
+let db = null;
+
+function log(msg) {
+    const d = document.getElementById('debug-log');
+    d.innerHTML += "> " + msg + "<br>";
+    console.log(msg);
+}
+
+function mostraDebug() { document.getElementById('debug-log').style.display = 'block'; }
+
+async function init() {
+    log("Inizializzo client...");
     try {
-        // Interrogo direttamente l'indirizzo internet del database
-        const response = await fetch(`${URL_BASE}/rest/v1/interventi?select=*&order=data.desc`, {
-            headers: {
-                'apikey': API_KEY,
-                'Authorization': `Bearer ${API_KEY}`
-            }
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.message || "Errore sconosciuto del server");
+        db = supabase.createClient(URL_SB, KEY_SB);
+        log("Client creato. Scarico dati...");
+        
+        const { data, error } = await db.from('interventi').select('*').order('data', {ascending: false});
+        
+        if (error) {
+            log("ERRORE DATABASE: " + error.message);
+            document.getElementById('st-text').textContent = "ERRORE CONNESSIONE";
+        } else {
+            log("Dati scaricati: " + data.length + " righe");
+            render(data);
+            document.getElementById('dot').classList.add('online');
+            document.getElementById('st-text').textContent = "COLLEGATO AL CLOUD";
         }
-
-        const data = await response.json();
-        render(data);
-
-        // Aggiorno interfaccia
-        dot.classList.add('online');
-        st.textContent = "DATABASE COLLEGATO";
-        errBox.style.display = "none";
-
     } catch (e) {
-        console.error("Errore sincronizzazione:", e);
-        st.textContent = "ERRORE DI CONNESSIONE";
-        dot.classList.remove('online');
-        errBox.style.display = "block";
-        errBox.textContent = "DETTAGLIO ERRORE: " + e.message;
+        log("ERRORE CRITICO JS: " + e.message);
     }
 }
 
-function render(interventi) {
-    const body = document.getElementById('tbodyI');
-    if (interventi.length === 0) {
-        body.innerHTML = '<tr><td colspan="4" style="text-align:center;">Nessun intervento trovato nel database.</td></tr>';
+function render(data) {
+    const list = document.getElementById('lista');
+    if(data.length === 0) {
+        list.innerHTML = '<tr><td colspan="4" style="text-align:center;">Nessun dato. Prova a cliccare Nuovo Intervento.</td></tr>';
         return;
     }
-    body.innerHTML = interventi.map(i => `
-        <tr>
-            <td>${i.data || '-'}</td>
-            <td><b>${i.bungalow || '-'}</b></td>
-            <td>${i.operatore || '-'}</td>
-            <td><button class="btn" style="padding:5px 10px;" onclick="alert('Usa Nuovo Intervento per testare il salvataggio')">Info</button></td>
-        </tr>
-    `).join('');
+    list.innerHTML = data.map(i => `<tr><td>${i.data}</td><td><b>${i.bungalow}</b></td><td>${i.operatore}</td><td>-</td></tr>`).join('');
 }
 
-// Avvio automatico
-sync();
+// Avvio
+window.onload = init;
 </script>
 </body>
 </html>
