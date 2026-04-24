@@ -3,137 +3,82 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CellaTesto PRO 2.3 — Fix Totale</title>
-    <!-- Motore Supabase Più Recente -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.40.0/dist/umd/supabase.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <title>CellaTesto PRO 2.4 — Diagnosi Attiva</title>
+    <!-- Caricamento Supabase Standard -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        :root { --primary: #2a5c45; --bg: #f4f3ef; --border: #e2e0d8; --text: #1a1916; }
-        body { font-family: 'DM Sans', sans-serif; background: var(--bg); margin: 0; }
-        header { background: var(--primary); color: #fff; padding: 1rem; display: flex; justify-content: space-between; align-items: center; }
-        .tabs { background: #fff; display: flex; padding: 0 1rem; border-bottom: 2px solid var(--border); gap: 20px; }
-        .tab { padding: 12px 0; cursor: pointer; font-weight: 600; color: #888; border-bottom: 3px solid transparent; }
-        .tab.active { color: var(--primary); border-bottom-color: var(--primary); }
-        .main { padding: 1.5rem; max-width: 1200px; margin: 0 auto; }
-        .card { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
-        th { text-align: left; padding: 12px; background: #f9f8f5; font-size: 11px; text-transform: uppercase; }
-        td { padding: 12px; border-bottom: 1px solid var(--border); }
-        .btn { padding: 10px 20px; border-radius: 8px; border: 1px solid var(--border); cursor: pointer; font-weight: 600; }
-        .btn-p { background: var(--primary); color: #fff; border: none; }
-        .modal-ov { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: flex-start; padding: 20px; overflow-y: auto; }
-        .modal-ov.open { display: flex; }
-        .modal { background: #fff; border-radius: 16px; padding: 2rem; width: 100%; max-width: 800px; }
-        .form-g { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .fg label { display: block; font-size: 11px; font-weight: 700; margin-bottom: 5px; color: var(--primary); }
-        .fg input, .fg textarea, .fg select { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 8px; }
+        body { font-family: sans-serif; background: #f4f3ef; padding: 20px; }
+        #debug-box { background: #fee2e2; color: #991b1b; padding: 15px; border-radius: 8px; display: none; margin-bottom: 20px; border: 1px solid #f87171; }
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .btn { padding: 10px 20px; background: #2a5c45; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        .status { padding: 5px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; }
     </style>
 </head>
 <body>
 
-<header>
-    <div><b>📋 CellaTesto PRO 2.3</b></div>
-    <div style="display:flex; align-items:center; gap:8px; font-size:11px;">
-        <div id="dot" style="width:10px; height:10px; border-radius:50%; background:#f87171;"></div>
-        <span id="stat">Cloud Disconnesso</span>
+    <!-- Box che appare SOLO se c'è un errore nel codice -->
+    <div id="debug-box">
+        <b>⚠️ ERRORE RILEVATO:</b> <span id="error-msg"></span>
     </div>
-</header>
 
-<div class="tabs">
-    <div class="tab active" onclick="swTab('reg', this)">Registro Giornaliero</div>
-    <div class="tab" onclick="swTab('mag', this)">Magazzino</div>
-</div>
-
-<div class="main">
-    <div id="v-reg" class="view">
-        <div style="display:flex; justify-content:space-between;">
-            <h2>Interventi</h2>
-            <button class="btn btn-p" onclick="openM()">+ Nuovo Intervento</button>
-        </div>
-        <div class="card">
-            <table><thead><tr><th>Data</th><th>Bungalow</th><th>Operaio</th><th>Azioni</th></tr></thead><tbody id="tbI"></tbody></table>
+    <div class="card">
+        <h1>📋 CellaTesto PRO 2.4</h1>
+        <p>Stato Connessione: <span id="status-label" class="status" style="background:#f87171; color:white;">VERIFICA IN CORSO...</span></p>
+        <hr>
+        <div id="app-content">
+            <button class="btn" onclick="testAutomatico()">🚀 CLICCA QUI PER TESTARE</button>
         </div>
     </div>
-    
-    <div id="v-mag" class="view" style="display:none;">
-        <h2>Magazzino</h2>
-        <div class="card"><tbody id="tbM"></tbody></table></div>
-    </div>
-</div>
-
-<div class="modal-ov" id="mod">
-    <div class="modal">
-        <h2>Nuovo Intervento</h2>
-        <div class="form-g">
-            <div class="fg"><label>Data</label><input type="date" id="f-data"></div>
-            <div class="fg"><label>Città</label><input type="text" id="f-citta" placeholder="Napoli"></div>
-            <div class="fg"><label>Bungalow</label><input type="text" id="f-bung"></div>
-            <div class="fg"><label>Operaio</label><input type="text" id="f-op"></div>
-            <div class="fg" style="grid-column: span 2;"><label>Descrizione</label><textarea id="f-desc" rows="3"></textarea></div>
-        </div>
-        <div style="margin-top:20px; display:flex; justify-content:flex-end; gap:10px;">
-            <button class="btn" onclick="closeM()">Annulla</button>
-            <button class="btn btn-p" onclick="salva()">💾 SALVA NEL CLOUD</button>
-        </div>
-    </div>
-</div>
 
 <script>
+// --- DIAGNOSI ERRORI ---
+window.onerror = function(msg, url, line) {
+    document.getElementById('debug-box').style.display = 'block';
+    document.getElementById('error-msg').textContent = msg + " (Riga: " + line + ")";
+    return false;
+};
+
 // --- CHIAVI ---
-const S_URL = ''https://ukzconegwpoaculadefx.supabase.co';
+const S_URL = ''https://ukzconegwpoaculadefx.supabase.co';'
 const S_KEY = 'sb_publishable_dS8SzPIks90Yd1ISjsXQFQ_T8VtusA1';
 
-const db = supabase.createClient(S_URL, S_KEY);
-let listI = [];
+let db = null;
 
-async function sync() {
+async function testAutomatico() {
     try {
-        const { data, error } = await db.from('interventi').select('*').order('data', {ascending:false});
-        if (error) throw error;
-        listI = data || [];
-        render();
-        document.getElementById('dot').style.background = '#4ade80';
-        document.getElementById('stat').textContent = 'Cloud Collegato';
+        console.log("Inizializzo Supabase...");
+        
+        // Prova a creare il client in due modi diversi
+        if (window.supabase && window.supabase.createClient) {
+            db = window.supabase.createClient(S_URL, S_KEY);
+        } else if (typeof supabase !== 'undefined') {
+            db = supabase.createClient(S_URL, S_KEY);
+        } else {
+            throw new Error("Libreria Supabase non caricata! Controlla la connessione internet.");
+        }
+
+        const label = document.getElementById('status-label');
+        
+        // Test di lettura
+        const { data, error } = await db.from('interventi').select('count');
+        
+        if (error) {
+            label.style.background = "#ef4444";
+            label.textContent = "ERRORE: " + error.message;
+            alert("Il database risponde con errore: " + error.message);
+        } else {
+            label.style.background = "#22c55e";
+            label.textContent = "COLLEGATO AL CLOUD!";
+            alert("CONGRATULAZIONI! Il sistema è connesso e funzionante.");
+        }
     } catch (e) {
-        console.error(e);
-        document.getElementById('stat').textContent = 'Errore Connessione';
+        alert("ERRORE CRITICO: " + e.message);
     }
 }
 
-function render() {
-    document.getElementById('tbI').innerHTML = listI.map(i => `<tr><td>${i.data}</td><td>${i.bungalow}</td><td>${i.operatore}</td><td><button class="btn" onclick="scaricaPDF('${i.id}')">PDF</button></td></tr>`).join('');
-}
+// Avvio automatico al caricamento
+setTimeout(testAutomatico, 1000);
 
-async function salva() {
-    const obj = {
-        data: document.getElementById('f-data').value,
-        bungalow: document.getElementById('f-bung').value,
-        operatore: document.getElementById('f-op').value,
-        descrizione: document.getElementById('f-desc').value,
-        confermato: true
-    };
-    const { error } = await db.from('interventi').insert([obj]);
-    if (error) {
-        alert("Errore salvataggio: " + error.message);
-    } else {
-        alert("Salvato correttamente!");
-        closeM(); sync();
-    }
-}
-
-function swTab(v, b) {
-    document.querySelectorAll('.view').forEach(x => x.style.display='none');
-    document.getElementById('v-'+v).style.display='block';
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    b.classList.add('active');
-}
-function openM() { document.getElementById('mod').classList.add('open'); }
-function closeM() { document.getElementById('mod').classList.remove('open'); }
-
-sync();
 </script>
 </body>
 </html>
