@@ -3,207 +3,128 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GAVINA SUPREME COMMANDER | Global Master 2.35</title>
+    <title>GAVINA VILLAGE | Supreme Commander 2.40</title>
     
-    <!-- LIBRERIE ESTERNE -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&display=swap" rel="stylesheet">
     
     <style>
-        :root { 
-            --p: #004d40; --s: #028574; --bg: #f0f4f4; 
-            --danger: #d32f2f; --warn: #ffca28; --blue: #1565c0; 
-            --white: #ffffff; --border: #cfd8dc;
-        }
-
-        body { font-family: 'Outfit', sans-serif; background: var(--bg); color: #1a232e; margin: 0; padding-bottom: 60px; overflow-x: hidden; }
-
-        /* HEADER PREMIUM */
-        header { 
-            background: var(--p); color: white; padding: 1rem 2rem; 
-            display: flex; justify-content: space-between; align-items: center; 
-            border-bottom: 5px solid var(--warn); position: sticky; top: 0; z-index: 1000;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-        }
+        :root { --p: #004d40; --s: #028574; --bg: #f2f7f7; --danger: #d32f2f; --warn: #ffca28; --brand: #ffca28; }
+        body { font-family: 'Outfit', sans-serif; background: var(--bg); color: #1a232f; margin: 0; padding-bottom: 50px; }
+        
+        /* HEADER CON LOGO GAVINA */
+        header { background: var(--p); color: white; padding: 1rem 2.5rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 5px solid var(--brand); position: sticky; top: 0; z-index: 1000; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
         .logo-box { display: flex; align-items: center; gap: 15px; }
-        .logo-circle { 
-            width: 45px; height: 45px; background: white; border-radius: 50%; 
-            display: flex; align-items: center; justify-content: center; 
-            font-weight: 900; color: var(--p); border: 2px solid var(--warn);
-            font-size: 22px;
-        }
+        /* Logo SVG Gavina */
+        .gavina-logo { width: 50px; height: 50px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 3px solid var(--brand); overflow: hidden; }
+        .gavina-logo svg { width: 35px; fill: var(--p); }
 
-        .lang-picker { display: flex; gap: 15px; align-items: center; }
-        .flag { cursor: pointer; font-size: 25px; filter: grayscale(1); transition: 0.3s; transform: scale(1); }
+        .lang-picker { display: flex; gap: 12px; }
+        .flag { cursor: pointer; font-size: 26px; filter: grayscale(1); transition: 0.3s; }
         .flag.active { filter: grayscale(0); transform: scale(1.3); }
 
-        /* STATUS DOT */
-        .status-box {
-            font-size: 11px; background: rgba(255,255,255,0.1); 
-            padding: 8px 15px; border-radius: 30px; display: flex; align-items: center; gap: 8px;
-        }
-        #dot { width: 10px; height: 10px; border-radius: 50%; background: #ff5252; box-shadow: 0 0 5px #ff5252; }
+        .status-box { font-size: 11px; background: rgba(255,255,255,0.1); padding: 8px 15px; border-radius: 30px; display: flex; align-items: center; gap: 8px; font-weight: 800; }
+        #dot { width: 10px; height: 10px; border-radius: 50%; background: #ff5252; }
 
         /* TABS */
-        nav.tabs { 
-            background: white; display: flex; gap: 20px; padding: 0 2rem; 
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05); overflow-x: auto; 
-            position: sticky; top: 76px; z-index: 950;
-        }
-        .tab { 
-            padding: 1.3rem 0; cursor: pointer; font-weight: 800; color: #90a4ae; 
-            border-bottom: 4px solid transparent; text-transform: uppercase; 
-            font-size: 11px; white-space: nowrap; transition: 0.3s;
-        }
-        .tab.active { color: var(--p); border-bottom-color: var(--p); }
+        nav.tabs { background:white; display:flex; gap:20px; padding:0 2.5rem; box-shadow:0 1px 10px rgba(0,0,0,0.05); overflow-x: auto; position: sticky; top: 82px; z-index: 950; }
+        .tab { padding:1.3rem 0; cursor:pointer; font-weight:800; color:#90a4ae; border-bottom:4px solid transparent; text-transform:uppercase; font-size:11px; white-space:nowrap; transition: 0.3s; }
+        .tab.active { color:var(--p); border-bottom-color:var(--p); }
 
-        /* BANNER ORDINI E NOTIFICHE */
+        /* ORDINI BANNER */
         #order-banner { background: #fff1f0; padding: 15px 2rem; border-bottom: 3px solid var(--danger); display: none; }
-        .order-card { 
-            background: white; padding: 18px; border-radius: 15px; 
-            border-left: 10px solid var(--danger); margin-bottom: 12px; 
-            display: flex; justify-content: space-between; align-items: center; 
-            box-shadow: 0 6px 15px rgba(0,0,0,0.08); animation: slideIn 0.5s ease;
-        }
+        .order-card { background: white; padding: 15px; border-radius: 15px; border-left: 8px solid var(--danger); margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 5px 15px rgba(0,0,0,0.08); }
         .order-card.Media { border-left-color: var(--warn); }
-        @keyframes slideIn { from { transform: translateX(-20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        .order-card-info b { font-size: 10px; color: var(--danger); display: block; text-transform: uppercase; margin-bottom: 4px; }
+        .order-card-info p { margin: 0; font-size: 15px; font-weight: 700; color: #333; }
 
-        /* LAYOUT GENERAL */
-        .container { max-width: 1300px; margin: 30px auto; padding: 0 20px; }
-        .card { 
-            background: white; border-radius: 20px; border: 1px solid #cfd8dc; 
-            box-shadow: 0 10px 40px rgba(0,0,0,0.05); overflow: hidden; margin-bottom: 35px;
-        }
-        .toolbar { 
-            padding: 1.8rem 2.5rem; background: #fff; border-bottom: 1px solid #eee; 
-            display: flex; justify-content: space-between; align-items: center; 
-            flex-wrap: wrap; gap: 20px;
-        }
-
-        /* TABLES */
+        /* CONTAINER */
+        .container { max-width: 1350px; margin: 30px auto; padding: 0 20px; }
+        .card { background: white; border-radius: 20px; border: 1px solid #cfd8dc; box-shadow: 0 5px 25px rgba(0,0,0,0.05); overflow: hidden; margin-bottom: 30px; }
+        .toolbar { padding: 1.5rem 2rem; background: #fff; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; }
+        
         table { width: 100%; border-collapse: collapse; }
-        th { background: #f8fafb; padding: 20px; text-align: left; font-size: 11px; color: #546e7a; text-transform: uppercase; font-weight: 900; letter-spacing: 1px; }
-        td { padding: 20px; border-bottom: 1px solid #f0f3f5; font-size: 15px; vertical-align: middle; }
-        tr:hover { background: #fafbfc; }
-
-        /* PULSANTI */
-        .btn { 
-            padding: 14px 28px; border-radius: 14px; border: none; cursor: pointer; 
-            font-weight: 800; font-size: 12px; display: inline-flex; align-items: center; 
-            gap: 10px; text-transform: uppercase; transition: 0.3s;
-        }
-        .btn-p { background: var(--p); color: white; box-shadow: 0 8px 15px rgba(0, 77, 64, 0.2); }
-        .btn-blue { background: var(--blue); color: white; }
+        th { background: #f8fafb; padding: 18px; text-align: left; font-size: 11px; color: #546e7a; text-transform: uppercase; border-bottom: 2px solid #eee; }
+        td { padding: 18px; border-bottom: 1px solid #f0f3f5; font-size: 15px; }
+        
+        .btn { padding: 14px 28px; border-radius: 14px; border: none; cursor: pointer; font-weight: 800; font-size: 12px; display: inline-flex; align-items: center; gap: 10px; text-transform: uppercase; transition: 0.3s; }
+        .btn-p { background: var(--p); color: white; box-shadow: 0 5px 15px rgba(0, 77, 64, 0.2); }
+        .btn-blue { background: #1565c0; color: white; }
         .btn-danger { background: var(--danger); color: white; }
         .btn-green { background: #2e7d32; color: white; }
         .btn-ghost { background: #f1f3f4; color: #455a64; border: 1.5px solid #dde1e3; }
-        .btn:hover { transform: translateY(-3px); filter: brightness(1.1); }
+        .btn:hover { transform: translateY(-3px); opacity: 0.95; }
 
-        /* FORM E MODALI */
-        .modal-ov { 
-            display: none; position: fixed; inset: 0; background: rgba(0, 15, 12, 0.95); 
-            z-index: 2000; justify-content: center; align-items: center; 
-            backdrop-filter: blur(15px); padding: 20px;
-        }
+        /* MODALI */
+        .modal-ov { display: none; position: fixed; inset: 0; background: rgba(0, 15, 12, 0.95); z-index: 2000; justify-content: center; align-items: center; backdrop-filter: blur(15px); padding: 20px; }
         .modal-ov.open { display: flex; }
-        .modal { 
-            background: white; border-radius: 35px; width: 100%; max-width: 1150px; 
-            padding: 3.5rem; max-height: 94vh; overflow-y: auto; position: relative; 
-            box-shadow: 0 50px 100px rgba(0,0,0,0.6);
-        }
-        .close-x { position: absolute; top: 30px; right: 40px; font-size: 50px; cursor: pointer; color: #ccc; line-height: 1; transition: 0.3s; }
-        .close-x:hover { color: var(--danger); }
-
-        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; }
-        .fg label { display: block; font-size: 11px; font-weight: 900; margin-bottom: 8px; color: var(--p); text-transform: uppercase; letter-spacing: 0.8px; }
-        .fg input, .fg select, .fg textarea { 
-            width: 100%; padding: 16px; border: 2px solid #e0e6e9; border-radius: 15px; 
-            font-size: 16px; font-family: inherit; font-weight: 500; transition: 0.3s; box-sizing: border-box;
-        }
-        .fg input:focus { border-color: var(--s); outline: none; background: #f0f7f6; }
-
-        /* FOTOGRAFIA */
-        .photo-input { 
-            border: 3px dashed #cfd8dc; border-radius: 20px; padding: 20px; 
-            text-align: center; cursor: pointer; background: #fafbfc; 
-            min-height: 120px; display: flex; align-items: center; justify-content: center; 
-            position: relative; overflow: hidden; transition: 0.3s;
-        }
-        .photo-input:hover { border-color: var(--s); background: #f0f7f6; }
-        .photo-input img { max-height: 180px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); }
-        .mag-img { width: 80px; height: 80px; object-fit: cover; border-radius: 15px; border: 2px solid #eee; }
-
-        .weather-display { 
-            background: linear-gradient(135deg, #e0f2f1 0%, #b2dfdb 100%); 
-            padding: 20px; border-radius: 18px; margin-top: 10px; font-size: 14px; 
-            border: 1px solid #80cbc4; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
-            font-weight: 600; color: #004d40;
-        }
-
-        #lock-screen { 
-            position:fixed; inset:0; background:white; z-index:9999; 
-            display:none; flex-direction:column; align-items:center; 
-            justify-content:center; text-align:center; padding:20px;
-        }
+        .modal { background: white; border-radius: 28px; width: 100%; max-width: 1100px; padding: 3rem; max-height: 94vh; overflow-y: auto; position: relative; box-shadow: 0 50px 100px rgba(0,0,0,0.6); }
+        .close-x { position: absolute; top: 25px; right: 35px; font-size: 45px; cursor: pointer; color: #ccc; }
+        
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+        .fg label { display: block; font-size: 11px; font-weight: 800; margin-bottom: 8px; color: var(--p); text-transform: uppercase; }
+        .fg input, .fg select, .fg textarea { width: 100%; padding: 15px; border: 2px solid #e0e6e9; border-radius: 14px; font-size: 16px; font-family: inherit; box-sizing: border-box; }
+        
+        .photo-input { border: 3px dashed #cfd8dc; border-radius: 20px; padding: 18px; text-align: center; cursor: pointer; background: #fafbfc; min-height: 100px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .photo-input img { max-height: 160px; border-radius: 15px; box-shadow: 0 5px 25px rgba(0,0,0,0.1); }
+        .mag-img { width: 75px; height: 75px; object-fit: cover; border-radius: 15px; border: 1px solid #ddd; }
+        
+        .weather-display { background: #e0f2f1; padding: 18px; border-radius: 15px; margin-top: 10px; font-size: 14px; border-left: 6px solid var(--s); font-weight: 600; }
+        #lock-screen { position:fixed; inset:0; background:white; z-index:9999; display:none; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:20px; }
     </style>
 </head>
 <body>
 
-<!-- SCHERMATA DI BLOCCU -->
-<div id="lock-screen">
-    <div class="logo-circle" style="width:120px; height:120px; font-size:55px; margin-bottom:30px; border-width:5px;">G</div>
-    <h1 style="color:var(--p); font-size:55px; margin:0; letter-spacing:4px; font-weight:900;">GAVINA</h1>
-    <p style="color:#777; margin-bottom:45px; font-weight:700; font-size:20px; letter-spacing:1px;">GLOBAL COMMANDER SYSTEM</p>
+<!-- SCHERMATA BLOCCO -->
+<div id="lock-screen" style="display:none;">
+    <div class="gavina-logo" style="width:120px; height:120px; margin-bottom:30px; border-width:5px;">
+        <svg viewBox="0 0 24 24"><path d="M21,16.5C21,16.88 20.79,17.21 20.47,17.38L12.57,21.82C12.41,21.94 12.21,22 12,22C11.79,22 11.59,21.94 11.43,21.82L3.53,17.38C3.21,17.21 3,16.88 3,16.5V7.5C3,7.12 3.21,6.79 3.53,6.62L11.43,2.18C11.59,2.06 11.79,2 12,2C12.21,2 12.41,2.06 12.57,2.18L20.47,6.62C20.79,6.79 21,7.12 21,7.5V16.5Z"></path></svg>
+    </div>
+    <h1 style="color:var(--p); font-size:55px; margin:0; letter-spacing:3px;">GAVINA</h1>
+    <p style="color:#777; margin-bottom:40px; font-weight:700;">VILLAGE COMMANDER SYSTEM</p>
     <div id="lock-content">
-        <input type="text" id="reg-nome" placeholder="IL TUO NOME / TU NOMBRE / NAME" style="padding:22px; border:3px solid var(--p); border-radius:18px; width:400px; text-align:center; font-size:22px; box-shadow: 0 15px 40px rgba(0,0,0,0.1);">
-        <br><br>
-        <button class="btn btn-p" style="padding:22px 70px; font-size:16px; letter-spacing:1px;" onclick="richiediAccesso()">SBLOCCA / UNLOCK</button>
+        <input type="text" id="reg-nome" placeholder="NOME / NOMBRE / NAME" style="padding:22px; border:3px solid var(--p); border-radius:18px; width:400px; text-align:center; font-size:22px;">
+        <br><br><button class="btn btn-p" style="padding:22px 70px; font-size:16px;" onclick="richiediAccesso()">AUTORIZZA LOGIN</button>
     </div>
 </div>
 
 <header>
     <div class="logo-box">
-        <div class="logo-circle">G</div>
-        <div style="line-height:1.2;">
-            <div style="font-size:24px; font-weight:900; letter-spacing:2px;">GAVINA</div>
-            <div style="font-size:11px; opacity:0.8; letter-spacing:3px; font-weight:700;">COMMANDER 2.35</div>
+        <div class="gavina-logo">
+            <svg viewBox="0 0 24 24"><path d="M12,2L4.5,20.29L5.21,21L12,18L18.79,21L19.5,20.29L12,2Z"/></svg>
+        </div>
+        <div>
+            <div style="font-size:22px; font-weight:900; letter-spacing:1px;">GAVINA VILLAGE</div>
+            <div style="font-size:11px; opacity:0.8; letter-spacing:3px;">MASTER COMMANDER 2.40</div>
         </div>
     </div>
-    <div style="display:flex; align-items:center; gap:30px;">
-        <div class="lang-picker">
-            <span class="flag" id="flag-it" onclick="setLang('it')">🇮🇹</span>
-            <span class="flag" id="flag-es" onclick="setLang('es')">🇪🇸</span>
-            <span class="flag" id="flag-en" onclick="setLang('en')">🇬🇧</span>
-        </div>
-        <div class="status-box">
-            <div id="dot"></div>
-            <span id="st-text" style="font-weight:900; letter-spacing:0.5px;">SYNCING...</span>
-        </div>
+    <div style="display:flex; align-items:center; gap:25px;">
+        <div class="lang-picker"><span class="flag" id="flag-it" onclick="setLang('it')">🇮🇹</span><span class="flag" id="flag-es" onclick="setLang('es')">🇪🇸</span><span class="flag" id="flag-en" onclick="setLang('en')">🇬🇧</span></div>
+        <div class="status-box"><div id="dot"></div><span id="st-text">SYSTEM ONLINE</span></div>
     </div>
 </header>
 
-<!-- AREA COMANDI PRIORITATI -->
+<!-- BANNER ORDINI -->
 <div id="order-banner">
-    <div style="font-size:12px; font-weight:900; color:var(--danger); margin-bottom:15px; text-transform:uppercase; letter-spacing:2px;" data-t="h-priority">⚠️ Ordini Urgenti dall'Amministrazione</div>
+    <div style="font-size:11px; font-weight:900; color:var(--danger); margin-bottom:12px;" data-t="h-priority">⚠️ ORDINI URGENTI PER IL TEAM</div>
     <div id="order-list"></div>
 </div>
 
 <nav class="tabs">
-    <div class="tab active" data-t="t-reg" onclick="swTab('reg', this)">Registro Lavori</div>
+    <div class="tab active" data-t="t-reg" onclick="swTab('reg', this)">Registro</div>
     <div class="tab admin-only" data-t="t-ord" onclick="swTab('ord', this)" style="color:var(--danger);">📢 Comandi</div>
     <div class="tab admin-only" data-t="t-mag" onclick="swTab('mag', this)">Magazzino</div>
-    <div class="tab admin-only" data-t="t-rep" onclick="swTab('rep', this)">Esportazione</div>
-    <div class="tab admin-only" data-t="t-acc" onclick="swTab('acc', this)">🔐 Accessi</div>
+    <div class="tab admin-only" data-t="t-rep" onclick="swTab('rep', this)">Esporta</div>
 </nav>
 
 <div class="container">
-    <!-- VIEW: REGISTRO -->
+    <!-- REGISTRO -->
     <div id="v-reg" class="view">
         <div class="toolbar">
-            <h2 data-t="h-reg" style="font-weight:900; color:var(--p); font-size:28px;">Registro Manutenzioni</h2>
-            <div style="display:flex; gap:15px;">
-                <button class="btn btn-blue admin-only" data-t="b-word" onclick="openBulkModal()">📅 Report Word Pro</button>
+            <h2 data-t="h-reg" style="font-size:26px; font-weight:900; color:var(--p);">Registro Manutenzioni</h2>
+            <div style="display:flex; gap:12px;">
+                <button class="btn btn-blue admin-only" data-t="b-word" onclick="openBulkModal()">Report Word Pro</button>
                 <button class="btn btn-p" data-t="b-new" onclick="openM()">+ Nuovo Intervento</button>
             </div>
         </div>
@@ -215,143 +136,78 @@
         </div>
     </div>
 
-    <!-- VIEW: ORDINI (ADMIN MODE) -->
+    <!-- COMANDI (ADMIN) -->
     <div id="v-ord" class="view admin-only" style="display:none;">
-        <div class="toolbar"><h2 data-t="h-ord-title" style="font-weight:900; color:var(--danger);">📢 Invia Nuovi Comandi</h2></div>
-        <div class="card" style="padding:3rem;">
+        <div class="toolbar"><h2 style="color:var(--danger); font-weight:900;">📢 Invia Comandi al Team</h2></div>
+        <div class="card" style="padding:2.5rem;">
             <div class="form-grid">
-                <div class="fg"><label>TITOLO INTERVENTO</label><input type="text" id="o-titolo" placeholder="es: Perdita d'acqua Bungalow 12"></div>
-                <div class="fg"><label>PRIORITÀ</label><select id="o-prio"><option value="Alta">ALTA ( Rosso )</option><option value="Media">Media ( Giallo )</option></select></div>
-                <div class="fg" style="grid-column: span 2;"><label>DETTAGLI E ISTRUZIONI</label><textarea id="o-desc" rows="2" placeholder="Dati tecnici, urgenza o pezzi necessari..."></textarea></div>
+                <div class="fg"><label>TITOLO INTERVENTO</label><input type="text" id="o-titolo"></div>
+                <div class="fg"><label>PRIORITÀ</label><select id="o-prio"><option value="Alta">ALTA (Rosso)</option><option value="Media">Media (Giallo)</option></select></div>
+                <div class="fg" style="grid-column: span 2;"><label>DETTAGLI</label><textarea id="o-desc" rows="2"></textarea></div>
             </div>
-            <button class="btn btn-danger" style="margin-top:25px; width:100%; padding:20px; font-size:15px; box-shadow:0 12px 25px rgba(211,47,47,0.3);" onclick="inviaOrdine()">🚀 LANCIA COMANDO IMMEDIATO AL TEAM</button>
+            <button class="btn btn-danger" style="width:100%; margin-top:20px; padding:18px; font-size:14px; font-weight:900;" onclick="inviaOrdine()">🚀 INVIA ORDINE ORA</button>
         </div>
-        <div class="card">
-            <div class="toolbar"><h3>Cronologia Ordini Inviati</h3></div>
-            <table><thead><tr><th>Inviato</th><th>Ordine</th><th>Priorità</th><th>Stato</th><th>Azione</th></tr></thead><tbody id="tbodyOrd"></tbody></table>
-        </div>
+        <div class="card"><table><thead><tr><th>Inviato</th><th>Ordine</th><th>Stato</th><th>🗑️</th></tr></thead><tbody id="tbodyOrd"></tbody></table></div>
     </div>
 
-    <!-- VIEW: MAGAZZINO -->
+    <!-- MAGAZZINO -->
     <div id="v-mag" class="view admin-only" style="display:none;">
-        <div class="toolbar"><h2 data-t="h-mag">Giacenze Magazzino</h2><button class="btn btn-p" onclick="openMM()">+ Aggiungi Materiale</button></div>
-        <div class="card">
-            <table><thead><tr><th>FOTO</th><th data-t="th-art">ARTICOLO</th><th data-t="th-qty">STOCK ATTUALE</th><th>GESTIONE</th></tr></thead><tbody id="tbodyM"></tbody></table>
-        </div>
+        <div class="toolbar"><h2>Giacenze Articoli</h2><button class="btn btn-p" onclick="openMM()">+ Nuovo Materiale</button></div>
+        <div class="card"><table><thead><tr><th>FOTO</th><th>ARTICOLO</th><th>GIACENZA</th><th>AZIONE</th></tr></thead><tbody id="tbodyM"></tbody></table></div>
     </div>
 
-    <!-- VIEW: BACKUP -->
+    <!-- EXCEL -->
     <div id="v-rep" class="view admin-only" style="display:none;">
-        <div class="card" style="padding:10rem; text-align:center;">
-            <h2 data-t="h-excel" style="font-size:35px; color:var(--p); margin-bottom:20px;">Esportazione Totale Foto</h2>
-            <p style="color:#666; font-size:18px; max-width:600px; margin: 0 auto 40px;">Questo processo genera un file Excel avanzato con tutte le immagini dei lavori incorporate nelle celle.</p>
-            <button class="btn btn-green" style="padding:22px 60px; font-size:18px;" onclick="esportaExcelCompleto()">📊 SCARICA BACKUP EXCEL (.XLS)</button>
+        <div class="card" style="padding:8rem; text-align:center;">
+            <h2 style="font-size:35px; color:var(--p);">Backup Foto Excel</h2>
+            <button class="btn btn-green" style="padding:18px 60px; font-size:16px;" onclick="esportaExcelCompleto()">📊 SCARICA EXCEL CON IMMAGINI</button>
         </div>
-    </div>
-
-    <!-- VIEW: ACCESSI -->
-    <div id="v-acc" class="view admin-only" style="display:none;">
-        <div class="toolbar"><h2>Dispositivi Collegati</h2></div>
-        <div class="card"><table><thead><tr><th>UTENTE</th><th>ID DISPOSITIVO</th><th>STATO</th><th>GESTIONE</th></tr></thead><tbody id="tbodyAcc"></tbody></table></div>
     </div>
 </div>
 
-<!-- MODALE SCHEDA TECNICA MASTER -->
+<!-- MODALE SCHEDA -->
 <div class="modal-ov" id="modI">
     <div class="modal">
         <span class="close-x" onclick="closeAll()">&times;</span>
-        <h2 id="mTitle" style="text-align:center; color:var(--p); font-size:35px; font-weight:900; margin-bottom:2.5rem; letter-spacing:1px;" data-t="m-title">SCHEDA TECNICA GAVINA</h2>
+        <h2 id="mTitle" style="text-align:center; color:var(--p); font-size:35px; font-weight:900;" data-t="m-title">SCHEDA GAVINA</h2>
         <input type="hidden" id="f-id">
-        
         <div class="form-grid">
             <div class="fg"><label data-t="l-date">📅 Data</label><input type="date" id="f-data"></div>
-            <div class="fg">
-                <label data-t="l-meteo">☁️ Meteo Locale</label>
-                <div style="display:flex; gap:8px;"><input type="text" id="f-citta" value="Mont-roig del Camp"><button class="btn btn-ghost" onclick="getWeather()">METEO</button></div>
-                <div id="wInfo" class="weather-display" style="display:none;"></div>
-                <input type="hidden" id="f-meteo">
-            </div>
-            <div class="fg"><label data-t="l-sup">🛡️ Supervisore</label><input type="text" id="f-sup" placeholder="Nome Supervisore"></div>
-            <div class="fg"><label data-t="l-res">👤 Responsabile</label><input type="text" id="f-assign" placeholder="Nome Responsabile"></div>
-            <div class="fg"><label data-t="l-op">👷 Operaio</label><input type="text" id="f-op" placeholder="Eseguito da..."></div>
-            <div class="fg"><label data-t="l-typ">🏠 Tipologia Alloggio</label><select id="f-bung"></select></div>
-            <div class="fg"><label data-t="l-area">📍 Area / Numero</label><input type="text" id="f-area" placeholder="es. A-110"></div>
-            <div class="fg"><label data-t="l-mat">🛠️ Materiale Usato</label><select id="f-mat-sel"></select></div>
-            
-            <div class="fg" style="grid-column: span 3;"><label data-t="l-des">📝 Descrizione Lavori Svolti</label><textarea id="f-desc" rows="5" placeholder="Descrivi nel dettaglio l'intervento..."></textarea></div>
+            <div class="fg"><label data-t="l-meteo">☁️ Meteo</label><div style="display:flex; gap:5px;"><input type="text" id="f-citta" value="Mont-roig del Camp"><button class="btn btn-ghost" onclick="getWeather()">VAI</button></div><div id="wInfo" class="weather-display" style="display:none;"></div><input type="hidden" id="f-meteo"></div>
+            <div class="fg"><label data-t="l-sup">🛡️ Supervisore</label><input type="text" id="f-sup"></div>
+            <div class="fg"><label data-t="l-res">👤 Responsabile</label><input type="text" id="f-assign"></div>
+            <div class="fg"><label data-t="l-op">👷 Operaio</label><input type="text" id="f-op"></div>
+            <div class="fg"><label data-t="l-typ">🏠 Alloggio</label><select id="f-bung"></select></div>
+            <div class="fg"><label data-t="l-area">📍 Numero Unità</label><input type="text" id="f-area"></div>
+            <div class="fg"><label data-t="l-mat">🛠️ Materiale</label><select id="f-mat-sel"></select></div>
+            <div class="fg" style="grid-column: span 3;"><label data-t="l-des">📝 Descrizione Lavori</label><textarea id="f-desc" rows="4"></textarea></div>
 
-            <div class="fg">
-                <label data-t="l-fo">Foto Operaio</label>
-                <div class="photo-input" onclick="document.getElementById('i-o').click()">
-                    <input type="file" id="i-o" accept="image/*" capture="user" hidden onchange="hPhoto(this,'o')">
-                    <div id="pr-o">🤳 Scatta Selfie</div>
-                </div>
-            </div>
+            <div class="fg"><label>Foto Operaio</label><div class="photo-input" onclick="document.getElementById('i-o').click()"><input type="file" id="i-o" accept="image/*" capture="user" hidden onchange="hPhoto(this,'o')"><div id="pr-o">🤳 Scatta</div></div></div>
             
-            <div class="fg">
-                <label data-t="l-fp">Foto Inizio</label>
-                <div class="photo-input" onclick="document.getElementById('i-p').click()">
-                    <input type="file" id="i-p" accept="image/*" capture="environment" hidden onchange="hPhoto(this,'p')">
-                    <div id="pr-p">📷 Foto Prima</div>
-                </div>
-                <input type="text" id="f-note-p" placeholder="Nota foto inizio..." style="margin-top:8px;">
-            </div>
-
-            <div class="fg">
-                <label data-t="l-fd">Foto Fine</label>
-                <div class="photo-input" onclick="document.getElementById('i-d').click()">
-                    <input type="file" id="i-d" accept="image/*" capture="environment" hidden onchange="hPhoto(this,'d')">
-                    <div id="pr-d">📸 Foto Dopo</div>
-                </div>
-                <input type="text" id="f-note-d" placeholder="Nota foto fine..." style="margin-top:8px;">
-            </div>
+            <div class="fg"><label>Foto Inizio</label><div class="photo-input" onclick="document.getElementById('i-p').click()"><input type="file" id="i-p" accept="image/*" capture="environment" hidden onchange="hPhoto(this,'p')"><div id="pr-p">📷 Foto</div></div><input type="text" id="f-note-p" placeholder="Note Inizio..." style="margin-top:8px;"></div>
             
-            <div class="fg" style="grid-column: span 3;">
-                <label data-t="l-sgn">✍️ Firma Approvvazione</label>
-                <canvas id="cvF" width="800" height="150" style="width:100%; border:2.5px solid #ddd; background:#fff; border-radius:18px; touch-action:none;"></canvas>
-            </div>
+            <div class="fg"><label>Foto Fine</label><div class="photo-input" onclick="document.getElementById('i-d').click()"><input type="file" id="i-d" accept="image/*" capture="environment" hidden onchange="hPhoto(this,'d')"><div id="pr-d">📸 Foto</div></div><input type="text" id="f-note-d" placeholder="Note Fine..." style="margin-top:8px;"></div>
+            
+            <div class="fg" style="grid-column: span 3;"><label>Firma Approvazione</label><canvas id="cvF" width="800" height="150" style="width:100%; border:2px solid #ddd; background:#fff; border-radius:15px; touch-action:none;"></canvas></div>
         </div>
-        <button class="btn btn-p" style="width:100%; margin-top:35px; padding:22px; font-size:16px; font-weight:900; box-shadow:0 15px 30px rgba(0,77,64,0.3);" onclick="saveI()">💾 SALVA E SINCRONIZZA NEL CLOUD GAVINA</button>
+        <button class="btn btn-p" style="width:100%; margin-top:30px; padding:22px; font-size:16px;" onclick="saveI()">💾 SALVA E SINCRONIZZA CON GAVINA</button>
     </div>
 </div>
 
-<!-- MODALI EXTRA -->
-<div class="modal-ov" id="modM"><div class="modal" style="max-width:450px;"><span class="close-x" onclick="closeAll()">&times;</span><h2 data-t="m-mat">Nuovo Articolo Magazzino</h2><div class="form-grid" style="grid-template-columns: 1fr;"><div class="fg"><label>Articolo</label><input type="text" id="m-nome"></div><div class="fg"><label>Stock</label><input type="number" id="m-giac"></div><div class="fg"><label>Prezzo</label><input type="number" id="m-prez" step="0.01"></div><div class="fg"><label>Foto Articolo</label><div class="photo-input" onclick="document.getElementById('i-m').click()"><input type="file" id="i-m" accept="image/*" capture="environment" hidden onchange="hPhoto(this,'m')"><div id="pr-m">📸 Foto</div></div></div></div><button class="btn btn-p" style="width:100%; margin-top:25px;" onclick="saveM()">💾 SALVA MATERIALE</button></div></div>
-<div class="modal-ov" id="modBulk"><div class="modal" style="max-width:600px;"><span class="close-x" onclick="closeAll()">&times;</span><h3>Report Word Pro</h3><p style="font-size:12px; color:#777;">Introduzione del documento:</p><textarea id="bulk-notes" style="width:100%; height:130px; margin-top:10px; padding:15px; border-radius:15px;"></textarea><button class="btn btn-blue" style="width:100%; margin-top:20px; padding:18px;" onclick="esportaWordPro()">📝 GENERA DOCUMENTO WORD</button></div></div>
+<!-- MODALE MATERIALE -->
+<div class="modal-ov" id="modM"><div class="modal" style="max-width:450px;"><span class="close-x" onclick="closeAll()">&times;</span><h2 data-t="m-mat">Dati Magazzino</h2><div class="fg"><label>Articolo</label><input type="text" id="m-nome"></div><div class="fg"><label>Giacenza</label><input type="number" id="m-giac"></div><div class="fg"><label>Prezzo</label><input type="number" id="m-prez" step="0.01"></div><div class="fg"><label>Foto Articolo</label><div class="photo-input" onclick="document.getElementById('i-m').click()"><input type="file" id="i-m" accept="image/*" capture="environment" hidden onchange="hPhoto(this,'m')"><div id="pr-m">📸 Foto</div></div></div><button class="btn btn-p" style="width:100%; margin-top:20px;" onclick="saveM()">💾 AGGIUNGI</button></div></div>
+
+<!-- MODALE WORD -->
+<div class="modal-ov" id="modBulk"><div class="modal" style="max-width:600px;"><span class="close-x" onclick="closeAll()">&times;</span><h3>Report Word Strategico</h3><textarea id="bulk-notes" style="width:100%; height:130px; margin-top:10px; padding:15px; border-radius:15px;"></textarea><button class="btn btn-blue" style="width:100%; margin-top:20px; padding:18px;" onclick="esportaWordPro()">📝 SCARICA WORD</button></div></div>
 
 <script>
-// --- CONFIGURAZIONE DATABASE ---
 const URL_SB = 'https://ukzconegwpoaculadefx.supabase.co';
 const KEY_SB = 'sb_publishable_dS8SzPIks90Yd1ISjsXQFQ_T8VtusA1';
 
 const LAN = {
-    it: {
-        't-reg': 'Registro', 't-ord': 'Ordini', 't-mag': 'Magazzino', 't-rep': 'Backup', 't-acc': 'Acc.',
-        'h-priority': '⚠️ Comandi Urgenti per il Team', 'h-reg': 'Mantenimento Gavina', 'b-new': 'Nuova Scheda', 'b-word': 'Report Word',
-        'th-date': 'Data', 'th-bung': 'Alloggio', 'th-op': 'Operaio', 'h-mag': 'Giacenze Magazzino', 'th-img': 'Foto', 'th-art': 'Articolo', 'th-qty': 'Stock',
-        'l-date': 'Data', 'l-meteo': 'Meteo Dettaglio', 'l-sup': 'Supervisore', 'l-res': 'Responsabile', 'l-op': 'Operaio',
-        'l-typ': 'Tipo Alloggio', 'l-area': 'Unità / Numero', 'l-mat': 'Articolo Usato', 'l-des': 'Descrizione Lavori',
-        'l-fo': 'Foto Operaio', 'l-fp': 'Foto Inizio', 'l-fd': 'Foto Fine', 'l-sgn': 'Firma Approvazione',
-        'b-save': 'Salva Tutto nel Cloud', 'm-title': 'Scheda Tecnica Gavina', 'm-mat': 'Carica Prodotto', 'h-excel': 'Download Backup Excel con Foto', 'h-ord-title': '📢 Invia Ordine Ufficiale'
-    },
-    es: {
-        't-reg': 'Registro', 't-ord': 'Órdenes', 't-mag': 'Almacén', 't-rep': 'Copia', 't-acc': 'Acc.',
-        'h-priority': '⚠️ Órdenes Urgentes del Equipo', 'h-reg': 'Mantenimiento Gavina', 'b-new': 'Nueva Ficha', 'b-word': 'Informe Word',
-        'th-date': 'Fecha', 'th-bung': 'Unidad', 'th-op': 'Operario', 'h-mag': 'Existencias Almacén', 'th-img': 'Foto', 'th-art': 'Artículo', 'th-qty': 'Stock',
-        'l-date': 'Fecha', 'l-meteo': 'Clima detallado', 'l-sup': 'Supervisor', 'l-res': 'Responsable', 'l-op': 'Operario',
-        'l-typ': 'Tipo de Vivienda', 'l-area': 'Unidad / Zona', 'l-mat': 'Material Usado', 'l-des': 'Detalles Trabajos',
-        'l-fo': 'Foto del Operario', 'l-fp': 'Foto Inicio', 'l-fd': 'Foto Fin', 'l-sgn': 'Firma Aprobación',
-        'b-save': 'Guardar y Sincronizar', 'm-title': 'Ficha Técnica Gavina', 'm-mat': 'Nuevo Producto', 'h-excel': 'Descargar Backup Excel con Fotos', 'h-ord-title': '📢 Enviar Orden Oficial'
-    },
-    en: {
-        't-reg': 'Registry', 't-ord': 'Orders', 't-mag': 'Warehouse', 't-rep': 'Backup', 't-acc': 'Acc.',
-        'h-priority': '⚠️ Urgent Team Job Orders', 'h-reg': 'Gavina Work Logs', 'b-new': 'New Sheet', 'b-word': 'Word Export',
-        'th-date': 'Date', 'th-bung': 'Unit', 'th-op': 'Worker', 'h-mag': 'Warehouse Inventory', 'th-img': 'Photo', 'th-art': 'Item', 'th-qty': 'Qty',
-        'l-date': 'Date', 'l-meteo': 'Weather details', 'l-sup': 'Supervisor', 'l-res': 'Manager', 'l-op': 'Worker',
-        'l-typ': 'Housing Type', 'l-area': 'Unit / Area', 'l-mat': 'Material Used', 'l-des': 'Work Details',
-        'l-fo': 'Worker Photo', 'l-fp': 'Photo Start', 'l-fd': 'Photo End', 'l-sgn': 'Manager Signature',
-        'b-save': 'Save and Sync Cloud', 'm-title': 'Gavina Technical Sheet', 'm-mat': 'Add Item', 'h-excel': 'Download Excel with Photos', 'h-ord-title': '📢 Send Official Order'
-    }
+    it: { 't-reg': 'Registro', 't-ord': 'Ordini', 't-mag': 'Magazzino', 't-rep': 'Backup', 'h-priority': '⚠️ ORDINI URGENTI TEAM', 'h-reg': 'Lavori Gavina Village', 'b-new': 'Nuova Scheda', 'b-word': 'Report Word', 'th-date': 'Data', 'th-bung': 'Alloggio', 'th-op': 'Operaio', 'h-mag': 'Magazzino Materiali', 'l-date': 'Data', 'l-meteo': 'Meteo Dettagliato', 'l-sup': 'Supervisore', 'l-res': 'Responsabile', 'l-op': 'Operaio', 'l-typ': 'Tipo Alloggio', 'l-area': 'Unità / Zona', 'l-mat': 'Articolo Usato', 'l-des': 'Descrizione', 'l-fo': 'Foto Operaio', 'l-fp': 'Foto Inizio', 'l-fd': 'Foto Fine', 'l-sgn': 'Firma Approvazione', 'b-save': 'Salva Tutto nel Cloud', 'm-title': 'Scheda Tecnica Gavina', 'm-mat': 'Carica Prodotto' },
+    es: { 't-reg': 'Registro', 't-ord': 'Comandos', 't-mag': 'Almacén', 't-rep': 'Copia', 'h-priority': '⚠️ ÓRDENES URGENTES', 'h-reg': 'Mantenimiento Gavina', 'b-new': 'Nueva Ficha', 'b-word': 'Informe Word', 'th-date': 'Fecha', 'th-bung': 'Unidad', 'th-op': 'Operario', 'h-mag': 'Almacén de Materiales', 'l-date': 'Fecha', 'l-meteo': 'Clima Detalle', 'l-sup': 'Supervisor', 'l-res': 'Responsable', 'l-op': 'Operario', 'l-typ': 'Tipo de Vivienda', 'l-area': 'Unidad / Zona', 'l-mat': 'Material Usado', 'l-des': 'Descripción', 'l-fo': 'Foto del Operario', 'l-fp': 'Foto Inicio', 'l-fd': 'Foto Fin', 'l-sgn': 'Firma Aprobación', 'b-save': 'Guardar Todo', 'm-title': 'Ficha Tecnica Gavina', 'm-mat': 'Nuevo Producto' },
+    en: { 't-reg': 'Registry', 't-ord': 'Orders', 't-mag': 'Warehouse', 't-rep': 'Backup', 'h-priority': '⚠️ URGENT JOB ORDERS', 'h-reg': 'Gavina Work Logs', 'b-new': 'New Job', 'b-word': 'Word Export', 'th-date': 'Date', 'th-bung': 'Home', 'th-op': 'Worker', 'h-mag': 'Materials Stock', 'l-date': 'Date', 'l-meteo': 'Weather info', 'l-sup': 'Supervisor', 'l-res': 'Manager', 'l-op': 'Worker', 'l-typ': 'Type', 'l-area': 'Unit', 'l-mat': 'Material', 'l-des': 'Description', 'l-fo': 'Worker Photo', 'l-fp': 'Photo Start', 'l-fd': 'Photo End', 'l-sgn': 'Manager Signature', 'b-save': 'Save Cloud', 'm-title': 'Gavina Technical Sheet', 'm-mat': 'Add Item' }
 };
 
 let curL = 'it', db = null, listI=[], listM=[], listA=[], listOrd=[], fotoO=null, fotoP=null, fotoD=null, fotoM=null, firma=null;
@@ -365,12 +221,12 @@ function setLang(l) {
 }
 
 function renderAccommodations() {
-    const categories = {
-        it: ['TENDE','MOBILHOMES','BUNGALOWS','TINY HOMES','BEACH CABINS','PARCOLE'],
+    const cats = {
+        it: ['TENDE','MOBILHOMES','BUNGALOWS','TINY HOMES','BEACH CABINS','PIAZZOLE'],
         es: ['TIENDAS','MOBILHOMES','BUNGALOWS','TINY HOMES','BEACH CABINS','PARCELAS'],
         en: ['TENTS','MOBILHOMES','BUNGALOWS','TINY HOMES','BEACH CABINS','PLOTS']
     };
-    const c = categories[curL];
+    const c = cats[curL];
     const s = document.getElementById('f-bung'); 
     s.innerHTML = `<option value="">-- Seleziona --</option>
         <optgroup label="${c[0]}"><option value="Junior">Junior</option><option value="Kenya">Kenya</option><option value="Luna">Luna</option><option value="Victoria">Victoria</option><option value="Sol">Sol</option><option value="Mayotte">Mayotte</option><option value="Safari+">Safari+</option></optgroup>
@@ -382,93 +238,76 @@ function renderAccommodations() {
 }
 
 async function sync() {
-    if(!db) return;
     try {
         const {data:i} = await db.from('interventi').select('*').order('data',{ascending:false});
         const {data:m} = await db.from('materiali').select('*').order('nome_articolo');
         const {data:a} = await db.from('accessi').select('*').order('data_richiesta',{ascending:false});
         const {data:o} = await db.from('ordini').select('*').eq('stato','Attivo').order('data_ordine',{ascending:false});
         
-        // --- NOTIFICA PER ADMIN ---
         if(localStorage.getItem('admin_master')==='true') {
             const completati = (o||[]).filter(x => x.stato === 'Chiuso' && !x.visto_da_admin);
             if(completati.length > 0) {
-                alert("📢 NOTIFICA GAVINA: Uno dei tuoi ordini è stato completato dal team!");
+                alert("📢 NOTIFICA: L'ordine è stato completato!");
                 await db.from('ordini').update({ visto_da_admin: true }).in('id', completati.map(c=>c.id));
             }
         }
-
-        listI=i||[]; listM=m||[]; listA=a||[]; listOrd=o||[]; render();
-        document.getElementById('dot').style.background = '#69f0ae'; document.getElementById('st-text').textContent = 'SISTEMA ONLINE';
-    } catch(err) { console.error("Database connection issue."); }
+        listI=i||[]; listM=m||[]; listOrd=o||[]; render();
+        document.getElementById('dot').style.background = '#69f0ae';
+    } catch(e) {}
 }
 
 function render() {
     document.getElementById('tbodyI').innerHTML = listI.map(i => `<tr><td><input type="checkbox" class="sel-row" value="${i.id}"></td><td>${i.data}</td><td><b>${i.bungalow}</b></td><td>${i.operatore}</td><td><button class="btn btn-ghost" onclick="editI('${i.id}')">✏️</button></td></tr>`).join('');
-    document.getElementById('tbodyM').innerHTML = listM.map(m => `<tr><td>${m.foto_url?`<img src="${m.foto_url}" class="mag-img">`:'-'}</td><td><b>${m.nome_articolo}</b></td><td>${m.giacenza_attuale}</td><td><button class="btn" style="background:#ffcdd2; color:#c62828;" onclick="delM('${m.id}')">🗑️</button></td></tr>`).join('');
+    document.getElementById('tbodyM').innerHTML = listM.map(m => `<tr><td>${m.foto_url?`<img src="${m.foto_url}" class="mag-img">`:'-'}</td><td><b>${m.nome_articolo}</b></td><td>${m.giacenza_attuale}</td><td><button class="btn btn-danger" onclick="delM('${m.id}')">🗑️</button></td></tr>`).join('');
     
-    // RENDER ORDINI PER IL TEAM
     if(listOrd.length > 0) {
         document.getElementById('order-banner').style.display = 'block';
-        document.getElementById('order-list').innerHTML = listOrd.map(o => `
-            <div class="order-card ${o.priorita}">
-                <div style="flex:1;"><b>${o.priorita}</b>: ${o.titolo}<br><small>${o.descrizione}</small></div>
-                <button class="btn btn-blue" onclick="chiudiOrdine('${o.id}')">FATTO / COMPLETADO</button>
-            </div>`).join('');
-    } else { document.getElementById('order-banner').style.display='none'; }
+        document.getElementById('order-list').innerHTML = listOrd.map(o => `<div class="order-card"><div><b>${o.priorita}:</b> ${o.titolo}<br><small>${o.descrizione}</small></div><button class="btn btn-blue" onclick="chiudiOrdine('${o.id}')">OK</button></div>`).join('');
+    } else document.getElementById('order-banner').style.display='none';
     
-    document.getElementById('tbodyOrd').innerHTML = listOrd.map(o => `<tr><td>${new Date(o.data_ordine).toLocaleDateString()}</td><td>${o.titolo}</td><td>${o.priorita}</td><td>${o.stato}</td><td><button class="btn btn-ghost" onclick="delOrd('${o.id}')">🗑️</button></td></tr>`).join('');
-    document.getElementById('tbodyAcc').innerHTML = listA.map(a => `<tr><td>${a.nome_utente}</td><td>${a.device_id}</td><td><b>${a.stato}</b></td><td><button onclick="cambiaAcc('${a.id}','autorizzato')">✅</button> <button onclick="cambiaAcc('${a.id}','bloccato')">🚫</button></td></tr>`).join('');
+    document.getElementById('tbodyOrd').innerHTML = listOrd.map(o => `<tr><td>${new Date(o.data_ordine).toLocaleDateString()}</td><td>${o.titolo}</td><td>${o.priorita}</td><td>${o.stato}</td><td><button onclick="delOrd('${o.id}')">🗑️</button></td></tr>`).join('');
     document.getElementById('f-mat-sel').innerHTML = '<option value="">-- Nessuno --</option>' + listM.map(m => `<option value="${m.nome_articolo}">${m.nome_articolo}</option>`).join('');
 }
 
-// --- AZIONI DATABASE ---
 async function inviaOrdine() {
-    const t = document.getElementById('o-titolo').value, d = document.getElementById('o-desc').value, p = document.getElementById('o-prio').value;
-    if(!t) return alert("Titolo mancante!");
-    await db.from('ordini').insert([{ titolo: t, descrizione: d, priorita: p, stato: 'Attivo', visto_da_admin: false }]);
+    const t=document.getElementById('o-titolo').value, d=document.getElementById('o-desc').value, p=document.getElementById('o-prio').value;
+    if(!t)return;
+    const {error} = await db.from('ordini').insert([{ titolo: t, descrizione: d, priorita: p, stato: 'Attivo', visto_da_admin: false }]);
+    if(error) alert(error.message);
     document.getElementById('o-titolo').value=''; document.getElementById('o-desc').value='';
     sync();
 }
 
 async function chiudiOrdine(id) { 
-    const chi = prompt("Chi ha completato il lavoro? / ¿Quién completó?");
-    if(!chi) return;
+    const chi = prompt("Firmato da:"); if(!chi) return;
     await db.from('ordini').update({ stato: 'Chiuso', completato_da: chi, visto_da_admin: false }).eq('id', id);
     sync(); 
 }
 
-async function delOrd(id) { if(confirm("Eliminare ordine?")) { await db.from('ordini').delete().eq('id', id); sync(); } }
+async function delOrd(id) { if(confirm("Eliminare?")) { await db.from('ordini').delete().eq('id', id); sync(); } }
 
 async function saveI() {
-    const row = {
-        data: document.getElementById('f-data').value, supervisore: document.getElementById('f-sup').value,
-        responsabile_assegnazione: document.getElementById('f-assign').value, operatore: document.getElementById('f-op').value,
-        bungalow: document.getElementById('f-bung').value, area: document.getElementById('f-area').value, descrizione: document.getElementById('f-desc').value,
-        materiale_usato: document.getElementById('f-mat-sel').value, quantita_usata: 0,
-        foto_operaio_url: fotoO, foto_prima_url: fotoP, foto_dopo_url: fotoD,
-        foto_prima_note: document.getElementById('f-note-p').value, foto_dopo_note: document.getElementById('f-note-d').value,
-        firma_url: firma, confermato:true
-    };
+    const r = { data:document.getElementById('f-data').value, supervisore:document.getElementById('f-sup').value,bungalow:document.getElementById('f-bung').value, area:document.getElementById('f-area').value, descrizione:document.getElementById('f-desc').value, operatore:document.getElementById('f-op').value, foto_prima_url:fotoP, foto_dopo_url:fotoD, foto_prima_note:document.getElementById('f-note-p').value, foto_dopo_note:document.getElementById('f-note-d').value, firma_url:firma, confermato:true };
     const id = document.getElementById('f-id').value;
-    id ? await db.from('interventi').update(row).eq('id', id) : await db.from('interventi').insert([row]);
+    id ? await db.from('interventi').update(r).eq('id', id) : await db.from('interventi').insert([r]);
     closeAll(); sync();
 }
 
 function editI(id) {
-    const r = listI.find(x => x.id === id); document.getElementById('f-id').value = r.id; 
-    document.getElementById('f-data').value = r.data; document.getElementById('f-sup').value = r.supervisore||'';
-    document.getElementById('f-assign').value = r.responsabile_assegnazione||''; document.getElementById('f-op').value = r.operatore||'';
-    document.getElementById('f-bung').value = r.bungalow; document.getElementById('f-area').value = r.area||''; document.getElementById('f-desc').value = r.descrizione;
-    document.getElementById('f-note-p').value = r.foto_prima_note||''; document.getElementById('f-note-d').value = r.foto_dopo_note||'';
+    const r=listI.find(x=>x.id===id); document.getElementById('f-id').value=r.id; 
+    document.getElementById('f-data').value=r.data; document.getElementById('f-sup').value=r.supervisore||'';
+    document.getElementById('f-note-p').value=r.foto_prima_note||''; document.getElementById('f-note-d').value=r.foto_dopo_note||'';
     fotoO=r.foto_operaio_url; fotoP=r.foto_prima_url; fotoD=r.foto_dopo_url; firma=r.firma_url;
-    if(fotoO) document.getElementById('pr-o').innerHTML=`<img src="${fotoO}">`;
     if(fotoP) document.getElementById('pr-p').innerHTML=`<img src="${fotoP}">`;
     if(fotoD) document.getElementById('pr-d').innerHTML=`<img src="${fotoD}">`;
     document.getElementById('modI').classList.add('open'); initCv();
 }
 
-// --- PHOTOGRAPHY & UTILS ---
+async function saveM() {
+    await db.from('materiali').insert([{ nome_articolo:document.getElementById('m-nome').value, giacenza_attuale:parseFloat(document.getElementById('m-giac').value), foto_url:fotoM }]);
+    closeAll(); sync();
+}
+
 function hPhoto(input, tipo) {
     const r=new FileReader(); r.onload=(e)=>{
         const i=new Image(); i.onload=()=>{
@@ -488,31 +327,23 @@ function initCv() {
     window.onmouseup=()=>{ if(drw){drw=false; firma=c.toDataURL();} };
 }
 
-async function getWeather() {
-    const cit=document.getElementById('f-citta').value;
-    try {
-        const gR=await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${cit}`); const g=await gR.json();
-        const wR=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${g[0].lat}&longitude=${g[0].lon}&current_weather=true&daily=temperature_2m_max,temperature_2m_min,precipitation_sum&timezone=auto`);
-        const w=await wR.json(); const res = `Min: ${w.daily.temperature_2m_min[0]}°C | Max: ${w.daily.temperature_2m_max[0]}°C | Pioggia: ${w.daily.precipitation_sum[0]}mm`;
-        document.getElementById('f-meteo').value=res; document.getElementById('wInfo').style.display='block'; document.getElementById('wInfo').innerHTML=`⛅ <b>INFO METEO:</b> ${res}`;
-    } catch(e){}
-}
+async function getWeather() { const cit=document.getElementById('f-citta').value; try { const gR=await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${cit}`); const g=await gR.json(); const wR=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${g[0].lat}&longitude=${g[0].lon}&current_weather=true&daily=temperature_2m_max,temperature_2m_min,precipitation_sum&timezone=auto`); const w=await wR.json(); const res = `Min: ${w.daily.temperature_2m_min[0]}°C | Max: ${w.daily.temperature_2m_max[0]}°C`; document.getElementById('f-meteo').value=res; document.getElementById('wInfo').style.display='block'; document.getElementById('wInfo').innerHTML=res; } catch(e){} }
 
 function esportaExcelCompleto() {
-    let html = `<html><head><meta charset='utf-8'></head><body><table border="1"><tr style="background:#004d40; color:white;"><th>Data</th><th>Unità</th><th>Operaio</th><th>Supervisore</th><th>Note Foto Inizio</th><th>Foto Inizio</th><th>Note Foto Fine</th><th>Foto Fine</th></tr>`;
-    listI.forEach(i => { html += `<tr><td>${i.data}</td><td>${i.bungalow}</td><td>${i.operatore}</td><td>${i.supervisore||'-'}</td><td>${i.foto_prima_note||'-'}</td><td><img src="${i.foto_prima_url}" width="120"></td><td>${i.foto_dopo_note||'-'}</td><td><img src="${i.foto_dopo_url}" width="120"></td></tr>`; });
+    let html = `<html><body><table border="1"><tr><th>Data</th><th>Alloggio</th><th>Note Foto Inizio</th><th>Foto Inizio</th><th>Note Foto Fine</th><th>Foto Fine</th></tr>`;
+    listI.forEach(i => { html += `<tr><td>${i.data}</td><td>${i.bungalow}</td><td>${i.foto_prima_note||'-'}</td><td><img src="${i.foto_prima_url}" width="120"></td><td>${i.foto_dopo_note||'-'}</td><td><img src="${i.foto_dopo_url}" width="120"></td></tr>`; });
     html += `</table></body></html>`;
     const b = new Blob([html], {type: 'application/vnd.ms-excel'});
-    const a = document.createElement('a'); a.href=URL.createObjectURL(b); a.download="GavinaMASTER_Export.xls"; a.click();
+    const a = document.createElement('a'); a.href=URL.createObjectURL(b); a.download="Gavina_Backup.xls"; a.click();
 }
 
 function esportaWordPro() {
     const ids=Array.from(document.querySelectorAll('.sel-row:checked')).map(x=>x.value); const list=listI.filter(x=>ids.includes(x.id)); 
-    let html = `<html><body><h1 style='color:#004d40'>GAVINA VILLAGE - REPORT</h1><p>${document.getElementById('bulk-notes').value}</p><hr>`;
+    let html = `<html><body><h1>GAVINA VILLAGE - REPORT</h1><p>${document.getElementById('bulk-notes').value}</p><hr>`;
     list.forEach(i => {
         html += `<div style='page-break-after:always;'><h2>${i.bungalow} - ${i.data}</h2><p>${i.descrizione}</p>`;
-        if(i.foto_prima_url) html += `<p>FOTO PRIMA:<br><img src='${i.foto_prima_url}' width='450'></p>`;
-        if(i.foto_dopo_url) html += `<p>FOTO DOPO:<br><img src='${i.foto_dopo_url}' width='450'></p>`;
+        if(i.foto_prima_url) html += `<p>INIZIO:<br><img src='${i.foto_prima_url}' width='450'></p>`;
+        if(i.foto_dopo_url) html += `<p>FINE:<br><img src='${i.foto_dopo_url}' width='450'></p>`;
         html += `</div><hr>`;
     });
     html += `</body></html>`;
@@ -520,25 +351,11 @@ function esportaWordPro() {
     const a = document.createElement('a'); a.href=URL.createObjectURL(b); a.download="ReportGavina.doc"; a.click();
 }
 
-// --- UTILITY UI ---
-function openM() { document.getElementById('f-id').value=''; document.getElementById('f-data').value=new Date().toISOString().split('T')[0]; document.getElementById('modI').classList.add('open'); initCv(); renderAccommodations(); }
-function openMM() { fotoM=null; document.getElementById('modM').classList.add('open'); }
-function openBulkModal() { document.getElementById('modBulk').classList.add('open'); }
 function closeAll() { document.querySelectorAll('.modal-ov').forEach(m=>m.classList.remove('open')); }
 function swTab(v,b) { document.querySelectorAll('.view').forEach(x=>x.style.display='none'); document.getElementById('v-'+v).style.display='block'; document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active')); b.classList.add('active'); sync(); }
 function selAll(cb) { document.querySelectorAll('.sel-row').forEach(x=>x.checked=cb.checked); }
-
-// --- ACCESSO ---
-async function checkAccess() {
-    if(localStorage.getItem('admin_master') === 'true') { document.getElementById('lock-screen').style.display='none'; sync(); return; }
-    document.getElementById('lock-screen').style.display = 'flex';
-}
-async function richiediAccesso() {
-    const nome = document.getElementById('reg-nome').value.toUpperCase();
-    if(nome === 'ADMIN_PRO') { localStorage.setItem('admin_master', 'true'); location.reload(); }
-    else { alert("Richiesta di accesso inviata all'amministrazione."); }
-}
-
+async function checkAccess() { if(localStorage.getItem('admin_master')==='true'){document.getElementById('lock-screen').style.display='none'; sync(); return;} document.getElementById('lock-screen').style.display='flex'; }
+async function richiediAccesso() { if(document.getElementById('reg-nome').value.toUpperCase()==='ADMIN_PRO'){localStorage.setItem('admin_master','true'); location.reload();} }
 setLang('it'); checkAccess(); setInterval(sync, 20000);
 </script>
 </body>
