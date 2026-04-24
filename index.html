@@ -3,84 +3,108 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GAVINA COMMANDER | Multisite System</title>
+    <title>GAVINA COMMANDER | Global Edition 2.25</title>
+    <!-- LIBRERIE ESTERNE -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        :root { --p: #004d40; --s: #028574; --bg: #f0f4f4; --danger: #d32f2f; --warn: #ffa000; }
-        body { font-family: 'Outfit', sans-serif; background: var(--bg); color: #1a232e; margin: 0; }
-        header { background: var(--p); color: white; padding: 0.8rem 2rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 5px solid #ffca28; }
+        :root { --p: #004d40; --s: #028574; --bg: #f2f7f7; --danger: #d32f2f; --warn: #ffa000; --admin: #1565c0; }
+        body { font-family: 'Outfit', sans-serif; background: var(--bg); color: #1a232e; margin: 0; padding-bottom: 50px; }
         
-        .lang-picker { display: flex; gap: 10px; margin-right: 15px; }
-        .flag { cursor: pointer; font-size: 20px; filter: grayscale(1); transition: 0.2s; }
-        .flag.active { filter: grayscale(0); transform: scale(1.2); }
+        /* HEADER */
+        header { background: var(--p); color: white; padding: 0.8rem 2rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 5px solid #ffca28; position: sticky; top: 0; z-index: 900; }
+        .logo-box { display: flex; align-items: center; gap: 12px; }
+        .logo-circle { width: 40px; height: 40px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; color: var(--p); border: 2px solid #ffca28; }
+        
+        .lang-picker { display: flex; gap: 12px; }
+        .flag { cursor: pointer; font-size: 22px; filter: grayscale(0.9); transition: 0.3s; }
+        .flag.active { filter: grayscale(0); transform: scale(1.3); }
 
-        nav.tabs { background:white; display:flex; gap:15px; padding:0 2rem; box-shadow:0 3px 6px rgba(0,0,0,0.05); overflow-x: auto; }
+        /* TABS */
+        nav.tabs { background:white; display:flex; gap:15px; padding:0 2rem; box-shadow:0 3px 6px rgba(0,0,0,0.05); overflow-x: auto; position: sticky; top: 60px; z-index: 850; }
         .tab { padding:1.2rem 0; cursor:pointer; font-weight:700; color:#78909c; border-bottom:4px solid transparent; text-transform:uppercase; font-size:11px; white-space:nowrap; }
         .tab.active { color:var(--p); border-bottom-color:var(--p); }
-        
-        /* BANNER ORDINI PER OPERAI */
-        #order-banner { background: #fff; padding: 10px 20px; border-bottom: 2px solid #ddd; display: none; }
-        .order-card { padding: 10px; border-radius: 8px; margin-bottom: 8px; border-left: 5px solid var(--danger); background: #fff5f5; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        .order-card.Media { border-left-color: var(--warn); background: #fffdf2; }
 
+        /* BANNER ORDINI PRIORITÀ */
+        #order-banner { background: #fff1f0; padding: 15px 2rem; border-bottom: 3px solid var(--danger); display: none; }
+        .order-card { background: white; padding: 12px 18px; border-radius: 12px; border-left: 6px solid var(--danger); margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .order-card.Media { border-left-color: var(--warn); }
+        .order-info b { color: var(--danger); text-transform: uppercase; font-size: 11px; display: block; }
+        .order-info p { margin: 4px 0 0; font-size: 14px; font-weight: 600; }
+
+        /* LAYOUT GENERAL */
         .container { max-width: 1300px; margin: 25px auto; padding: 0 15px; }
-        .card { background: white; border-radius: 16px; border: 1px solid #cfd8dc; box-shadow: 0 8px 25px rgba(0,0,0,0.05); overflow: hidden; margin-bottom: 25px; }
+        .card { background: white; border-radius: 16px; border: 1px solid #cfd8dc; box-shadow: 0 8px 30px rgba(0,0,0,0.05); overflow: hidden; margin-bottom: 30px; }
         .toolbar { display: flex; justify-content: space-between; align-items: center; padding: 1.5rem; background: #fff; border-bottom: 1px solid #eee; flex-wrap:wrap; gap:15px; }
         
         table { width: 100%; border-collapse: collapse; }
-        th { background: #f8fafb; padding: 15px; text-align: left; font-size: 11px; color: #546e7a; text-transform: uppercase; }
+        th { background: #f8fafb; padding: 15px; text-align: left; font-size: 11px; color: #546e7a; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid #eee; }
         td { padding: 15px; border-bottom: 1px solid #f0f3f5; font-size: 14px; }
         
-        .btn { padding: 12px 20px; border-radius: 10px; border: none; cursor: pointer; font-weight: 700; font-size: 11px; display: inline-flex; align-items: center; gap: 8px; text-transform: uppercase; }
+        .btn { padding: 12px 22px; border-radius: 12px; border: none; cursor: pointer; font-weight: 700; font-size: 11px; display: inline-flex; align-items: center; gap: 8px; text-transform: uppercase; transition: 0.3s; }
         .btn-p { background: var(--p); color: white; }
-        .btn-blue { background: #1565c0; color: white; }
+        .btn-blue { background: var(--admin); color: white; }
         .btn-danger { background: var(--danger); color: white; }
-        
-        .modal-ov { display: none; position: fixed; inset: 0; background: rgba(0, 33, 27, 0.85); z-index: 1000; justify-content: center; align-items: center; backdrop-filter: blur(8px); padding: 15px; }
+        .btn-green { background: #2e7d32; color: white; }
+        .btn-ghost { background: #f1f3f4; color: #455a64; border: 1px solid #dde1e3; }
+        .btn:hover { transform: translateY(-2px); opacity: 0.9; }
+
+        /* MODALI */
+        .modal-ov { display: none; position: fixed; inset: 0; background: rgba(0, 31, 24, 0.85); z-index: 2000; justify-content: center; align-items: center; backdrop-filter: blur(10px); padding: 15px; }
         .modal-ov.open { display: flex; }
-        .modal { background: white; border-radius: 24px; width: 100%; max-width: 1000px; padding: 2.5rem; max-height: 92vh; overflow-y: auto; position: relative; }
-        .close-x { position: absolute; top: 20px; right: 25px; font-size: 35px; cursor: pointer; color: #ccc; }
+        .modal { background: white; border-radius: 24px; width: 100%; max-width: 1000px; padding: 2.5rem; max-height: 90vh; overflow-y: auto; position: relative; box-shadow: 0 30px 60px rgba(0,0,0,0.4); }
+        .close-x { position: absolute; top: 20px; right: 25px; font-size: 40px; cursor: pointer; color: #ccc; line-height: 1; }
         
-        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; }
-        .fg label { display: block; font-size: 11px; font-weight: 800; margin-bottom: 6px; color: var(--p); text-transform: uppercase; }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; }
+        .fg label { display: block; font-size: 10px; font-weight: 800; margin-bottom: 6px; color: var(--p); text-transform: uppercase; letter-spacing: 1px; }
         .fg input, .fg select, .fg textarea { width: 100%; padding: 14px; border: 1.5px solid #e0e6e9; border-radius: 12px; font-size: 15px; font-family: inherit; box-sizing: border-box; }
         
-        .photo-input { border: 2.5px dashed #cfd8dc; border-radius: 16px; padding: 15px; text-align: center; cursor: pointer; background: #fafbfc; min-height: 80px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        .photo-input img { max-height: 120px; border-radius: 8px; }
-        .mag-img { width: 60px; height: 60px; object-fit: cover; border-radius: 10px; }
+        .photo-input { border: 2.5px dashed #cfd8dc; border-radius: 16px; padding: 15px; text-align: center; cursor: pointer; background: #fafbfc; min-height: 80px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+        .photo-input img { max-height: 140px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .mag-img { width: 60px; height: 60px; object-fit: cover; border-radius: 10px; border: 1px solid #ddd; }
+        
+        .weather-display { background: #e0f2f1; padding: 15px; border-radius: 12px; margin-top: 10px; font-size: 13px; border: 1px solid #80cbc4; border-left: 5px solid var(--s); }
 
         #lock-screen { position:fixed; inset:0; background:white; z-index:9999; display:none; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:20px; }
     </style>
 </head>
 <body>
 
-<div id="lock-screen" style="display:none;">
-    <h1 style="color:var(--p); font-size:45px; margin-bottom:10px;">GAVINA COMMANDER</h1>
+<!-- SCHERMATA ACCESSO -->
+<div id="lock-screen">
+    <div class="logo-circle" style="width:80px; height:80px; font-size:40px; margin-bottom:20px;">G</div>
+    <h1 style="color:var(--p); font-size:45px; margin:0;">GAVINA</h1>
+    <p style="color:#777; margin-bottom:30px;">VILLAGE COMMANDER SYSTEM</p>
     <div id="lock-content">
-        <input type="text" id="reg-nome" placeholder="NAME" style="padding:15px; border:2px solid var(--p); border-radius:12px; width:300px; text-align:center; font-size:18px;">
+        <input type="text" id="reg-nome" placeholder="NOME / NOMBRE / NAME" style="padding:15px; border:2px solid var(--p); border-radius:14px; width:300px; text-align:center; font-size:18px; box-shadow:0 5px 15px rgba(0,0,0,0.05);">
         <br><br>
-        <button class="btn btn-p" onclick="richiediAccesso()">AUTORIZZA / AUTHORIZE</button>
+        <button class="btn btn-p" style="padding:15px 40px; font-size:14px;" onclick="richiediAccesso()">AUTORIZZA / AUTHORIZE</button>
     </div>
 </div>
 
 <header>
-    <div style="display:flex; align-items:center; gap:15px;">
-        <div style="background:white; color:var(--p); width:35px; height:35px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:900;">G</div>
-        <div style="font-size:18px; font-weight:800;">COMMANDER 2.23</div>
+    <div class="logo-box">
+        <div class="logo-circle">G</div>
+        <div style="line-height:1.1;">
+            <div style="font-size:20px; font-weight:800; letter-spacing:1px;">GAVINA</div>
+            <div style="font-size:10px; opacity:0.8; letter-spacing:2px;">COMMANDER 2.25</div>
+        </div>
     </div>
-    <div style="display:flex; align-items:center;">
+    <div style="display:flex; align-items:center; gap:20px;">
         <div class="lang-picker">
             <span class="flag active" id="flag-it" onclick="setLang('it')">🇮🇹</span>
             <span class="flag" id="flag-es" onclick="setLang('es')">🇪🇸</span>
             <span class="flag" id="flag-en" onclick="setLang('en')">🇬🇧</span>
         </div>
-        <div id="dot" style="width:10px; height:10px; border-radius:50%; background:#69f0ae;"></div>
+        <div style="font-size:11px; display:flex; align-items:center; gap:8px; background:rgba(255,255,255,0.1); padding:8px 15px; border-radius:30px;">
+            <div id="dot" style="width:10px; height:10px; border-radius:50%; background:#ff5252;"></div>
+            <span id="st-text" style="font-weight:700;">SYNC...</span>
+        </div>
     </div>
 </header>
 
-<!-- BANNER ORDINI SEMPRE VISIBILE -->
+<!-- BANNER ORDINI (VISIBILE A TUTTI) -->
 <div id="order-banner">
     <div style="font-size:10px; font-weight:900; color:var(--danger); margin-bottom:10px; text-transform:uppercase;" data-t="h-priority">⚠️ Priorità Urgenti / Urgencias</div>
     <div id="order-list"></div>
@@ -88,7 +112,7 @@
 
 <nav class="tabs">
     <div class="tab active" data-t="t-reg" onclick="swTab('reg', this)">Registro</div>
-    <div class="tab admin-only" data-t="t-ord" onclick="swTab('ord', this)" style="color:var(--danger);">📢 Ordini</div>
+    <div class="tab admin-only" data-t="t-ord" onclick="swTab('ord', this)" style="color:var(--danger);">📢 Comandi</div>
     <div class="tab admin-only" data-t="t-mag" onclick="swTab('mag', this)">Magazzino</div>
     <div class="tab admin-only" data-t="t-rep" onclick="swTab('rep', this)">Esportazione</div>
     <div class="tab admin-only" data-t="t-acc" onclick="swTab('acc', this)">🔐 Accessi</div>
@@ -98,10 +122,10 @@
     <!-- REGISTRO INTERVENTI -->
     <div id="v-reg" class="view">
         <div class="toolbar">
-            <h2 data-t="h-reg">Lavori Eseguiti</h2>
-            <div style="display:flex; gap:10px;">
-                <button class="btn btn-blue admin-only" data-t="b-word" onclick="openBulkModal()">Word Report</button>
-                <button class="btn btn-p" data-t="b-new" onclick="openM()">+ Nuovo</button>
+            <h2 data-t="h-reg">Interventi Eseguiti</h2>
+            <div style="display:flex; gap:12px;">
+                <button class="btn btn-blue admin-only" data-t="b-word" onclick="openBulkModal()">📅 Report Word Pro</button>
+                <button class="btn btn-p" data-t="b-new" onclick="openM()">+ Nuovo Intervento</button>
             </div>
         </div>
         <div class="card">
@@ -114,63 +138,97 @@
 
     <!-- COMANDI / ORDINI (SOLO ADMIN) -->
     <div id="v-ord" class="view admin-only" style="display:none;">
-        <div class="toolbar"><h2>📢 Invia Ordini al Team</h2></div>
-        <div class="card" style="padding:2rem;">
+        <div class="toolbar"><h2 data-t="h-ord-title">📢 Invia Nuovo Comando al Team</h2></div>
+        <div class="card" style="padding:2.5rem;">
             <div class="form-grid">
-                <div class="fg"><label>Titolo Ordine</label><input type="text" id="o-titolo" placeholder="es: Riparazione Condizionatore"></div>
-                <div class="fg"><label>Priorità</label><select id="o-prio"><option value="Alta">ALTA (Rosso)</option><option value="Media">Media (Giallo)</option></select></div>
-                <div class="fg" style="grid-column: span 2;"><label>Descrizione Dettagliata</label><textarea id="o-desc" rows="2"></textarea></div>
+                <div class="fg"><label>Titolo Ordine</label><input type="text" id="o-titolo" placeholder="es: Riparazione Urgente Tenda 5"></div>
+                <div class="fg"><label>Priorità</label><select id="o-prio"><option value="Alta">ALTA ( Rosso )</option><option value="Media">Media ( Giallo )</option></select></div>
+                <div class="fg" style="grid-column: span 2;"><label>Cosa bisogna fare?</label><textarea id="o-desc" rows="2"></textarea></div>
             </div>
-            <button class="btn btn-danger" style="margin-top:15px; width:100%; padding:15px;" onclick="inviaOrdine()">🚀 INVIA COMANDO IMMEDIATO</button>
+            <button class="btn btn-danger" style="margin-top:20px; width:100%; padding:18px; font-size:14px; box-shadow:0 10px 20px rgba(211,47,47,0.2);" onclick="inviaOrdine()">🚀 LANCIA ORDINE AL TEAM</button>
         </div>
         <div class="card">
-            <table><thead><tr><th>Data</th><th>Ordine</th><th>Stato</th><th>Azione</th></tr></thead><tbody id="tbodyOrd"></tbody></table>
+            <div class="toolbar"><h3>Ordini Attivi</h3></div>
+            <table><thead><tr><th>Inviato</th><th>Titolo</th><th>Priorità</th><th>Gestione</th></tr></thead><tbody id="tbodyOrd"></tbody></table>
         </div>
     </div>
 
     <!-- MAGAZZINO -->
     <div id="v-mag" class="view admin-only" style="display:none;">
-        <div class="toolbar"><h2 data-t="h-mag">Giacenze</h2><button class="btn btn-p" onclick="openMM()">+ Aggiungi</button></div>
-        <div class="card"><table><thead><tr><th>Foto</th><th>Articolo</th><th>Q.tà</th><th>Azione</th></tr></thead><tbody id="tbodyM"></tbody></table></div>
+        <div class="toolbar"><h2 data-t="h-mag">Inventario</h2><button class="btn btn-p" onclick="openMM()">+ Aggiungi Materiale</button></div>
+        <div class="card"><table><thead><tr><th data-t="th-img">Foto</th><th data-t="th-art">Nome</th><th data-t="th-qty">Stock</th><th>Azione</th></tr></thead><tbody id="tbodyM"></tbody></table></div>
     </div>
 
     <!-- ESPORTAZIONE -->
     <div id="v-rep" class="view admin-only" style="display:none;">
-        <div class="card" style="padding:5rem; text-align:center;"><button class="btn btn-green" style="padding:15px 40px;" onclick="esportaExcelCompleto()">📊 EXCEL CON FOTO</button></div>
+        <div class="card" style="padding:6rem; text-align:center;">
+            <h3 data-t="h-excel">Backup Database Completo con Immagini</h3>
+            <button class="btn btn-green" style="padding:15px 45px; font-size:15px;" onclick="esportaExcelCompleto()">📊 SCARICA EXCEL CON FOTO</button>
+        </div>
     </div>
 
     <!-- ACCESSI -->
-    <div id="v-acc" class="view admin-only" style="display:none;"><div class="card"><table><thead><tr><th>Nome</th><th>Stato</th><th>Gestione</th></tr></thead><tbody id="tbodyAcc"></tbody></table></div></div>
+    <div id="v-acc" class="view admin-only" style="display:none;">
+        <div class="toolbar"><h2>Gestione Dispositivi</h2></div>
+        <div class="card"><table><thead><tr><th>Utente</th><th>Device ID</th><th>Stato</th><th>Azione</th></tr></thead><tbody id="tbodyAcc"></tbody></table></div>
+    </div>
 </div>
 
-<!-- MODALE SCHEDA TECNICA -->
+<!-- MODALE SCHEDA INTERVENTO COMPLETA -->
 <div class="modal-ov" id="modI">
     <div class="modal">
         <span class="close-x" onclick="closeAll()">&times;</span>
-        <h2 id="mTitle" style="text-align:center; color:var(--p);">GAVINA TECHNICAL SHEET</h2>
+        <h2 id="mTitle" style="text-align:center; color:var(--p); font-size:28px;">SCHEDA TECNICA GAVINA</h2>
         <input type="hidden" id="f-id">
         <div class="form-grid">
             <div class="fg"><label data-t="l-date">Data</label><input type="date" id="f-data"></div>
-            <div class="fg"><label data-t="l-meteo">Meteo</label>
-                <div style="display:flex; gap:5px;"><input type="text" id="f-citta" value="Mont-roig del Camp"><button class="btn btn-ghost" onclick="getWeather()">METEO</button></div>
+            <div class="fg"><label data-t="l-meteo">Meteo Dettagliato</label>
+                <div style="display:flex; gap:5px;"><input type="text" id="f-citta" value="Mont-roig del Camp"><button class="btn btn-ghost" onclick="getWeather()">GO</button></div>
                 <div id="wInfo" class="weather-display" style="display:none;"></div>
                 <input type="hidden" id="f-meteo">
             </div>
             <div class="fg"><label data-t="l-sup">Supervisore</label><input type="text" id="f-sup"></div>
             <div class="fg"><label data-t="l-res">Responsabile</label><input type="text" id="f-assign"></div>
-            <div class="fg"><label data-t="l-op">Operaio</label><input type="text" id="f-op"></div>
-            <div class="fg"><label data-t="l-typ">Alloggio</label><select id="f-bung"></select></div>
-            <div class="fg"><label data-t="l-area">Unità / Area</label><input type="text" id="f-area"></div>
-            <div class="fg"><label data-t="l-mat">Materiale</label><select id="f-mat-sel"></select></div>
-            <div class="fg" style="grid-column: span 3;"><label data-t="l-des">Descrizione Lavori</label><textarea id="f-desc" rows="3"></textarea></div>
-            <div class="fg"><label data-t="l-fo">Foto Operaio</label><div class="photo-input" onclick="document.getElementById('i-o').click()"><input type="file" id="i-o" accept="image/*" capture="user" hidden onchange="hPhoto(this,'o')"><div id="pr-o">🤳</div></div></div>
-            <div class="fg"><label data-t="l-fp">Foto Inizio</label><div class="photo-input" onclick="document.getElementById('i-p').click()"><input type="file" id="i-p" accept="image/*" capture="environment" hidden onchange="hPhoto(this,'p')"><div id="pr-p">📷</div></div></div>
-            <div class="fg"><label data-t="l-fd">Foto Fine</label><div class="photo-input" onclick="document.getElementById('i-d').click()"><input type="file" id="i-d" accept="image/*" capture="environment" hidden onchange="hPhoto(this,'d')"><div id="pr-d">📸</div></div></div>
-            <div class="fg" style="grid-column: span 3;"><label data-t="l-sgn">Firma</label><canvas id="cvF" width="800" height="130" style="width:100%; border:1.5px solid #ddd; background:#fff; border-radius:12px; touch-action:none;"></canvas></div>
+            <div class="fg"><label data-t="l-op">Operaio Esecutore</label><input type="text" id="f-op"></div>
+            <div class="fg"><label data-t="l-typ">Alloggio / Zona</label><select id="f-bung"></select></div>
+            <div class="fg"><label data-t="l-area">Unità / Numero</label><input type="text" id="f-area"></div>
+            <div class="fg"><label data-t="l-mat">Articolo Usato</label><select id="f-mat-sel"></select></div>
+            
+            <div class="fg" style="grid-column: span 3;"><label data-t="l-des">Descrizione dei Lavori Svolti</label><textarea id="f-desc" rows="4"></textarea></div>
+
+            <div class="fg">
+                <label data-t="l-fo">Foto Operaio</label>
+                <div class="photo-input" onclick="document.getElementById('i-o').click()">
+                    <input type="file" id="i-o" accept="image/*" capture="user" hidden onchange="hPhoto(this,'o')">
+                    <div id="pr-o">🤳 Scatta</div>
+                </div>
+            </div>
+            <div class="fg">
+                <label data-t="l-fp">Foto Inizio</label>
+                <div class="photo-input" onclick="document.getElementById('i-p').click()">
+                    <input type="file" id="i-p" accept="image/*" capture="environment" hidden onchange="hPhoto(this,'p')">
+                    <div id="pr-p">📷 Foto</div>
+                </div>
+            </div>
+            <div class="fg">
+                <label data-t="l-fd">Foto Fine</label>
+                <div class="photo-input" onclick="document.getElementById('i-d').click()">
+                    <input type="file" id="i-d" accept="image/*" capture="environment" hidden onchange="hPhoto(this,'d')">
+                    <div id="pr-d">📸 Foto</div>
+                </div>
+            </div>
+            
+            <div class="fg" style="grid-column: span 3;"><label data-t="l-sgn">Firma Responsabile</label><canvas id="cvF" width="800" height="130" style="width:100%; border:1.5px solid #ddd; background:#fff; border-radius:12px; touch-action:none;"></canvas></div>
         </div>
-        <button class="btn btn-p" style="width:100%; margin-top:20px; padding:18px;" data-t="b-save" onclick="saveI()">💾 SALVA / GUARDAR / SAVE</button>
+        <button class="btn btn-p" style="width:100%; margin-top:25px; padding:18px; font-size:14px; box-shadow:0 10px 20px rgba(0,77,64,0.2);" onclick="saveI()">💾 SALVA E SINCRONIZZA NEL CLOUD GAVINA</button>
     </div>
 </div>
+
+<!-- MODALE MATERIALE -->
+<div class="modal-ov" id="modM"><div class="modal" style="max-width:400px;"><span class="close-x" onclick="closeAll()">&times;</span><h2 data-t="m-mat">Nuovo Articolo</h2><div class="fg"><label>Articolo</label><input type="text" id="m-nome"></div><div class="fg"><label>Stock</label><input type="number" id="m-giac"></div><div class="fg"><label>Prezzo</label><input type="number" id="m-prez" step="0.01"></div><div class="fg"><label>Foto Prodotto</label><div class="photo-input" onclick="document.getElementById('i-m').click()"><input type="file" id="i-m" accept="image/*" capture="environment" hidden onchange="hPhoto(this,'m')"><div id="pr-m">📸 Foto</div></div></div><button class="btn btn-p" style="width:100%; margin-top:20px;" onclick="saveM()">💾 SALVA</button></div></div>
+
+<!-- MODALE WORD -->
+<div class="modal-ov" id="modBulk"><div class="modal" style="max-width:550px;"><span class="close-x" onclick="closeAll()">&times;</span><h3>Esporta Report Word Professionale</h3><p style="font-size:12px; color:#666;">Scrivi una breve relazione introduttiva:</p><textarea id="bulk-notes" style="width:100%; height:120px; margin-top:10px; padding:14px; border-radius:12px; border:1px solid #ddd;"></textarea><button class="btn btn-blue" style="width:100%; margin-top:20px; padding:18px;" onclick="esportaWordPro()">📝 GENERA DOCUMENTO WORD (.doc)</button></div></div>
 
 <script>
 const URL_SB = 'https://ukzconegwpoaculadefx.supabase.co';
@@ -178,28 +236,31 @@ const KEY_SB = 'sb_publishable_dS8SzPIks90Yd1ISjsXQFQ_T8VtusA1';
 
 const LAN = {
     it: {
-        't-reg': 'Registro', 't-ord': 'Ordini', 't-mag': 'Magazzino', 't-rep': 'Backup', 't-acc': 'Acc.',
-        'h-priority': '⚠️ Ordini Prioritari Team', 'h-reg': 'Lavori Cantieri', 'b-word': 'Report Word', 'b-new': 'Nuovo',
-        'th-date': 'Data', 'th-bung': 'Alloggio', 'th-op': 'Operaio', 'h-mag': 'Magazzino',
-        'l-date': 'Data', 'l-meteo': 'Meteo', 'l-sup': 'Supervisore', 'l-res': 'Responsabile', 'l-op': 'Operaio',
-        'l-typ': 'Tipologia', 'l-area': 'Unità', 'l-mat': 'Materiale', 'l-des': 'Lavori',
-        'l-fo': 'Foto Operaio', 'l-fp': 'Inizio', 'l-fd': 'Fine', 'l-sgn': 'Firma', 'b-save': 'Salva Tutto'
+        't-reg': 'Registro', 't-ord': 'Comandi', 't-mag': 'Magazzino', 't-rep': 'Backup', 't-acc': 'Acc.',
+        'h-priority': '⚠️ Comandi Prioritari dall\'Admin', 'h-reg': 'Registro Lavori Eseguiti', 'b-new': 'Nuovo Lavoro', 'b-word': 'Report Word',
+        'th-date': 'Data', 'th-bung': 'Alloggio', 'th-op': 'Operaio', 'h-mag': 'Inventario Magazzino', 'th-img': 'Foto', 'th-art': 'Articolo', 'th-qty': 'Giac.',
+        'l-date': 'Data', 'l-meteo': 'Meteo dettagliato', 'l-sup': 'Supervisore', 'l-res': 'Responsabile', 'l-op': 'Operaio',
+        'l-typ': 'Tipologia Alloggio', 'l-area': 'Unità / Numero', 'l-mat': 'Articolo Usato', 'l-des': 'Dettagli Lavori',
+        'l-fo': 'Foto Operaio', 'l-fp': 'Foto Inizio', 'l-fd': 'Foto Fine', 'l-sgn': 'Firma Responsabile',
+        'b-save': 'Salva e Invia al Cloud', 'm-title': 'Scheda Tecnica Gavina', 'm-mat': 'Nuovo Articolo Magazzino', 'h-excel': 'Download Backup Excel con Foto'
     },
     es: {
-        't-reg': 'Registro', 't-ord': 'Comandos', 't-mag': 'Almacén', 't-rep': 'Backup', 't-acc': 'Acc.',
-        'h-priority': '⚠️ Órdenes Prioritarias', 'h-reg': 'Fichas Trabajo', 'b-word': 'Reporte Word', 'b-new': 'Nuevo',
-        'th-date': 'Fecha', 'th-bung': 'Vivienda', 'th-op': 'Operario', 'h-mag': 'Inventario',
-        'l-date': 'Fecha', 'l-meteo': 'Clima', 'l-sup': 'Supervisor', 'l-res': 'Responsabile', 'l-op': 'Operario',
-        'l-typ': 'Tipo', 'l-area': 'Unidad', 'l-mat': 'Material', 'l-des': 'Trabajos',
-        'l-fo': 'Foto Operario', 'l-fp': 'Inicio', 'l-fd': 'Fin', 'l-sgn': 'Firma', 'b-save': 'Guardar'
+        't-reg': 'Registro', 't-ord': 'Comandos', 't-mag': 'Almacén', 't-rep': 'Copia', 't-acc': 'Acc.',
+        'h-priority': '⚠️ Órdenes Prioritarias del Admin', 'h-reg': 'Registro Trabajos Realizados', 'b-new': 'Nuevo Trabajo', 'b-word': 'Informe Word',
+        'th-date': 'Fecha', 'th-bung': 'Vivienda', 'th-op': 'Operario', 'h-mag': 'Inventario Almacén', 'th-img': 'Foto', 'th-art': 'Artículo', 'th-qty': 'Stock',
+        'l-date': 'Fecha', 'l-meteo': 'Clima detallado', 'l-sup': 'Supervisor', 'l-res': 'Responsable', 'l-op': 'Operario',
+        'l-typ': 'Tipo de Alojamiento', 'l-area': 'Unidad / Zona', 'l-mat': 'Material Usado', 'l-des': 'Detalles Trabajos',
+        'l-fo': 'Foto Operario', 'l-fp': 'Foto Inicio', 'l-fd': 'Foto Fin', 'l-sgn': 'Firma Responsable',
+        'b-save': 'Guardar y Sincronizar', 'm-title': 'Ficha Técnica Gavina', 'm-mat': 'Nuevo Artículo', 'h-excel': 'Descargar Backup Excel con Fotos'
     },
     en: {
-        't-reg': 'Log', 't-ord': 'Orders', 't-mag': 'Warehouse', 't-rep': 'Backup', 't-acc': 'Acc.',
-        'h-priority': '⚠️ Urgent Job Orders', 'h-reg': 'Work Logs', 'b-word': 'Word Export', 'b-new': 'New',
-        'th-date': 'Date', 'th-bung': 'Housing', 'th-op': 'Worker', 'h-mag': 'Stock',
-        'l-date': 'Date', 'l-meteo': 'Weather', 'l-sup': 'Supervisor', 'l-res': 'Manager', 'l-op': 'Worker',
-        'l-typ': 'Type', 'l-area': 'Unit', 'l-mat': 'Material', 'l-des': 'Work',
-        'l-fo': 'Worker Photo', 'l-fp': 'Start', 'l-fd': 'End', 'l-sgn': 'Signature', 'b-save': 'Save'
+        't-reg': 'Registry', 't-ord': 'Command', 't-mag': 'Warehouse', 't-rep': 'Backup', 't-acc': 'Acc.',
+        'h-priority': '⚠️ Urgent Orders from Admin', 'h-reg': 'Work Registry Logs', 'b-new': 'New Job', 'b-word': 'Word Export',
+        'th-date': 'Date', 'th-bung': 'Unit', 'th-op': 'Worker', 'h-mag': 'Warehouse Inventory', 'th-img': 'Photo', 'th-art': 'Item', 'th-qty': 'Qty',
+        'l-date': 'Date', 'l-meteo': 'Weather info', 'l-sup': 'Supervisor', 'l-res': 'Manager', 'l-op': 'Worker',
+        'l-typ': 'Housing Type', 'l-area': 'Unit / Area', 'l-mat': 'Material Used', 'l-des': 'Work Details',
+        'l-fo': 'Worker Photo', 'l-fp': 'Photo Start', 'l-fd': 'Photo End', 'l-sgn': 'Manager Signature',
+        'b-save': 'Save and Sync Cloud', 'm-title': 'Gavina Technical Sheet', 'm-mat': 'New Warehouse Item', 'h-excel': 'Download Excel with Photos'
     }
 };
 
@@ -213,43 +274,61 @@ function setLang(l) {
     renderAccommodations();
 }
 
+function renderAccommodations() {
+    const cats = {
+        it: ['TENDE','MOBILHOMES','BUNGALOWS','TINY HOMES','BEACH CABINS','PIAZZOLE'],
+        es: ['TIENDAS','MOBILHOMES','BUNGALOWS','TINY HOMES','BEACH CABINS','PARCELAS'],
+        en: ['TENTS','MOBILHOMES','BUNGALOWS','TINY HOMES','BEACH CABINS','PLOTS']
+    };
+    const c = cats[curL];
+    document.getElementById('f-bung').innerHTML = `<option value="">--</option>
+        <optgroup label="${c[0]}"><option value="Junior">Junior</option><option value="Kenya">Kenya</option><option value="Luna">Luna</option><option value="Victoria">Victoria</option><option value="Sol">Sol</option><option value="Mayotte">Mayotte</option><option value="Safari+">Safari+</option></optgroup>
+        <optgroup label="${c[1]}"><option value="Tarraco 6">Tarraco 6</option><option value="Tarraco 4">Tarraco 4</option><option value="Tarraco 2">Tarraco 2</option><option value="Costa">Costa</option></optgroup>
+        <optgroup label="${c[2]}"><option value="Dune">Dune</option><option value="Beach">Beach</option></optgroup>
+        <optgroup label="${c[3]}"><option value="Tiny Home">Tiny Home</option><option value="Tiny Natura">Tiny Natura</option></optgroup>
+        <optgroup label="${c[4]}"><option value="Beach Cabins">Beach Cabins</option><option value="Vista Mar">Vista Mar</option><option value="2ª Linea">2ª Linea</option></optgroup>
+        <optgroup label="${c[5]}"><option value="Parcela 1ª">1ª Linea</option><option value="Parcela 2ª">2ª Linea</option><option value="Parcela 3ª">3ª Linea</option></optgroup>`;
+}
+
 async function sync() {
+    if(!db) return;
     const {data:i} = await db.from('interventi').select('*').order('data',{ascending:false});
     const {data:m} = await db.from('materiali').select('*').order('nome_articolo');
     const {data:a} = await db.from('accessi').select('*').order('data_richiesta',{ascending:false});
-    const {data:o} = await db.from('ordini').select('*').eq('stato','Attivo').order('data_ordine',{ascending:false});
+    const {data:o} = await db.from('ordini').select('*').eq('stato','Attivo').order('priorita',{ascending:true});
     listI=i||[]; listM=m||[]; listA=a||[]; listOrd=o||[]; render();
+    document.getElementById('dot').style.background = '#69f0ae'; document.getElementById('st-text').textContent = 'ONLINE';
 }
 
 function render() {
     document.getElementById('tbodyI').innerHTML = listI.map(i => `<tr><td><input type="checkbox" class="sel-row" value="${i.id}"></td><td>${i.data}</td><td><b>${i.bungalow}</b></td><td>${i.operatore}</td><td><button class="btn btn-ghost" onclick="editI('${i.id}')">✏️</button></td></tr>`).join('');
     document.getElementById('tbodyM').innerHTML = listM.map(m => `<tr><td>${m.foto_url?`<img src="${m.foto_url}" class="mag-img">`:'-'}</td><td><b>${m.nome_articolo}</b></td><td>${m.giacenza_attuale}</td><td><button class="btn" style="background:#ffcdd2" onclick="delM('${m.id}')">🗑️</button></td></tr>`).join('');
     
-    // RENDER ORDINI ATTIVI PER TUTTI
+    // ORDINI TEAM
     if(listOrd.length > 0) {
         document.getElementById('order-banner').style.display = 'block';
         document.getElementById('order-list').innerHTML = listOrd.map(o => `
             <div class="order-card ${o.priorita}">
-                <div><b>${o.priorita}:</b> ${o.titolo}<br><small>${o.descrizione}</small></div>
-                <button class="btn btn-blue" onclick="chiudiOrdine('${o.id}')">FATTO / OK</button>
+                <div class="order-info"><b>${o.priorita}</b><p>${o.titolo}: ${o.descrizione}</p></div>
+                <button class="btn btn-blue" onclick="chiudiOrdine('${o.id}')">OK / FATTO</button>
             </div>`).join('');
     } else { document.getElementById('order-banner').style.display='none'; }
     
-    // TABELLA ORDINI PER ADMIN
-    document.getElementById('tbodyOrd').innerHTML = listOrd.map(o => `<tr><td>${new Date(o.data_ordine).toLocaleDateString()}</td><td>${o.titolo}</td><td>${o.priorita}</td><td><button onclick="chiudiOrdine('${o.id}')">🗑️</button></td></tr>`).join('');
-    
-    document.getElementById('tbodyAcc').innerHTML = listA.map(a => `<tr><td>${a.nome_utente}</td><td>${a.stato}</td><td><button onclick="cambiaAcc('${a.id}','autorizzato')">✅</button></td></tr>`).join('');
+    document.getElementById('tbodyOrd').innerHTML = listOrd.map(o => `<tr><td>${o.priorita}</td><td><b>${o.titolo}</b></td><td>${o.stato}</td><td><button onclick="chiudiOrdine('${o.id}')">🗑️</button></td></tr>`).join('');
+    document.getElementById('tbodyAcc').innerHTML = listA.map(a => `<tr><td>${a.nome_utente}</td><td>${a.device_id}</td><td><b>${a.stato}</b></td><td><button onclick="cambiaAcc('${a.id}','autorizzato')">✅</button></td></tr>`).join('');
     document.getElementById('f-mat-sel').innerHTML = '<option value="">--</option>' + listM.map(m => `<option value="${m.nome_articolo}">${m.nome_articolo}</option>`).join('');
 }
 
+// --- FUNZIONI CORE ---
 async function inviaOrdine() {
-    const r = { titolo: document.getElementById('o-titolo').value, descrizione: document.getElementById('o-desc').value, priorita: document.getElementById('o-prio').value };
-    await db.from('ordini').insert([r]); sync();
+    const t = document.getElementById('o-titolo').value, d = document.getElementById('o-desc').value, p = document.getElementById('o-prio').value;
+    if(!t) return alert("Titolo!");
+    await db.from('ordini').insert([{ titolo: t, descrizione: d, priorita: p }]);
+    document.getElementById('o-titolo').value=''; document.getElementById('o-desc').value='';
+    sync();
 }
-
 async function chiudiOrdine(id) { await db.from('ordini').update({ stato: 'Chiuso' }).eq('id', id); sync(); }
 
-// --- LOGICAREGISTRO ---
 async function saveI() {
     const row = {
         data: document.getElementById('f-data').value, supervisore: document.getElementById('f-sup').value,
@@ -266,32 +345,85 @@ async function saveI() {
 function editI(id) {
     const r=listI.find(x=>x.id===id); document.getElementById('f-id').value=r.id; 
     document.getElementById('f-data').value=r.data; document.getElementById('f-sup').value=r.supervisore||'';
+    document.getElementById('f-assign').value=r.responsabile_assegnazione||''; document.getElementById('f-op').value=r.operatore||'';
+    document.getElementById('f-bung').value=r.bungalow; document.getElementById('f-area').value=r.area||''; document.getElementById('f-desc').value=r.descrizione;
     fotoO=r.foto_operaio_url; fotoP=r.foto_prima_url; fotoD=r.foto_dopo_url; firma=r.firma_url;
+    if(fotoO) document.getElementById('pr-o').innerHTML=`<img src="${fotoO}">`;
+    if(fotoP) document.getElementById('pr-p').innerHTML=`<img src="${fotoP}">`;
+    if(fotoD) document.getElementById('pr-d').innerHTML=`<img src="${fotoD}">`;
     document.getElementById('modI').classList.add('open'); initCv();
 }
 
-// --- EXPORT ---
-function esportaExcelCompleto() {
-    let html = `<html><body><table border="1"><tr><th>Data</th><th>Alloggio</th><th>Operaio</th><th>Foto Prima</th><th>Foto Dopo</th></tr>`;
-    listI.forEach(i => { html += `<tr><td>${i.data}</td><td>${i.bungalow}</td><td>${i.operatore}</td><td><img src="${i.foto_prima_url}" width="80"></td><td><img src="${i.foto_dopo_url}" width="80"></td></tr>`; });
-    html += `</table></body></html>`;
-    const b = new Blob([html], {type: 'application/vnd.ms-excel'});
-    const a = document.createElement('a'); a.href=URL.createObjectURL(b); a.download="Gavina_Commander_Backup.xls"; a.click();
+async function getWeather() {
+    const cit=document.getElementById('f-citta').value;
+    try {
+        const gR=await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${cit}`); const g=await gR.json();
+        const wR=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${g[0].lat}&longitude=${g[0].lon}&current_weather=true&daily=temperature_2m_max,temperature_2m_min,precipitation_sum&timezone=auto`);
+        const w=await wR.json(); const res = `Min: ${w.daily.temperature_2m_min[0]}°C | Max: ${w.daily.temperature_2m_max[0]}°C | Piogge: ${w.daily.precipitation_sum[0]}mm`;
+        document.getElementById('f-meteo').value=res; document.getElementById('wInfo').style.display='block'; document.getElementById('wInfo').innerHTML=`⛅ <b>METEO:</b> ${res}`;
+    } catch(e){ alert("Err."); }
 }
 
-// MISC
-function swTab(v,b) { document.querySelectorAll('.view').forEach(x=>x.style.display='none'); document.getElementById('v-'+v).style.display='block'; document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active')); b.classList.add('active'); }
+function hPhoto(input, tipo) {
+    const r=new FileReader(); r.onload=(e)=>{
+        const i=new Image(); i.onload=()=>{
+            const cv=document.createElement('canvas'); const s=450/i.width; cv.width=450; cv.height=i.height*s;
+            cv.getContext('2d').drawImage(i,0,0,450,cv.height); const res=cv.toDataURL('image/jpeg',0.5);
+            if(tipo==='o') fotoO=res; else if(tipo==='p') fotoP=res; else if(tipo==='d') fotoD=res; else fotoM=res;
+            document.getElementById('pr-'+tipo).innerHTML=`<img src="${res}">`;
+        }; i.src=e.target.result;
+    }; r.readAsDataURL(input.files[0]);
+}
+
+function initCv() {
+    const c=document.getElementById('cvF'); ctx=c.getContext('2d'); if(!document.getElementById('f-id').value) ctx.clearRect(0,0,c.width,c.height);
+    const p=(e)=>{ const r=c.getBoundingClientRect(); return { x:(e.clientX||(e.touches&&e.touches[0].clientX))-r.left, y:(e.clientY||(e.touches&&e.touches[0].clientY))-r.top }; };
+    c.onmousedown=(e)=>{ drw=true; ctx.beginPath(); ctx.moveTo(p(e).x,p(e).y); };
+    c.onmousemove=(e)=>{ if(!drw)return; e.preventDefault(); ctx.lineTo(p(e).x,p(e).y); ctx.stroke(); };
+    window.onmouseup=()=>{ if(drw){drw=false; firma=c.toDataURL();} };
+}
+
+function esportaExcelCompleto() {
+    let html = `<html><head><meta charset='utf-8'></head><body><table border="1"><tr style="background:#004d40; color:white;"><th>Data</th><th>Unità</th><th>Operaio</th><th>Supervisore</th><th>Foto Prima</th><th>Foto Dopo</th></tr>`;
+    listI.forEach(i => { html += `<tr><td>${i.data}</td><td>${i.bungalow}</td><td>${i.operatore}</td><td>${i.supervisore||'-'}</td><td><img src="${i.foto_prima_url}" width="100"></td><td><img src="${i.foto_dopo_url}" width="100"></td></tr>`; });
+    html += `</table></body></html>`;
+    const b = new Blob([html], {type: 'application/vnd.ms-excel'});
+    const a = document.createElement('a'); a.href=URL.createObjectURL(b); a.download="Gavina_Global_Backup.xls"; a.click();
+}
+
+function esportaWordPro() {
+    const ids=Array.from(document.querySelectorAll('.sel-row:checked')).map(x=>x.value); const list=listI.filter(x=>ids.includes(x.id)); 
+    let html = `<html><body><h1>GAVINA VILLAGE - REPORT</h1><p>${document.getElementById('bulk-notes').value}</p><hr>`;
+    list.forEach(i => {
+        html += `<div style='page-break-after:always;'><h2>${i.bungalow} - ${i.data}</h2><p>DESC: ${i.descrizione}</p>`;
+        if(i.foto_prima_url) html += `<p>BEFORE:<br><img src='${i.foto_prima_url}' width='450'></p>`;
+        if(i.foto_dopo_url) html += `<p>AFTER:<br><img src='${i.foto_dopo_url}' width='450'></p>`;
+        html += `</div><hr>`;
+    });
+    html += `</body></html>`;
+    const b = new Blob([html], {type: 'application/msword'});
+    const a = document.createElement('a'); a.href=URL.createObjectURL(b); a.download="Report_Word.doc"; a.click();
+}
+
+// MISC UI
+function openM() { document.getElementById('modI').classList.add('open'); initCv(); renderAccommodations(); }
+function openMM() { fotoM=null; document.getElementById('pr-m').innerHTML='📸'; document.getElementById('modM').classList.add('open'); }
+function openBulkModal() { document.getElementById('modBulk').classList.add('open'); }
 function closeAll() { document.querySelectorAll('.modal-ov').forEach(m=>m.classList.remove('open')); }
-function hPhoto(input, tipo) { const r=new FileReader(); r.onload=(e)=>{ const i=new Image(); i.onload=()=>{ const cv=document.createElement('canvas'); const s=450/i.width; cv.width=450; cv.height=i.height*s; cv.getContext('2d').drawImage(i,0,0,450,cv.height); const res=cv.toDataURL('image/jpeg',0.5); if(tipo==='o') fotoO=res; else if(tipo==='p') fotoP=res; else if(tipo==='d') fotoD=res; else fotoM=res; document.getElementById('pr-'+tipo).innerHTML=`<img src="${res}">`; }; i.src=e.target.result; }; r.readAsDataURL(input.files[0]); }
-function initCv() { const c=document.getElementById('cvF'); ctx=c.getContext('2d'); if(!document.getElementById('f-id').value) ctx.clearRect(0,0,c.width,c.height); const p=(e)=>{ const r=c.getBoundingClientRect(); return { x:(e.clientX||(e.touches&&e.touches[0].clientX))-r.left, y:(e.clientY||(e.touches&&e.touches[0].clientY))-r.top }; }; c.onmousedown=(e)=>{ drw=true; ctx.beginPath(); ctx.moveTo(p(e).x,p(e).y); }; c.onmousemove=(e)=>{ if(!drw)return; e.preventDefault(); ctx.lineTo(p(e).x,p(e).y); ctx.stroke(); }; window.onmouseup=()=>{ if(drw){drw=false; firma=c.toDataURL();} }; }
-function renderAccommodations() { /* Vedi precedenti */ }
-function openM() { document.getElementById('modI').classList.add('open'); initCv(); }
+function swTab(v,b) { document.querySelectorAll('.view').forEach(x=>x.style.display='none'); document.getElementById('v-'+v).style.display='block'; document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active')); b.classList.add('active'); if(v==='reg') sync(); }
+function selAll(cb) { document.querySelectorAll('.sel-row').forEach(x=>x.checked=cb.checked); }
 
 // AUTH
 let myID_ls = localStorage.getItem('gav_did'); 
-async function checkAccess() { if(localStorage.getItem('admin')==='true') { document.getElementById('lock-screen').style.display='none'; sync(); return; } document.getElementById('lock-screen').style.display='flex'; }
-async function richiediAccesso() { const nome=document.getElementById('reg-nome').value.toUpperCase(); if(nome==='ADMIN_PRO'){localStorage.setItem('admin','true'); location.reload();} }
-checkAccess();
+async function checkAccess() { 
+    if(localStorage.getItem('admin')==='true') { document.getElementById('lock-screen').style.display='none'; sync(); return; } 
+    const {data:ac} = await db.from('accessi').select('*').eq('device_id', localStorage.getItem('gav_did')).single();
+    if(ac && ac.stato === 'autorizzato') { document.getElementById('lock-screen').style.display='none'; sync(); }
+    else { document.getElementById('lock-screen').style.display='flex'; }
+}
+async function richiediAccesso() { const nome=document.getElementById('reg-nome').value.toUpperCase(); if(nome==='ADMIN_PRO'){localStorage.setItem('admin','true'); location.reload();} else { await db.from('accessi').upsert([{ device_id: localStorage.getItem('gav_did'), nome_utente: nome, stato: 'pendente' }]); location.reload(); } }
+
+setLang('it'); checkAccess(); setInterval(sync, 10000); // Sync automatico ogni 10 secondi per gli ordini
 </script>
 </body>
 </html>
