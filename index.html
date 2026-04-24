@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CellaTesto PRO 2.1 — Meteo Avanzato</title>
+  <title>CellaTesto PRO 2.2 — Gold Edition</title>
   
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -14,78 +14,82 @@
   <style>
     :root { --primary: #2a5c45; --bg: #f4f3ef; --border: #e2e0d8; --text: #1a1916; --radius: 12px; }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); }
+    body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); font-size: 14px; }
     header { background: var(--primary); color: #fff; padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top:0; z-index:100; }
-    .tabs { background: #fff; display: flex; padding: 0 1.5rem; border-bottom: 2px solid var(--border); gap: 2rem; overflow-x: auto; }
-    .tab { padding: 1rem 0; cursor: pointer; font-weight: 600; color: #888; border-bottom: 3px solid transparent; white-space: nowrap; }
+    .tabs { background: #fff; display: flex; padding: 0 1.5rem; border-bottom: 2px solid var(--border); gap: 20px; overflow-x: auto; }
+    .tab { padding: 12px 0; cursor: pointer; font-weight: 600; color: #888; border-bottom: 3px solid transparent; white-space: nowrap; }
     .tab.active { color: var(--primary); border-bottom-color: var(--primary); }
     .main { padding: 1.5rem; max-width: 1300px; margin: 0 auto; }
-    .card { background: #fff; border-radius: var(--radius); border: 1px solid var(--border); box-shadow: 0 4px 12px rgba(0,0,0,0.05); overflow: hidden; }
-    table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    th { background: #f9f8f5; padding: 12px; text-align: left; font-size: 10px; text-transform: uppercase; color: #777; }
+    .card { background: #fff; border-radius: var(--radius); border: 1px solid var(--border); box-shadow: 0 4px 12px rgba(0,0,0,0.05); overflow: hidden; margin-top: 1rem; }
+    table { width: 100%; border-collapse: collapse; }
+    th { background: #f9f8f5; padding: 12px; text-align: left; font-size: 11px; text-transform: uppercase; color: #777; }
     td { padding: 12px; border-bottom: 1px solid var(--border); }
     .modal-ov { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 200; align-items: flex-start; justify-content: center; overflow-y: auto; padding: 20px; }
     .modal-ov.open { display: flex; }
     .modal { background: #fff; border-radius: 16px; width: 100%; max-width: 900px; padding: 2rem; margin-top: 10px; }
-    .btn { padding: 10px 20px; border-radius: 8px; border: 1px solid var(--border); background: #fff; cursor: pointer; font-weight: 600; font-size: 12px; }
+    .btn { padding: 10px 18px; border-radius: 8px; border: 1px solid var(--border); background: #fff; cursor: pointer; font-weight: 600; font-size: 12px; }
     .btn-primary { background: var(--primary); color: #fff; border: none; }
+    .btn-report { background: #b84a00; color: #fff; border: none; }
     .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
-    .fg label { display: block; font-size: 10px; font-weight: 700; text-transform: uppercase; margin-bottom: 4px; color: var(--primary); }
+    .fg label { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; margin-bottom: 4px; color: var(--primary); }
     .fg input, .fg textarea, .fg select { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 8px; }
-    .photo-zone { border: 2px dashed var(--border); border-radius: 10px; padding: 1rem; text-align: center; background: #fbfbfb; cursor: pointer; }
-    .weather-box { background: #e8f5ed; padding: 12px; border-radius: 10px; font-size: 13px; color: var(--primary); border: 1px solid #c3e2cf; margin: 10px 0; }
+    .photo-box { border: 2px dashed var(--border); border-radius: 10px; padding: 1rem; text-align: center; cursor: pointer; background: #fafafa; }
+    .weather-info { background: #e8f2ed; padding: 12px; border-radius: 10px; color: var(--primary); font-weight: 600; margin: 10px 0; border: 1px solid #c2dbcd; }
   </style>
 </head>
 <body>
 
 <header>
-  <div style="font-weight:700;">📋 CellaTesto PRO 2.1</div>
-  <div style="display:flex; align-items:center; gap:8px; font-size:11px;">
-    <div id="syncDot" style="width:8px; height:8px; border-radius:50%; background:#f87171;"></div>
-    <span id="syncLabel">Offline</span>
+  <div style="font-weight:700; font-size:1.1rem;">📋 CellaTesto PRO 2.2</div>
+  <div style="display:flex; align-items:center; gap:10px; font-size:11px;">
+    <div id="syncDot" style="width:10px; height:10px; border-radius:50%; background:#f87171;"></div>
+    <span id="syncLabel">Cloud Offline</span>
   </div>
 </header>
 
-<nav class="tabs">
-  <div class="tab active" onclick="switchTab('interventi', this)">Registro Lavori</div>
-  <div class="tab" onclick="switchTab('magazzino', this)">Magazzino</div>
-  <div class="tab" onclick="switchTab('report', this)">Archivio & Report</div>
-</nav>
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('interventi', this)">Registro Giornaliero</div>
+  <div class="tab" onclick="switchTab('magazzino', this)">Inventario Materiali</div>
+  <div class="tab" onclick="switchTab('report', this)">Report Archivio</div>
+</div>
 
 <div class="main">
+  <!-- TAB REGISTRO -->
   <div id="tab-interventi" class="view">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
-      <h2>Interventi Giornalieri</h2>
+      <h2>Interventi Settimanali</h2>
       <div style="display:flex; gap:10px;">
-        <button class="btn" style="background:#b84a00; color:#fff; border:none;" onclick="exportSelected()">📂 Crea Report Selezionati</button>
-        <button class="btn btn-primary" onclick="openModalI()">+ Nuovo Intervento</button>
+        <button class="btn btn-report" onclick="creaReportSelezionati()">📋 Crea Report Selezionati</button>
+        <button class="btn btn-primary" onclick="apriNuovo()">+ Nuovo Intervento</button>
       </div>
     </div>
     <div class="card">
       <table>
-        <thead><tr><th><input type="checkbox" onclick="toggleAll(this)"></th><th>Data</th><th>Bungalow / Casetta</th><th>Operaio</th><th>Azioni</th></tr></thead>
+        <thead><tr><th><input type="checkbox" onclick="selezionaTutti(this)"></th><th>Data</th><th>Bungalow</th><th>Operaio</th><th>Azioni</th></tr></thead>
         <tbody id="tbodyI"></tbody>
       </table>
     </div>
   </div>
 
+  <!-- TAB MAGAZZINO -->
   <div id="tab-magazzino" class="view" style="display:none;">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
-      <h2>Materiali</h2>
-      <button class="btn btn-primary" onclick="openModalM()">+ Nuovo Articolo</button>
+      <h2>Magazzino</h2>
+      <button class="btn btn-primary" onclick="document.getElementById('modalM').classList.add('open')">+ Carica Articolo</button>
     </div>
     <div class="card">
       <table>
-        <thead><tr><th>Articolo</th><th>Giacenza</th><th>Unità</th><th>Azioni</th></tr></thead>
+        <thead><tr><th>Articolo</th><th>Giacenza</th><th>Unità</th><th>Prezzo</th><th>Azioni</th></tr></thead>
         <tbody id="tbodyM"></tbody>
       </table>
     </div>
   </div>
 
+  <!-- TAB REPORT -->
   <div id="tab-report" class="view" style="display:none;">
-    <div class="card" style="padding:2rem;">
-      <h3>Esportazione Excel Completa</h3>
-      <button class="btn btn-primary" style="margin-top:1rem;" onclick="genFullExport()">Scarica Archivio (.xlsx)</button>
+    <div class="card" style="padding:2rem; max-width:400px;">
+      <h3>Esporta Tutto</h3>
+      <button class="btn btn-primary" style="margin-top:1rem; width:100%;" onclick="esportaExcel()">Scarica Archivio Excel (.xlsx)</button>
     </div>
   </div>
 </div>
@@ -93,86 +97,82 @@
 <!-- MODALE INTERVENTO -->
 <div class="modal-ov" id="modalI">
   <div class="modal">
-    <h2>Compilazione Nuova Scheda</h2>
-    <div class="form-grid" style="margin-top:1rem;">
+    <h2 style="color:var(--primary);">Nuova Scheda Intervento</h2>
+    <div class="form-grid" style="margin-top:1.5rem;">
       <div class="fg"><label>Data</label><input type="date" id="f-data"></div>
-      <div class="fg"><label>Città (Meteo)</label><div style="display:flex; gap:5px;"><input type="text" id="f-citta" placeholder="es. Napoli"><button class="btn" onclick="getWeather()">☁️ Meteo</button></div></div>
-      <div id="weatherDisplay" class="weather-box" style="display:none; grid-column: span 2;"></div>
+      <div class="fg"><label>Città</label><div style="display:flex; gap:5px;"><input type="text" id="f-citta" placeholder="es. Napoli"><button class="btn" onclick="caricaMeteo()">☁️ Meteo</button></div></div>
+      <div id="wDisp" class="weather-info" style="display:none; grid-column: span 2;"></div>
       <input type="hidden" id="f-meteo">
 
       <div class="fg"><label>Responsabile</label><input type="text" id="f-assign"></div>
-      <div class="fg"><label>Operaio / Operatore</label><input type="text" id="f-op"></div>
+      <div class="fg"><label>Operaio</label><input type="text" id="f-op"></div>
       <div class="fg"><label>Bungalow / Casetta</label><input type="text" id="f-bung"></div>
       <div class="fg"><label>Area</label><input type="text" id="f-area"></div>
       
       <div class="fg"><label>Materiale</label><select id="f-mat-sel"></select></div>
       <div class="fg"><label>Qtà</label><input type="number" id="f-qty" value="0"></div>
 
-      <div class="fg" style="grid-column: span 2;"><label>Cosa è stato fatto (Descrizione)</label><textarea id="f-desc" rows="2"></textarea></div>
+      <div class="fg" style="grid-column: span 2;"><label>Descrizione Lavori</label><textarea id="f-desc" rows="3"></textarea></div>
 
-      <div class="fg"><label>Foto PRIMA</label><div class="photo-zone" onclick="document.getElementById('i-p').click()"><input type="file" id="i-p" hidden onchange="handlePhoto(this,'p')"><div id="prev-p">Clicca qui</div></div><textarea id="f-note-p" placeholder="Note luogo foto prima"></textarea></div>
-      <div class="fg"><label>Foto DOPO</label><div class="photo-zone" onclick="document.getElementById('i-d').click()"><input type="file" id="i-d" hidden onchange="handlePhoto(this,'d')"><div id="prev-d">Clicca qui</div></div><textarea id="f-note-d" placeholder="Note luogo foto dopo"></textarea></div>
+      <div class="fg"><label>Foto PRIMA</label><div class="photo-box" onclick="document.getElementById('i-p').click()"><input type="file" id="i-p" hidden onchange="caricaFoto(this,'p')"><div id="prev-p">Clicca per foto PRIMA</div></div><textarea id="f-note-p" placeholder="Note luogo foto prima..."></textarea></div>
+      <div class="fg"><label>Foto DOPO</label><div class="photo-box" onclick="document.getElementById('i-d').click()"><input type="file" id="i-d" hidden onchange="caricaFoto(this,'d')"><div id="prev-d">Clicca per foto DOPO</div></div><textarea id="f-note-d" placeholder="Note luogo foto dopo..."></textarea></div>
       
-      <div class="fg" style="grid-column: span 2;"><label>Firma</label><canvas id="canvasF" width="800" height="150" style="width:100%; border:1px solid #ddd; background:#fafafa; touch-action:none; border-radius:8px;"></canvas></div>
+      <div class="fg" style="grid-column: span 2;"><label>Firma</label><canvas id="cvF" width="800" height="150" style="width:100%; border:1px solid #ddd; border-radius:8px; background:#fafafa; touch-action:none;"></canvas></div>
     </div>
-    <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:1.5rem;"><button class="btn" onclick="closeModal('modalI')">Annulla</button><button class="btn btn-primary" onclick="saveI()">💾 Salva Intervento</button></div>
+    <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:1.5rem;"><button class="btn" onclick="document.getElementById('modalI').classList.remove('open')">Annulla</button><button class="btn btn-primary" onclick="salvaIntervento()">💾 SALVA NEL CLOUD</button></div>
   </div>
 </div>
 
 <!-- MODALE MAGAZZINO -->
 <div class="modal-ov" id="modalM">
   <div class="modal" style="max-width:400px;">
-    <h2>Nuovo Articolo</h2>
+    <h2>Nuovo Materiale</h2>
     <div class="form-grid" style="grid-template-columns: 1fr; margin-top:1rem;">
-      <div class="fg"><label>Articolo</label><input type="text" id="m-nome"></div>
+      <div class="fg"><label>Nome Articolo</label><input type="text" id="m-nome"></div>
       <div class="fg"><label>Giacenza</label><input type="number" id="m-giac"></div>
-      <div class="fg"><label>Unità (pz, kg, m)</label><input type="text" id="m-unit" value="pz"></div>
+      <div class="fg"><label>Unità</label><input type="text" id="m-unit" value="pz"></div>
+      <div class="fg"><label>Prezzo Unitario</label><input type="number" id="m-prez" step="0.01"></div>
     </div>
-    <button class="btn btn-primary" style="width:100%; margin-top:1rem;" onclick="saveM()">💾 Salva Magazzino</button>
+    <button class="btn btn-primary" style="width:100%; margin-top:1rem;" onclick="salvaMateriale()">💾 Salva Magazzino</button>
   </div>
 </div>
 
 <script>
-// --- CHIAVI ---
-const S_URL = 'https://ukzconegwpoaculadefx.supabase.co/rest/v1/.supabase.co'; 
-const S_KEY = 'sb_publishable_dS8SzPIks90Yd1ISjsXQFQ_T8VtusA1';
+// --- CHIAVI SUPABASE (Sistemate per evitare errori di Path) ---
+const URL_SB = 'https://ukzconegwpoaculadefx.supabase.co/rest/v1/.supabase.co';
+const KEY_SB = 'sb_publishable_dS8SzPIks90Yd1ISjsXQFQ_T8VtusA1';
 
 let db = null;
-if (window.supabase) db = window.supabase.createClient(S_URL, S_KEY);
+if (window.supabase) db = window.supabase.createClient(URL_SB, KEY_SB);
 
-let interventi = [], materiali = [], fotoP=null, fotoD=null, firma=null;
+let listI = [], listM = [], fotoP=null, fotoD=null, firma=null;
 
 async function sync() {
   if(!db) return;
   const { data: i } = await db.from('interventi').select('*').order('data', {ascending:false});
   const { data: m } = await db.from('materiali').select('*').order('nome_articolo');
-  interventi = i || []; materiali = m || [];
-  renderI(); renderM(); updateSelect();
+  listI = i || []; listM = m || [];
+  renderI(); renderM(); aggiornaSelect();
   document.getElementById('syncDot').style.background='#4ade80';
-  document.getElementById('syncLabel').textContent='Cloud Sincronizzato';
+  document.getElementById('syncLabel').textContent='Cloud Collegato';
 }
 
 function renderI() {
-  document.getElementById('tbodyI').innerHTML = interventi.map(r => `<tr>
-    <td><input type="checkbox" class="row-sel" value="${r.id}"></td>
+  document.getElementById('tbodyI').innerHTML = listI.map(r => `<tr>
+    <td><input type="checkbox" class="sel-riga" value="${r.id}"></td>
     <td>${r.data}</td><td><b>${r.bungalow}</b></td><td>${r.operatore}</td>
-    <td><button class="btn" style="padding:4px 8px;" onclick="pdfS('${r.id}')">📄 PDF</button></td>
+    <td><button class="btn" style="padding:4px 8px;" onclick="scaricaPDF('${r.id}')">📄 PDF</button></td>
   </tr>`).join('');
 }
 
 function renderM() {
-  document.getElementById('tbodyM').innerHTML = materiali.map(m => `<tr>
-    <td><b>${m.nome_articolo}</b></td><td>${m.giacenza_attuale}</td><td>${m.unita_misura}</td>
-    <td><button class="btn" onclick="delM('${m.id}')">🗑️</button></td>
+  document.getElementById('tbodyM').innerHTML = listM.map(m => `<tr>
+    <td><b>${m.nome_articolo}</b></td><td>${m.giacenza_attuale}</td><td>${m.unita_misura}</td><td>€ ${m.prezzo_unitario}</td>
+    <td><button class="btn" onclick="cancM('${m.id}')">🗑️</button></td>
   </tr>`).join('');
 }
 
-function updateSelect() {
-  const sel = document.getElementById('f-mat-sel');
-  sel.innerHTML = '<option value="">-- Nessuno --</option>' + materiali.map(m => `<option value="${m.nome_articolo}">${m.nome_articolo} (${m.giacenza_attuale} disp.)</option>`).join('');
-}
-
-async function saveI() {
+async function salvaIntervento() {
   const row = {
     data: document.getElementById('f-data').value, citta: document.getElementById('f-citta').value, meteo: document.getElementById('f-meteo').value,
     responsabile_assegnazione: document.getElementById('f-assign').value, operatore: document.getElementById('f-op').value,
@@ -185,55 +185,50 @@ async function saveI() {
   if(error) return alert("ERRORE: " + error.message);
   
   if(row.materiale_usato && row.quantita_usata > 0) {
-    const art = materiali.find(m => m.nome_articolo === row.materiale_usato);
+    const art = listM.find(m => m.nome_articolo === row.materiale_usato);
     if(art) await db.from('materiali').update({ giacenza_attuale: art.giacenza_attuale - row.quantita_usata }).eq('id', art.id);
   }
-  closeModal('modalI'); sync();
+  document.getElementById('modalI').classList.remove('open'); sync();
 }
 
-async function saveM() {
-  const r = { nome_articolo: document.getElementById('m-nome').value, giacenza_attuale: parseFloat(document.getElementById('m-giac').value), unita_misura: document.getElementById('m-unit').value };
-  const { error } = await db.from('materiali').insert([r]);
-  if(error) return alert("ERRORE: " + error.message);
-  closeModal('modalM'); sync();
+async function salvaMateriale() {
+  const r = { nome_articolo: document.getElementById('m-nome').value, giacenza_attuale: parseFloat(document.getElementById('m-giac').value), unita_misura: document.getElementById('m-unit').value, prezzo_unitario: parseFloat(document.getElementById('m-prez').value) };
+  await db.from('materiali').insert([r]);
+  document.getElementById('modalM').classList.remove('open'); sync();
 }
 
-async function getWeather() {
+async function caricaMeteo() {
   const cit = document.getElementById('f-citta').value; if(!cit) return;
   try {
     const gR = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${cit}`);
     const g = await gR.json();
-    const lat = g[0].lat; const lon = g[0].lon;
-    // Chiediamo anche le temperature min/max giornaliere
-    const wR = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&daily=temperature_2m_max,temperature_2m_min&timezone=auto&hourly=precipitation`);
+    const wR = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${g[0].lat}&longitude=${g[0].lon}&current_weather=true&daily=temperature_2m_max,temperature_2m_min&timezone=auto&hourly=precipitation`);
     const w = await wR.json();
-    
-    const ico = { 0:"☀️ Sole", 1:"⛅ Poco Nuvole", 3:"☁️ Nuvole", 61:"🌧️ Pioggia", 95:"⛈️ Tempesta" };
-    const tMax = w.daily.temperature_2m_max[0];
-    const tMin = w.daily.temperature_2m_min[0];
+    const cod = w.current_weather.weathercode;
+    const icons = { 0:"☀️ Sole", 1:"⛅ Poco Nuvole", 3:"☁️ Nuvole", 61:"🌧️ Pioggia" };
+    const tMax = w.daily.temperature_2m_max[0], tMin = w.daily.temperature_2m_min[0];
     const wind = w.current_weather.windspeed;
-    const rain = w.hourly.precipitation[0] === 0 ? "Assente" : (w.hourly.precipitation[0] < 2 ? "Forte" : "Debole");
-    
-    const res = `${ico[w.current_weather.weathercode]||"⛅"} | Temp: Max ${tMax}°C / Min ${tMin}°C | Vento: ${wind}km/h | Pioggia: ${rain}`;
+    const rain = w.hourly.precipitation[0] === 0 ? "Assente" : "Debole/Moderata";
+    const res = `${icons[cod]||"⛅"} | Temp: ${tMax}°C / ${tMin}°C | Vento: ${wind}km/h | Pioggia: ${rain}`;
     document.getElementById('f-meteo').value = res;
-    const d = document.getElementById('weatherDisplay'); d.style.display='block'; d.innerHTML=`☁️ <b>Meteo di oggi a ${cit.toUpperCase()}</b><br>${res}`;
+    const d = document.getElementById('wDisp'); d.style.display='block'; d.innerHTML=`☁️ <b>Meteo a ${cit.toUpperCase()}</b><br>${res}`;
   } catch(e) { alert("Città non trovata"); }
 }
 
-function handlePhoto(input, type) {
+function caricaFoto(input, tipo) {
   const reader = new FileReader(); reader.onload = (e) => {
     const img = new Image(); img.onload = () => {
       const cv=document.createElement('canvas'); const s=600/img.width; cv.width=600; cv.height=img.height*s;
       cv.getContext('2d').drawImage(img,0,0,600,cv.height); const res=cv.toDataURL('image/jpeg',0.5);
-      if(type==='p'){ fotoP=res; document.getElementById('prev-p').innerHTML=`<img src="${res}" style="max-height:100px;">`; }
+      if(tipo==='p'){ fotoP=res; document.getElementById('prev-p').innerHTML=`<img src="${res}" style="max-height:100px;">`; }
       else { fotoD=res; document.getElementById('prev-d').innerHTML=`<img src="${res}" style="max-height:100px;">`; }
     }; img.src=e.target.result;
   }; reader.readAsDataURL(input.files[0]);
 }
 
 let ctx, drw=false;
-function initCanvas() {
-  const c = document.getElementById('canvasF'); ctx=c.getContext('2d');
+function initCv() {
+  const c = document.getElementById('cvF'); ctx=c.getContext('2d');
   const pos=(e)=>{ const r=c.getBoundingClientRect(); return { x:(e.clientX||(e.touches&&e.touches[0].clientX))-r.left, y:(e.clientY||(e.touches&&e.touches[0].clientY))-r.top }; };
   c.onmousedown=(e)=>{ drw=true; ctx.beginPath(); const p=pos(e); ctx.moveTo(p.x,p.y); };
   c.onmousemove=(e)=>{ if(!drw)return; e.preventDefault(); const p=pos(e); ctx.lineTo(p.x,p.y); ctx.stroke(); };
@@ -245,14 +240,12 @@ function switchTab(t, b) {
   document.getElementById('tab-'+t).style.display='block';
   document.querySelectorAll('.tab').forEach(x => x.classList.remove('active')); b.classList.add('active');
 }
-function openModalI() { document.getElementById('modalI').classList.add('open'); initCanvas(); }
-function openModalM() { document.getElementById('modalM').classList.add('open'); }
-function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-async function delM(id) { if(confirm("Elimina?")) { await db.from('materiali').delete().eq('id', id); sync(); } }
-function toggleAll(cb) { document.querySelectorAll('.row-sel').forEach(x => x.checked = cb.checked); }
+function apriNuovo() { document.getElementById('modalI').classList.add('open'); initCv(); }
+async function cancM(id) { if(confirm("Elimina?")) { await db.from('materiali').delete().eq('id', id); sync(); } }
+function selezionaTutti(cb) { document.querySelectorAll('.sel-riga').forEach(x => x.checked = cb.checked); }
 
-function pdfS(id) {
-  const r = interventi.find(x => x.id === id); const { jsPDF } = window.jspdf; const doc = new jsPDF();
+function scaricaPDF(id) {
+  const r = listI.find(x => x.id === id); const { jsPDF } = window.jspdf; const doc = new jsPDF();
   doc.text("SCHEDA INTERVENTO", 15, 15); doc.setFontSize(10);
   doc.text(`Data: ${r.data} | Bungalow: ${r.bungalow} | Operaio: ${r.operatore}`, 15, 25);
   doc.text(`Meteo: ${r.meteo}`, 15, 30);
@@ -262,19 +255,24 @@ function pdfS(id) {
   doc.save(`intervento_${r.bungalow}.pdf`);
 }
 
-function exportSelected() {
-  const ids = Array.from(document.querySelectorAll('.row-sel:checked')).map(x => x.value);
-  if(!ids.length) return alert("Seleziona almeno un rigo con il quadratino!");
-  const list = interventi.filter(x => ids.includes(x.id));
+function creaReportSelezionati() {
+  const ids = Array.from(document.querySelectorAll('.sel-riga:checked')).map(x => x.value);
+  if(!ids.length) return alert("Seleziona almeno un intervento!");
+  const list = listI.filter(x => ids.includes(x.id));
   const { jsPDF } = window.jspdf; const doc = new jsPDF();
-  doc.text("REPORT SETTIMANALE", 15, 15);
-  doc.autoTable({ head:[['Data','Bungalow','Operaio','Desc']], body: list.map(x=>[x.data, x.bungalow, x.operatore, x.descrizione]), startY: 20 });
-  doc.save("Report_Selezionati.pdf");
+  doc.text("REPORT INTERVENTI SELEZIONATI", 15, 15);
+  doc.autoTable({ head:[['Data','Bungalow','Operaio','Materiale']], body: list.map(x=>[x.data, x.bungalow, x.operatore, x.materiale_usato]), startY: 20 });
+  doc.save("Report_Personalizzato.pdf");
 }
 
-function genFullExport() {
-    const ws = XLSX.utils.json_to_sheet(interventi); const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Archivio"); XLSX.writeFile(wb, "Archivio_Interventi.xlsx");
+function esportaExcel() {
+    const ws = XLSX.utils.json_to_sheet(listI); const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Archivio"); XLSX.writeFile(wb, "Archivio_Completo.xlsx");
+}
+
+function aggiornaSelect() {
+  const sel = document.getElementById('f-mat-sel');
+  sel.innerHTML = '<option value="">-- Nessuno --</option>' + listM.map(m => `<option value="${m.nome_articolo}">${m.nome_articolo} (${m.giacenza_attuale})</option>`).join('');
 }
 
 if(db) sync();
