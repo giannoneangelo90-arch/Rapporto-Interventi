@@ -280,7 +280,19 @@ function aggiornaSelect() {
   sel.innerHTML = '<option value="">-- Nessuno --</option>' + listM.map(m => `<option value="${m.nome_articolo}">${m.nome_articolo} (${m.giacenza_attuale})</option>`).join('');
 }
 
-if(db) sync();
+// Sostituisci "if(db) sync();" con questo:
+async function inizializzazione() {
+  if(db) {
+    try {
+      await sync();
+      console.log("Sistema Pronto e Sincronizzato");
+    } catch(e) {
+      console.error("Errore inizializzazione:", e);
+    }
+  }
+}
+inizializzazione();
+
 </script>
 </body>
 </html>
