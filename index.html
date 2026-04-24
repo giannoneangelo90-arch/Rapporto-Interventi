@@ -3,205 +3,320 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GAVINA MANAGER | Versione Definitiva Funzionante</title>
-    <!-- LIBRERIE PER IL FUNZIONAMENTO -->
+    <title>GAVINA VILLAGE | Management Suite</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        :root { --p: #004d40; --s: #00796b; --bg: #f8f9f9; --border: #cfd8dc; --txt: #263238; }
+        :root { --p: #004d40; --s: #028574; --bg: #f2f5f5; --border: #cfd8dc; --txt: #1a232e; }
         body { font-family: 'Outfit', sans-serif; background: var(--bg); color: var(--txt); margin: 0; }
-        header { background: var(--p); color: white; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 4px solid #ffca28; }
-        nav.tabs { background:white; display:flex; gap:20px; padding:0 2rem; box-shadow:0 2px 5px rgba(0,0,0,0.05); }
-        .tab { padding:1.2rem 0; cursor:pointer; font-weight:700; color:#78909c; border-bottom:4px solid transparent; text-transform:uppercase; font-size:11px; }
+        
+        /* HEADER & LOGO */
+        header { background: var(--p); color: white; padding: 0.8rem 2rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 5px solid #ffca28; }
+        .logo-box { display: flex; align-items: center; gap: 12px; }
+        .logo-circle { width: 45px; height: 45px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid #ffca28; }
+        .logo-circle span { color: var(--p); font-weight: 900; font-size: 20px; }
+        
+        nav.tabs { background:white; display:flex; gap:15px; padding:0 2rem; box-shadow:0 3px 6px rgba(0,0,0,0.05); overflow-x: auto; }
+        .tab { padding:1.2rem 0; cursor:pointer; font-weight:700; color:#78909c; border-bottom:4px solid transparent; text-transform:uppercase; font-size:11px; white-space:nowrap; }
         .tab.active { color:var(--p); border-bottom-color:var(--p); }
+        
         #lock-screen { position:fixed; inset:0; background:white; z-index:9999; display:none; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:20px; }
+        
         .container { max-width: 1300px; margin: 25px auto; padding: 0 15px; }
-        .card { background: white; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 5px 15px rgba(0,0,0,0.1); overflow: hidden; margin-bottom: 20px; }
-        .toolbar { display: flex; justify-content: space-between; align-items: center; padding: 1.2rem 1.5rem; background: #fff; border-bottom: 1px solid #eee; }
+        .card { background: white; border-radius: 16px; border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0,0,0,0.08); overflow: hidden; margin-bottom: 25px; }
+        .toolbar { display: flex; justify-content: space-between; align-items: center; padding: 1.5rem; background: #fff; border-bottom: 1px solid #eee; flex-wrap:wrap; gap:15px; }
+        
         table { width: 100%; border-collapse: collapse; }
-        th { background: #eceff1; padding: 12px; text-align: left; font-size: 11px; color: #546e7a; text-transform: uppercase; }
-        td { padding: 12px; border-bottom: 1px solid #eee; font-size: 14px; }
-        .btn { padding: 10px 18px; border-radius: 8px; border: none; cursor: pointer; font-weight: 700; font-size: 11px; display: inline-flex; align-items: center; gap: 8px; text-transform: uppercase; }
-        .btn-p { background: var(--p); color: white; }
+        th { background: #f8fafb; padding: 15px; text-align: left; font-size: 11px; color: #546e7a; text-transform: uppercase; letter-spacing: 1px; }
+        td { padding: 15px; border-bottom: 1px solid #f0f3f5; font-size: 14px; }
+        
+        .btn { padding: 12px 22px; border-radius: 10px; border: none; cursor: pointer; font-weight: 700; font-size: 11px; display: inline-flex; align-items: center; gap: 8px; text-transform: uppercase; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .btn-p { background: var(--p); color: white; box-shadow: 0 4px 12px rgba(0, 77, 64, 0.2); }
         .btn-blue { background: #1565c0; color: white; }
         .btn-green { background: #2e7d32; color: white; }
-        .btn-ghost { background: #f5f5f5; color: #455a64; border: 1px solid #ddd; }
-        .modal-ov { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
+        .btn-ghost { background: #f1f3f4; color: #455a64; border: 1px solid #dde1e3; }
+        .btn:hover { transform: translateY(-2px); opacity: 0.9; }
+        
+        .modal-ov { display: none; position: fixed; inset: 0; background: rgba(0, 33, 27, 0.85); z-index: 1000; justify-content: center; align-items: center; backdrop-filter: blur(8px); padding: 15px; }
         .modal-ov.open { display: flex; }
-        .modal { background: white; border-radius: 16px; width: 100%; max-width: 950px; padding: 2rem; max-height: 90vh; overflow-y: auto; position: relative; }
-        .close-x { position: absolute; top: 15px; right: 20px; font-size: 35px; cursor: pointer; color: #bbb; line-height: 1; }
-        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
-        .fg label { display: block; font-size: 10px; font-weight: 800; margin-bottom: 4px; color: var(--p); text-transform: uppercase; }
-        .fg input, .fg select, .fg textarea { width: 100%; padding: 10px; border: 1px solid #cfd8dc; border-radius: 8px; font-size: 14px; font-family: inherit; box-sizing: border-box; }
-        .photo-input { border: 2px dashed #ccc; border-radius: 10px; padding: 10px; text-align: center; cursor: pointer; background: #fafafa; min-height: 90px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
-        .photo-input img { max-height: 85px; border-radius: 5px; }
-        .weather-display { background: #e0f2f1; padding: 15px; border-radius: 10px; margin-top: 10px; font-size: 13px; border: 1px solid #80cbc4; border-left: 5px solid var(--s); }
+        .modal { background: white; border-radius: 24px; width: 100%; max-width: 1050px; padding: 2.5rem; max-height: 92vh; overflow-y: auto; position: relative; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
+        .close-x { position: absolute; top: 25px; right: 30px; font-size: 40px; cursor: pointer; color: #ccc; line-height: 1; }
+        
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; }
+        .fg label { display: block; font-size: 11px; font-weight: 800; margin-bottom: 6px; color: var(--p); text-transform: uppercase; letter-spacing: 0.5px; }
+        .fg input, .fg select, .fg textarea { width: 100%; padding: 14px; border: 1.5px solid #e0e6e9; border-radius: 12px; font-size: 15px; font-family: inherit; box-sizing: border-box; transition: border 0.3s; }
+        .fg input:focus { border-color: var(--s); outline: none; }
+        
+        .photo-input { border: 2.5px dashed #cfd8dc; border-radius: 16px; padding: 20px; text-align: center; cursor: pointer; background: #fafbfc; min-height: 100px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; transition: all 0.3s; }
+        .photo-input:hover { border-color: var(--s); background: #f0f7f6; }
+        .photo-input img { max-height: 140px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        
+        .mag-img { width: 50px; height: 50px; object-fit: cover; border-radius: 8px; border: 1px solid #ddd; }
+        .weather-display { background: linear-gradient(135deg, #e0f2f1 0%, #b2dfdb 100%); padding: 18px; border-radius: 14px; margin-top: 10px; font-size: 13px; border: 1px solid #80cbc4; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); }
     </style>
 </head>
 <body>
 
-<!-- SCHERMATA DI ACCESSO -->
-<div id="lock-screen">
-    <h1 style="color:var(--p); font-size:45px; margin-bottom:10px;">GAVINA PRO</h1>
+<!-- BLOCCO ACCESSO -->
+<div id="lock-screen" style="display:none;">
+    <div class="logo-circle" style="width:100px; height:100px; margin-bottom:20px; border-width:4px;"><span>G</span></div>
+    <h1 style="color:var(--p); font-size:42px; margin-bottom:5px;">GAVINA VILLAGE</h1>
+    <p style="color:#777; margin-bottom:30px; font-weight:600;">Controllo Tecnico e Manutenzioni</p>
     <div id="lock-content">
-        <p>Inserisci il tuo nome per richiedere l'accesso:</p>
-        <input type="text" id="reg-nome" placeholder="es: Luca Smartphone" style="padding:15px; border:2px solid var(--p); border-radius:10px; width:300px; font-size:16px;">
+        <input type="text" id="reg-nome" placeholder="Il Tuo Nome Esempio: MARCO" style="padding:18px; border:2px solid var(--p); border-radius:14px; width:340px; font-size:18px; text-align:center; box-shadow:0 8px 20px rgba(0,0,0,0.1);">
         <br><br>
-        <button class="btn btn-p" style="padding:15px 40px;" onclick="richiediAccesso()">AUTORIZZA DISPOSITIVO</button>
+        <button class="btn btn-p" style="padding:18px 50px; font-size:14px; letter-spacing:1px;" onclick="richiediAccesso()">Sblocca Applicazione</button>
     </div>
 </div>
 
 <header>
-    <div style="display:flex; align-items:center; gap:15px;">
-        <div style="background:white; color:var(--p); padding:5px 10px; border-radius:5px; font-weight:900;">GAVINA</div>
-        <div style="font-size:18px; font-weight:700;">MANAGER FINALE</div>
+    <div class="logo-box">
+        <div class="logo-circle"><span>G</span></div>
+        <div style="line-height:1;">
+            <div style="font-size:20px; font-weight:800; letter-spacing:1.5px;">GAVINA</div>
+            <div style="font-size:11px; opacity:0.8; letter-spacing:3px;">VILLAGE MASTER</div>
+        </div>
     </div>
-    <div style="font-size:11px; display:flex; align-items:center; gap:5px;"><div id="dot" class="dot" style="width:10px; height:10px; border-radius:50%; background:#ff5252;"></div><span id="st-text">Verifica Cloud...</span></div>
+    <div style="font-size:12px; display:flex; align-items:center; gap:10px; background:rgba(255,255,255,0.1); padding:8px 15px; border-radius:30px;">
+        <div id="dot" class="dot" style="width:10px; height:10px; border-radius:50%; background:#ff5252;"></div>
+        <span id="st-text" style="font-weight:700;">OFFLINE</span>
+    </div>
 </header>
 
 <nav class="tabs">
-    <div class="tab active" onclick="swTab('reg', this)">Registro Lavori</div>
-    <div class="tab" onclick="swTab('mag', this)">Magazzino</div>
-    <div class="tab" onclick="swTab('rep', this)">Report</div>
-    <div class="tab" id="tab-accessi" onclick="swTab('acc', this)" style="color:#d32f2f;">🔐 ACCESSI</div>
+    <div class="tab active" onclick="swTab('reg', this)">Registro Giornaliero</div>
+    <div class="tab admin-only" onclick="swTab('mag', this)">Inventario Magazzino</div>
+    <div class="tab admin-only" onclick="swTab('rep', this)">Esportazione Report</div>
+    <div class="tab admin-only" onclick="swTab('acc', this)" style="color:#d32f2f; font-weight:900;">🔐 ACCESSI</div>
 </nav>
 
 <div class="container">
-    <!-- REGISTRO -->
+    <!-- REGISTRO INTERVENTI -->
     <div id="v-reg" class="view">
         <div class="toolbar">
-            <h2>Schede Intervento</h2>
-            <div style="display:flex; gap:10px;">
-                <button class="btn btn-blue" onclick="openBulkModal()">📝 Report Word Pro</button>
-                <button class="btn btn-p" onclick="openM()">+ Nuova Scheda</button>
+            <h2>Schede Interventi Gavina</h2>
+            <div style="display:flex; gap:12px;">
+                <button class="btn btn-blue admin-only" onclick="openBulkModal()">📅 Report Word Professionale</button>
+                <button class="btn btn-p" onclick="openM()">+ Nuovo Intervento</button>
             </div>
         </div>
         <div class="card">
             <table>
-                <thead><tr><th><input type="checkbox" onclick="selAll(this)"></th><th>Data</th><th>Bungalow</th><th>Operaio</th><th>Azioni</th></tr></thead>
+                <thead><tr><th><input type="checkbox" onclick="selAll(this)"></th><th>Data</th><th>Alloggio</th><th>Operaio</th><th>Azioni</th></tr></thead>
                 <tbody id="tbodyI"></tbody>
             </table>
         </div>
     </div>
 
     <!-- MAGAZZINO -->
-    <div id="v-mag" class="view" style="display:none;">
-        <div class="toolbar"><h2>Materiali</h2><button class="btn btn-p" onclick="openMM()">+ Aggiungi Articolo</button></div>
+    <div id="v-mag" class="view admin-only" style="display:none;">
+        <div class="toolbar"><h2>Giacenze Articoli</h2><button class="btn btn-p" onclick="openMM()">+ Carica Materiale</button></div>
         <div class="card">
             <table>
-                <thead><tr><th>Articolo</th><th>Giacenza</th><th>Unità</th><th>Prezzo</th><th>Azione</th></tr></thead>
+                <thead><tr><th>Foto</th><th>Articolo</th><th>Giacenza</th><th>Unità</th><th>Prezzo</th><th>Azione</th></tr></thead>
                 <tbody id="tbodyM"></tbody>
             </table>
         </div>
     </div>
 
     <!-- ESPORTAZIONE -->
-    <div id="v-rep" class="view" style="display:none;">
-        <div class="card" style="padding:4rem; text-align:center;">
-            <h3>Download Totale Database</h3>
-            <button class="btn btn-green" style="padding:15px 30px; margin-top:20px;" onclick="esportaExcel()">📊 ESPORTA EXCEL (.xlsx)</button>
+    <div id="v-rep" class="view admin-only" style="display:none;">
+        <div class="card" style="padding:6rem; text-align:center;">
+            <h3>Download Backup Database (.xlsx)</h3>
+            <button class="btn btn-green" style="padding:15px 35px; margin-top:20px; font-size:14px;" onclick="esportaExcel()">📊 SCARICA EXCEL COMPLETO</button>
         </div>
     </div>
 
     <!-- ACCESSI -->
-    <div id="v-acc" class="view" style="display:none;">
-        <div class="card"><table><thead><tr><th>Nome</th><th>ID</th><th>Stato</th><th>Azione</th></tr></thead><tbody id="tbodyAcc"></tbody></table></div>
+    <div id="v-acc" class="view admin-only" style="display:none;">
+        <div class="toolbar"><h2>Autorizzazioni Dispositivi</h2></div>
+        <div class="card"><table><thead><tr><th>Nome</th><th>ID Dispositivo</th><th>Stato</th><th>Gestione</th></tr></thead><tbody id="tbodyAcc"></tbody></table></div>
     </div>
 </div>
 
-<!-- MODALE SCHEDA COMPLETA -->
+<!-- MODALE SCHEDA INTERVENTO -->
 <div class="modal-ov" id="modI">
     <div class="modal">
-        <span class="close-x" onclick="document.getElementById('modI').classList.remove('open')">&times;</span>
-        <h2 id="mTitle">Scheda Tecnica</h2>
+        <span class="close-x" onclick="closeAll()">&times;</span>
+        <h2 id="mTitle" style="color:var(--p); margin-bottom:1.5rem; text-align:center; font-size:28px;">SCHEDA TECNICA GAVINA</h2>
         <input type="hidden" id="f-id">
         <div class="form-grid">
-            <div class="fg"><label>Data</label><input type="date" id="f-data"></div>
-            <div class="fg"><label>Meteo</label>
-                <div style="display:flex; gap:5px;"><input type="text" id="f-citta" value="Mont-roig del Camp"><button class="btn btn-ghost" onclick="getWeather()">☁️ METEO</button></div>
+            <div class="fg"><label>📅 Data</label><input type="date" id="f-data"></div>
+            <div class="fg"><label>☁️ Località & Meteo</label>
+                <div style="display:flex; gap:5px;"><input type="text" id="f-citta" value="Mont-roig del Camp"><button class="btn btn-ghost" onclick="getWeather()">METEO</button></div>
                 <div id="wInfo" class="weather-display" style="display:none;"></div>
                 <input type="hidden" id="f-meteo">
             </div>
-            <div class="fg"><label>Responsabile</label><input type="text" id="f-assign"></div>
-            <div class="fg"><label>Operaio</label><input type="text" id="f-op"></div>
-            <div class="fg"><label>Bungalow</label><input type="text" id="f-bung"></div>
-            <div class="fg"><label>Area</label><input type="text" id="f-area"></div>
-            <div class="fg"><label>Materiale</label><select id="f-mat-sel"></select></div>
-            <div class="fg"><label>Quantità</label><input type="number" id="f-qty" value="0"></div>
-            <div class="fg" style="grid-column: span 3;"><label>Descrizione Lavori</label><textarea id="f-desc" rows="3"></textarea></div>
-            <div class="fg"><label>Foto Operaio</label><div class="photo-input" onclick="document.getElementById('i-o').click()"><input type="file" id="i-o" accept="image/*" capture="user" hidden onchange="hPhoto(this,'o')"><div id="pr-o">👤 Scatta</div></div></div>
-            <div class="fg"><label>Foto Prima</label><div class="photo-input" onclick="document.getElementById('i-p').click()"><input type="file" id="i-p" accept="image/*" capture="environment" hidden onchange="hPhoto(this,'p')"><div id="pr-p">📷 Inizio</div></div><input type="text" id="f-note-p" placeholder="Note inizio..."></div>
-            <div class="fg"><label>Foto Dopo</label><div class="photo-input" onclick="document.getElementById('i-d').click()"><input type="file" id="i-d" accept="image/*" capture="environment" hidden onchange="hPhoto(this,'d')"><div id="pr-d">📸 Fine</div></div><input type="text" id="f-note-d" placeholder="Note fine..."></div>
-            <div class="fg" style="grid-column: span 3;"><label>Note Generali</label><textarea id="f-note-gen" rows="2"></textarea></div>
-            <div class="fg" style="grid-column: span 3;"><label>Firma</label><canvas id="cvF" width="800" height="130" style="width:100%; border:1px solid #ddd; background:#fff; border-radius:12px; touch-action:none;"></canvas></div>
+            <div class="fg"><label>📋 Responsabile</label><input type="text" id="f-assign"></div>
+            <div class="fg"><label>👷 Operaio Esecutore</label><input type="text" id="f-op"></div>
+            
+            <div class="fg"><label>🏠 Tipologia Alloggio</label>
+                <select id="f-bung">
+                    <option value="">-- Seleziona --</option>
+                    <optgroup label="TIENDAS (Tende)">
+                        <option value="Junior">Junior</option><option value="Kenya">Kenya</option><option value="Luna">Luna</option><option value="Victoria">Victoria</option><option value="Sol">Sol</option><option value="Mayotte">Mayotte</option><option value="Safari+">Safari+</option>
+                    </optgroup>
+                    <optgroup label="MOBILHOMES">
+                        <option value="Tarraco 6">Tarraco 6</option><option value="Tarraco 4">Tarraco 4</option><option value="Tarraco 2">Tarraco 2</option><option value="Costa">Costa</option>
+                    </optgroup>
+                    <optgroup label="BUNGALOWS">
+                        <option value="Dune">Dune</option><option value="Beach">Beach</option>
+                    </optgroup>
+                    <optgroup label="TINY HOMES">
+                        <option value="Tiny Home">Tiny Home</option><option value="Tiny Natura">Tiny Natura</option>
+                    </optgroup>
+                    <optgroup label="BEACH CABINS">
+                        <option value="Beach Cabins">Beach Cabins</option><option value="Vista Mar">Vista Mar</option><option value="2ª Linea Cabins">2ª Linea</option>
+                    </optgroup>
+                    <optgroup label="PARCELAS">
+                        <option value="Parcela 1ª Linea">1ª Linea</option><option value="Parcela 2ª Linea">2ª Linea</option><option value="Parcela 3ª Linea">3ª Linea</option>
+                    </optgroup>
+                </select>
+            </div>
+            
+            <div class="fg"><label>📍 Numero Unità / Area</label><input type="text" id="f-area" placeholder="es. A-110 o Settore D"></div>
+            <div class="fg"><label>🛠️ Articolo Usato</label><select id="f-mat-sel"></select></div>
+            <div class="fg"><label>🔢 Quantità</label><input type="number" id="f-qty" value="0"></div>
+            <div class="fg" style="grid-column: span 3;"><label>📝 Descrizione dei Lavori</label><textarea id="f-desc" rows="4" placeholder="Cosa è stato riparato o installato?"></textarea></div>
+
+            <div class="fg">
+                <label>👤 Foto Operaio</label>
+                <div class="photo-input" onclick="document.getElementById('i-o').click()">
+                    <input type="file" id="i-o" accept="image/*" capture="user" hidden onchange="hPhoto(this,'o')">
+                    <div id="pr-o">🤳 Scatta Selfie</div>
+                </div>
+            </div>
+            <div class="fg">
+                <label>📷 Foto Prima</label>
+                <div class="photo-input" onclick="document.getElementById('i-p').click()">
+                    <input type="file" id="i-p" accept="image/*" capture="environment" hidden onchange="hPhoto(this,'p')">
+                    <div id="pr-p">Fai Foto Inizio</div>
+                </div>
+                <input type="text" id="f-note-p" placeholder="Nota foto inizio..." style="margin-top:5px;">
+            </div>
+            <div class="fg">
+                <label>📸 Foto Dopo</label>
+                <div class="photo-input" onclick="document.getElementById('i-d').click()">
+                    <input type="file" id="i-d" accept="image/*" capture="environment" hidden onchange="hPhoto(this,'d')">
+                    <div id="pr-d">Fai Foto Fine</div>
+                </div>
+                <input type="text" id="f-note-d" placeholder="Nota foto fine..." style="margin-top:5px;">
+            </div>
+            
+            <div class="fg" style="grid-column: span 3;"><label>🛑 Note Generali / Ritardi / Incidenti</label><textarea id="f-note-gen" rows="2" placeholder="Segnala eventuali problemi o pezzi mancanti..."></textarea></div>
+            <div class="fg" style="grid-column: span 3;"><label>✍️ Firma per Conferma</label>
+                <canvas id="cvF" width="800" height="140" style="width:100%; border:1.5px solid #ddd; background:#fff; border-radius:15px; touch-action:none;"></canvas>
+            </div>
         </div>
-        <button class="btn btn-p" style="width:100%; margin-top:20px; padding:15px;" onclick="saveI()">💾 SALVA E SINCRONIZZA NEL CLOUD</button>
+        <button class="btn btn-p" style="width:100%; margin-top:25px; padding:18px; font-size:14px; box-shadow:0 10px 20px rgba(0,77,64,0.3);" onclick="saveI()">💾 SALVA E SINCRONIZZA NEL CLOUD GAVINA</button>
     </div>
 </div>
 
-<!-- ALTRE MODALI -->
-<div class="modal-ov" id="modM"><div class="modal" style="max-width:400px;"><span class="close-x" onclick="document.getElementById('modM').classList.remove('open')">&times;</span><h2>Nuovo Materiale</h2><div class="fg"><label>Nome</label><input type="text" id="m-nome"></div><div class="fg"><label>Giacenza</label><input type="number" id="m-giac"></div><div class="fg"><label>Unità</label><input type="text" id="m-unita" value="pz"></div><div class="fg"><label>Prezzo</label><input type="number" id="m-prez" step="0.01"></div><button class="btn btn-p" style="width:100%; margin-top:20px;" onclick="saveM()">💾 SALVA</button></div></div>
-<div class="modal-ov" id="modBulk"><div class="modal" style="max-width:500px;"><span class="close-x" onclick="document.getElementById('modBulk').classList.remove('open')">&times;</span><h3>Report Word Gavina</h3><textarea id="bulk-notes" style="width:100%; height:120px; margin-top:10px; padding:12px; border:1px solid #ddd; border-radius:10px;" placeholder="Relazione su avanzamento, meteo e note operative..."></textarea><button class="btn btn-blue" style="width:100%; margin-top:15px;" onclick="esportaWordPro()">📝 GENERA DOCUMENTO WORD (.doc)</button></div></div>
+<!-- MODALE MAGAZZINO CON FOTO -->
+<div class="modal-ov" id="modM">
+    <div class="modal" style="max-width:450px; text-align:center;">
+        <span class="close-x" onclick="closeAll()">&times;</span>
+        <h2 style="color:var(--p);">Nuovo Articolo Magazzino</h2>
+        <div class="form-grid" style="grid-template-columns: 1fr;">
+            <div class="fg"><label>Nome Articolo</label><input type="text" id="m-nome" placeholder="es. Vernice Bianco"></div>
+            <div class="fg"><label>Giacenza</label><input type="number" id="m-giac" value="0"></div>
+            <div class="fg"><label>Unità</label><input type="text" id="m-unita" value="pz"></div>
+            <div class="fg"><label>Prezzo Unitario (€)</label><input type="number" id="m-prez" step="0.01" value="0.00"></div>
+            <div class="fg">
+                <label>Foto Articolo</label>
+                <div class="photo-input" onclick="document.getElementById('i-m').click()">
+                    <input type="file" id="i-m" accept="image/*" capture="environment" hidden onchange="hPhoto(this,'m')">
+                    <div id="pr-m">📸 Scatta Foto Articolo</div>
+                </div>
+            </div>
+        </div>
+        <button class="btn btn-p" style="width:100%; margin-top:25px; padding:15px;" onclick="saveM()">💾 AGGIUNGI IN INVENTARIO</button>
+    </div>
+</div>
+
+<!-- MODALE REPORT WORD -->
+<div class="modal-ov" id="modBulk">
+    <div class="modal" style="max-width:550px;">
+        <span class="close-x" onclick="closeAll()">&times;</span>
+        <h3 style="text-align:center; font-size:24px; color:var(--p);">Generatore Report Word Pro</h3>
+        <p style="font-size:13px; color:#666; margin-bottom:15px;">Inserisci le note introduttive che appariranno in alto al documento.</p>
+        <textarea id="bulk-notes" style="width:100%; height:130px; margin-top:10px; padding:14px; border-radius:12px;" placeholder="Relazione avanzamento lavori Gavina Village..."></textarea>
+        <button class="btn btn-blue" style="width:100%; margin-top:20px; padding:18px;" onclick="esportaWordPro()">📝 SCARICA IL FILE WORD (.doc)</button>
+    </div>
+</div>
 
 <script>
 const URL_SB = 'https://ukzconegwpoaculadefx.supabase.co';
 const KEY_SB = 'sb_publishable_dS8SzPIks90Yd1ISjsXQFQ_T8VtusA1';
 
-let db = null, listI=[], listM=[], listA=[], fotoO=null, fotoP=null, fotoD=null, firma=null;
-try { db = supabase.createClient(URL_SB, KEY_SB); } catch(e) {}
+let db = null, listI=[], listM=[], listA=[], fotoO=null, fotoP=null, fotoD=null, fotoM=null, firma=null;
+try { db = supabase.createClient(URL_SB, KEY_SB); } catch(e) { console.error("Database connection failed"); }
 
-// --- LOGIN / ACCESSI ---
-let myID = localStorage.getItem('gav_did') || ('D' + Math.random().toString(36).substr(2, 6).toUpperCase());
+// --- AUTH / DISPOSITIVI ---
+let myID = localStorage.getItem('gav_did') || ('D-' + Math.random().toString(36).substr(2, 6).toUpperCase());
 localStorage.setItem('gav_did', myID);
 
 async function checkAccess() {
-    if(localStorage.getItem('is_admin') === 'true') { document.getElementById('lock-screen').style.display='none'; sync(); return; }
+    if(localStorage.getItem('gav_master') === 'true') { document.getElementById('lock-screen').style.display='none'; sync(); return; }
     const { data: acc } = await db.from('accessi').select('*').eq('device_id', myID).single();
     if(!acc || acc.stato !== 'autorizzato') {
         document.getElementById('lock-screen').style.display = 'flex';
-        if(acc && acc.stato === 'pendente') document.getElementById('lock-content').innerHTML = "<h3>✓ RICHIESTA INVIATA</h3><p>Attendi che il titolare ti autorizzi.</p>";
+        if(acc && acc.stato === 'pendente') document.getElementById('lock-content').innerHTML = "<h3 style='color:var(--s)'>RICHIESTA IN CORSO</h3><p>Attendi che il Titolare ti dia l'accesso.</p>";
+        if(acc && acc.stato === 'bloccato') document.getElementById('lock-content').innerHTML = "<h3 style='color:red'>ACCESSO REVOCATO</h3>";
     } else { document.getElementById('lock-screen').style.display='none'; sync(); }
 }
 
 async function richiediAccesso() {
-    const nome = document.getElementById('reg-nome').value;
-    if(nome === 'ADMIN_PRO') { localStorage.setItem('is_admin', 'true'); location.reload(); return; }
+    const nome = document.getElementById('reg-nome').value.toUpperCase();
+    if(!nome) return alert("Scrivi il tuo nome!");
+    if(nome === 'ADMIN_PRO') { localStorage.setItem('gav_master', 'true'); location.reload(); return; }
     await db.from('accessi').upsert([{ device_id: myID, nome_utente: nome, stato: 'pendente' }]);
     location.reload();
 }
 
 // --- SINCRONIZZAZIONE ---
 async function sync() {
+    if(!db) return;
     const {data:i} = await db.from('interventi').select('*').order('data', {ascending:false});
     const {data:m} = await db.from('materiali').select('*').order('nome_articolo');
     const {data:a} = await db.from('accessi').select('*').order('data_richiesta', {ascending:false});
     listI=i||[]; listM=m||[]; listA=a||[]; render();
     document.getElementById('dot').style.background = '#69f0ae';
-    document.getElementById('st-text').textContent = 'Connesso';
+    document.getElementById('st-text').textContent = 'SISTEMA ONLINE';
 }
 
 function render() {
     document.getElementById('tbodyI').innerHTML = listI.map(i => `<tr><td><input type="checkbox" class="sel-row" value="${i.id}"></td><td>${i.data}</td><td><b>${i.bungalow}</b></td><td>${i.operatore}</td><td><button class="btn btn-ghost" onclick="editI('${i.id}')">✏️</button></td></tr>`).join('');
-    document.getElementById('tbodyM').innerHTML = listM.map(m => `<tr><td>${m.nome_articolo}</td><td>${m.giacenza_attuale}</td><td>${m.unita_misura}</td><td>€ ${m.prezzo_unitario}</td><td><button class="btn" style="background:#ffcdd2;" onclick="delM('${m.id}')">🗑️</button></td></tr>`).join('');
-    document.getElementById('tbodyAcc').innerHTML = listA.map(a => `<tr><td>${a.nome_utente}</td><td>${a.device_id}</td><td><b>${a.stato}</b></td><td><button onclick="cambiaAcc('${a.id}','autorizzato')">✅</button> <button onclick="cambiaAcc('${a.id}','bloccato')">🚫</button></td></tr>`).join('');
+    
+    document.getElementById('tbodyM').innerHTML = listM.map(m => `
+        <tr>
+            <td>${m.foto_url ? `<img src="${m.foto_url}" class="mag-img">` : '🖼️'}</td>
+            <td><b>${m.nome_articolo}</b></td>
+            <td>${m.giacenza_attuale}</td>
+            <td>${m.unita_misura}</td>
+            <td>€ ${m.prezzo_unitario}</td>
+            <td><button class="btn" style="background:#ffebee; color:#c62828;" onclick="delM('${m.id}')">🗑️</button></td>
+        </tr>`).join('');
+    
+    document.getElementById('tbodyAcc').innerHTML = listA.map(a => `<tr><td>${a.nome_utente}</td><td>${a.device_id}</td><td><b>${a.stato}</b></td><td><button class="btn btn-p" onclick="cambiaAcc('${a.id}','autorizzato')">✅</button> <button class="btn btn-ghost" onclick="cambiaAcc('${a.id}','bloccato')">🚫</button></td></tr>`).join('');
     document.getElementById('f-mat-sel').innerHTML = '<option value="">-- Nessuno --</option>' + listM.map(m => `<option value="${m.nome_articolo}">${m.nome_articolo}</option>`).join('');
 }
 
 async function cambiaAcc(id, s) { await db.from('accessi').update({ stato: s }).eq('id', id); sync(); }
 
-// --- FUNZIONI SCHEDA ---
+// --- FUNZIONAMENTO ---
 async function getWeather() {
     const cit = document.getElementById('f-citta').value;
     try {
         const gR=await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${cit}`); const g=await gR.json();
         const wR=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${g[0].lat}&longitude=${g[0].lon}&current_weather=true&daily=temperature_2m_max,temperature_2m_min,precipitation_sum&timezone=auto`);
         const w=await wR.json(); 
-        const p = w.daily.precipitation_sum[0] > 0 ? (w.daily.precipitation_sum[0] > 5 ? '⛈️ Forte' : '🌦️ Debole') : '☀️ Assente';
-        const res = `Min: ${w.daily.temperature_2m_min[0]}°C | Max: ${w.daily.temperature_2m_max[0]}°C | Piogge: ${p} | Vento: ${w.current_weather.windspeed}km/h`;
-        document.getElementById('f-meteo').value=res; document.getElementById('wInfo').style.display='block'; document.getElementById('wInfo').innerHTML=`<b>☁️ METEO GAVINA:</b><br>${res}`;
+        const piog = w.daily.precipitation_sum[0] > 0 ? (w.daily.precipitation_sum[0] > 5 ? '⛈️ Forte' : '🌦️ Debole') : '☀️ Assente';
+        const res = `Min: ${w.daily.temperature_2m_min[0]}°C | Max: ${w.daily.temperature_2m_max[0]}°C | Pioggia: ${piog} | Vento: ${w.current_weather.windspeed}km/h`;
+        document.getElementById('f-meteo').value=res; document.getElementById('wInfo').style.display='block'; document.getElementById('wInfo').innerHTML=`⛅ <b>INFO METEO:</b><br>${res}`;
     } catch(e){ alert("Città non trovata."); }
 }
 
@@ -210,7 +325,7 @@ function hPhoto(input, tipo) {
         const i=new Image(); i.onload=()=>{
             const cv=document.createElement('canvas'); const s=450/i.width; cv.width=450; cv.height=i.height*s;
             cv.getContext('2d').drawImage(i,0,0,450,cv.height); const res=cv.toDataURL('image/jpeg',0.5);
-            if(tipo==='o') fotoO=res; else if(tipo==='p') fotoP=res; else fotoD=res; 
+            if(tipo==='o') fotoO=res; else if(tipo==='p') fotoP=res; else if(tipo==='d') fotoD=res; else fotoM=res;
             document.getElementById('pr-'+tipo).innerHTML=`<img src="${res}">`;
         }; i.src=e.target.result;
     }; r.readAsDataURL(input.files[0]);
@@ -227,16 +342,22 @@ async function saveI() {
     };
     const id = document.getElementById('f-id').value;
     const {error} = id ? await db.from('interventi').update(row).eq('id', id) : await db.from('interventi').insert([row]);
-    if(error) alert(error.message); else { document.getElementById('modI').classList.remove('open'); sync(); }
+    if(error) alert(error.message); else { closeAll(); sync(); }
+}
+
+async function saveM() {
+    const r = { nome_articolo: document.getElementById('m-nome').value, giacenza_attuale: parseFloat(document.getElementById('m-giac').value), unita_misura: document.getElementById('m-unita').value, prezzo_unitario: parseFloat(document.getElementById('m-prez').value), foto_url: fotoM };
+    const {error} = await db.from('materiali').insert([r]);
+    if(error) alert(error.message); else { closeAll(); sync(); }
 }
 
 function editI(id) {
     const r = listI.find(x => x.id === id);
-    document.getElementById('f-id').value = r.id; 
+    document.getElementById('f-id').value = r.id; document.getElementById('mTitle').textContent = 'Modifica Scheda Gavina';
     document.getElementById('f-data').value = r.data; document.getElementById('f-bung').value = r.bungalow;
     document.getElementById('f-op').value = r.operatore; document.getElementById('f-desc').value = r.descrizione;
     document.getElementById('f-note-p').value = r.foto_prima_note||''; document.getElementById('f-note-d').value = r.foto_dopo_note||'';
-    document.getElementById('f-note-gen').value = r.nota_generale||'';
+    document.getElementById('f-note-gen').value = r.nota_generale||''; document.getElementById('f-area').value = r.area||'';
     fotoO=r.foto_operaio_url; fotoP=r.foto_prima_url; fotoD=r.foto_dopo_url; firma=r.firma_url;
     if(fotoO) document.getElementById('pr-o').innerHTML=`<img src="${fotoO}">`;
     if(fotoP) document.getElementById('pr-p').innerHTML=`<img src="${fotoP}">`;
@@ -244,29 +365,29 @@ function editI(id) {
     document.getElementById('modI').classList.add('open'); initCv();
 }
 
-// --- EXPORT ---
 function esportaWordPro() {
     const ids = Array.from(document.querySelectorAll('.sel-row:checked')).map(x=>x.value);
     if(!ids.length) return alert("Seleziona almeno una riga!");
     const list = listI.filter(x=>ids.includes(x.id)); 
     let html = `<html><head><meta charset='utf-8'><style>table{width:100%; border-collapse:collapse;} td,th{border:1px solid #000; padding:10px; font-size:12px; font-family:Arial;}</style></head><body>`;
-    html += `<h1>GAVINA - REPORT LAVORI</h1><p><b>Note:</b> ${document.getElementById('bulk-notes').value}</p><hr>`;
+    html += `<h1 style='text-align:center; color:#004d40;'>GAVINA VILLAGE - REPORT LAVORI</h1><p><b>Note Tecniche:</b> ${document.getElementById('bulk-notes').value}</p><hr>`;
     list.forEach(i => {
-        html += `<div style='page-break-after:always;'><h2>SCHEDA: ${i.bungalow}</h2><p><b>Data:</b> ${i.data} | <b>Meteo:</b> ${i.meteo}</p>`;
-        html += `<p><b>Descrizione:</b> ${i.descrizione}</p>`;
-        if(i.foto_prima_url) html += `<p>FOTO PRIMA:<br><img src='${i.foto_prima_url}' width='450'></p>`;
-        if(i.foto_dopo_url) html += `<p>FOTO DOPO:<br><img src='${i.foto_dopo_url}' width='450'></p>`;
+        html += `<div style='page-break-after:always;'><h2>SCHEDA UNITÀ: ${i.bungalow} (${i.area})</h2><p><b>Data:</b> ${i.data} | <b>Meteo:</b> ${i.meteo}</p>`;
+        html += `<p><b>Descrizione dei Lavori Svolti:</b> ${i.descrizione}</p>`;
+        if(i.foto_prima_url) html += `<p>FOTO INIZIO LAVORI:<br><img src='${i.foto_prima_url}' width='400'></p>`;
+        if(i.foto_dopo_url) html += `<p>FOTO FINE LAVORI:<br><img src='${i.foto_dopo_url}' width='400'></p>`;
+        if(i.firma_url) html += `<p>Firma Tecnico:<br><img src='${i.firma_url}' width='150'></p>`;
         html += `</div><hr>`;
     });
     html += `</body></html>`;
     const b = new Blob([html], {type: 'application/msword'});
-    const a = document.createElement('a'); a.href=URL.createObjectURL(b); a.download="Report_Gavina.doc"; document.body.appendChild(a); a.click(); a.remove();
+    const a = document.createElement('a'); a.href=URL.createObjectURL(b); a.download="Report_Gavina_Village.doc"; document.body.appendChild(a); a.click(); a.remove();
 }
 
 function esportaExcel() {
     const clean = listI.map(x => { const { foto_operaio_url, foto_prima_url, foto_dopo_url, firma_url, ...rest } = x; return rest; });
     const ws = XLSX.utils.json_to_sheet(clean); const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Database"); XLSX.writeFile(wb, "Gavina_Master_DB.xlsx");
+    XLSX.utils.book_append_sheet(wb, ws, "Dati"); XLSX.writeFile(wb, "Gavina_Master_DB.xlsx");
 }
 
 let ctx, drw=false;
@@ -278,22 +399,17 @@ function initCv() {
     window.onmouseup=()=>{ if(drw){drw=false; firma=c.toDataURL();} };
 }
 
-// --- MISC ---
 function openM() { 
-    document.getElementById('f-id').value = ''; 
+    document.getElementById('f-id').value = ''; document.getElementById('mTitle').textContent = 'Nuova Scheda Gavina';
     document.getElementById('f-data').value = new Date().toISOString().split('T')[0];
     fotoO=null; fotoP=null; fotoD=null; firma=null;
-    document.getElementById('pr-o').innerHTML='👤 Scatta'; document.getElementById('pr-p').innerHTML='📷 Inizio'; document.getElementById('pr-d').innerHTML='📸 Fine';
+    document.getElementById('pr-o').innerHTML='🤳 Scatta Selfie'; document.getElementById('pr-p').innerHTML='Fai Foto Inizio'; document.getElementById('pr-d').innerHTML='Fai Foto Fine';
     document.getElementById('modI').classList.add('open'); initCv(); 
 }
-function openMM() { document.getElementById('modM').classList.add('open'); }
+function openMM() { fotoM=null; document.getElementById('pr-m').innerHTML='📸 Scatta Foto Articolo'; document.getElementById('modM').classList.add('open'); }
 function openBulkModal() { document.getElementById('modBulk').classList.add('open'); }
-
-async function saveM() {
-    const r = { nome_articolo: document.getElementById('m-nome').value, giacenza_attuale: parseFloat(document.getElementById('m-giac').value), unita_misura: document.getElementById('m-unita').value, prezzo_unitario: parseFloat(document.getElementById('m-prez').value) };
-    await db.from('materiali').insert([r]); document.getElementById('modM').classList.remove('open'); sync();
-}
-function delM(id) { if(confirm("Elimina?")) db.from('materiali').delete().eq('id',id).then(sync); }
+function closeAll() { document.querySelectorAll('.modal-ov').forEach(m=>m.classList.remove('open')); }
+function delM(id) { if(confirm("Elimina articolo dal magazzino?")) db.from('materiali').delete().eq('id',id).then(sync); }
 function swTab(v,b) { document.querySelectorAll('.view').forEach(x=>x.style.display='none'); document.getElementById('v-'+v).style.display='block'; document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active')); b.classList.add('active'); }
 function selAll(cb) { document.querySelectorAll('.sel-row').forEach(x=>x.checked=cb.checked); }
 
