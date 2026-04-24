@@ -1,9 +1,10 @@
+```html
 <!DOCTYPE html>
 <html lang="it">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GAVINA VILLAGE | Master Commander 2.70</title>
+    <title>GAVINA VILLAGE | Master Commander 2.80</title>
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
@@ -73,7 +74,7 @@
         <div class="logo-circle">G</div>
         <div>
             <div style="font-size:22px; font-weight:900;">GAVINA VILLAGE</div>
-            <div style="font-size:10px; opacity:0.8; letter-spacing:2px; font-weight:700;">MASTER COMMANDER 2.70</div>
+            <div style="font-size:10px; opacity:0.8; letter-spacing:2px; font-weight:700;">MASTER COMMANDER 2.80</div>
         </div>
     </div>
     <div style="display:flex; align-items:center; gap:20px;">
@@ -207,14 +208,21 @@ function render() {
 async function inviaOrdine() {
     const t=document.getElementById('o-titolo').value, d=document.getElementById('o-desc').value, p=document.getElementById('o-prio').value; if(!t)return;
     const {error} = await db.from('ordini').insert([{ titolo: t, descrizione: d, priorita: p, stato: 'Attivo', visto_da_admin: false }]);
-    if(error){ alert("ERRORE: Devi sbloccare RLS su Supabase!"); return; }
+    if(error){ alert("ERRORE INVIO: " + error.message); return; }
     sync(); document.getElementById('o-titolo').value=''; document.getElementById('o-desc').value='';
 }
 
-async function chiudiOrdine(id) { const chi=prompt("Chi firma?"); await db.from('ordini').update({ stato: 'Chiuso', completato_da: chi, visto_da_admin: false }).eq(id); sync(); }
+async function chiudiOrdine(id) { 
+    const chi=prompt("Chi ha completato il lavoro?"); if(!chi) return;
+    const {error} = await db.from('ordini').update({ stato: 'Chiuso', completato_da: chi, visto_da_admin: false }).eq('id', id); 
+    if(error) alert("ERRORE CHIUSURA: " + error.message);
+    sync(); 
+}
 async function saveI() {
     const r = { data:document.getElementById('f-data').value, supervisore:document.getElementById('f-sup').value, bungalow:document.getElementById('f-bung').value, area:document.getElementById('f-area').value, descrizione:document.getElementById('f-desc').value, operatore:document.getElementById('f-op').value, foto_prima_url:fotoP, foto_dopo_url:fotoD, foto_prima_note:document.getElementById('f-note-p').value, foto_dopo_note:document.getElementById('f-note-d').value, note_finali:document.getElementById('f-note-f').value, firma_url:firma };
-    const id=document.getElementById('f-id').value; id ? await db.from('interventi').update(r).eq('id',id) : await db.from('interventi').insert([r]);
+    const id=document.getElementById('f-id').value; 
+    const {error} = id ? await db.from('interventi').update(r).eq('id',id) : await db.from('interventi').insert([r]);
+    if(error) alert("ERRORE SALVATAGGIO: " + error.message);
     closeAll(); sync();
 }
 
@@ -238,9 +246,16 @@ function hPhoto(input, tipo) { const r=new FileReader(); r.onload=(e)=>{ const i
 function initCv() { const c=document.getElementById('cvF'); const ctx=c.getContext('2d'); if(!document.getElementById('f-id').value) ctx.clearRect(0,0,c.width,c.height); const p=(e)=>{ const r=c.getBoundingClientRect(); return { x:(e.clientX||(e.touches&&e.touches[0].clientX))-r.left, y:(e.clientY||(e.touches&&e.touches[0].clientY))-r.top }; }; c.onmousedown=(e)=>{ drw=true; ctx.beginPath(); ctx.moveTo(p(e).x,p(e).y); }; c.onmousemove=(e)=>{ if(!drw)return; e.preventDefault(); ctx.lineTo(p(e).x,p(e).y); ctx.stroke(); }; window.onmouseup=()=>{ if(drw){drw=false; firma=c.toDataURL();} }; }
 function setLang(l) { curL=l; document.querySelectorAll('.flag').forEach(f=>f.classList.remove('active')); document.getElementById('flag-'+l).classList.add('active'); document.querySelectorAll('[data-t]').forEach(el=>{ const k=el.getAttribute('data-t'); el.textContent=LAN[l][k]||el.textContent; }); renderAccommodations(); }
 function renderAccommodations() { const c = { it:['TENDE','MOBILHOMES','BUNGALOWS','TINY','CABINS','PIAZZOLE'], es:['TIENDAS','MOBILHOMES','BUNGALOWS','TINY','CABINS','PARCELAS'], en:['TENTS','MOBILHOMES','BUNGALOWS','TINY','CABINS','PLOTS'] }[curL]; document.getElementById('f-bung').innerHTML = `<option value="">--</option><optgroup label="${c[0]}"><option value="Junior">Junior</option><option value="Kenya">Kenya</option><option value="Luna">Luna</option><option value="Victoria">Victoria</option><option value="Sol">Sol</option><option value="Mayotte">Mayotte</option><option value="Safari+">Safari+</option></optgroup><optgroup label="${c[1]}"><option value="Tarraco 6">Tarraco 6</option><option value="Tarraco 4">Tarraco 4</option><option value="Tarraco 2">Tarraco 2</option><option value="Costa">Costa</option></optgroup><optgroup label="${c[2]}"><option value="Dune">Dune</option><option value="Beach">Beach</option></optgroup><optgroup label="${c[3]}"><option value="Tiny Home">Tiny Home</option><option value="Tiny Natura">Tiny Natura</option></optgroup><optgroup label="${c[4]}"><option value="Beach Cabins">Beach Cabins</option><option value="Vista Mar">Vista Mar</option><option value="2ª Linea">2ª Linea</option></optgroup><optgroup label="${c[5]}"><option value="1ª Linea">1ª Linea</option><option value="2ª Linea">2ª Linea</option><option value="3ª Linea">3ª Linea</option></optgroup>`; }
-async function saveM() { await db.from('materiali').insert([{ nome_articolo:document.getElementById('m-nome').value, giacenza_attuale:parseFloat(document.getElementById('m-giac').value), prezzo:parseFloat(document.getElementById('m-prez').value), foto_url:fotoM }]); closeAll(); sync(); }
-async function delM(id) { if(confirm("Eliminare?")) { await db.from('materiali').delete().eq('id',id); sync(); } }
-async function delOrd(id) { if(confirm("Eliminare?")) { await db.from('ordini').delete().eq('id',id); sync(); } }
+async function saveM() { 
+    const n = document.getElementById('m-nome').value; if(!n) return alert("Inserisci il nome articolo!");
+    const q = parseFloat(document.getElementById('m-giac').value) || 0;
+    const p = parseFloat(document.getElementById('m-prez').value) || 0;
+    const {error} = await db.from('materiali').insert([{ nome_articolo:n, giacenza_attuale:q, prezzo:p, foto_url:fotoM }]); 
+    if(error) alert("ERRORE MAGAZZINO: " + error.message);
+    closeAll(); sync(); 
+}
+async function delM(id) { if(confirm("Eliminare articolo?")) { const {error} = await db.from('materiali').delete().eq('id',id); if(error) alert(error.message); sync(); } }
+async function delOrd(id) { if(confirm("Eliminare ordine?")) { const {error} = await db.from('ordini').delete().eq('id',id); if(error) alert(error.message); sync(); } }
 function esportaExcelCompleto() { let html = `<html><body><table border="1"><tr><th>Data</th><th>Unità</th><th>Note Prima</th><th>Foto Prima</th><th>Note Dopo</th><th>Foto Dopo</th></tr>`; listI.forEach(i=>{ html+=`<tr><td>${i.data}</td><td>${i.bungalow}</td><td>${i.foto_prima_note||'-'}</td><td><img src="${i.foto_prima_url}" width="100"></td><td>${i.foto_dopo_note||'-'}</td><td><img src="${i.foto_dopo_url}" width="100"></td></tr>`; }); html+=`</table></body></html>`; const b=new Blob([html], {type: 'application/vnd.ms-excel'}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download="GavinaMASTER.xls"; a.click(); }
 
 function esportaWordPro() {
@@ -274,9 +289,17 @@ function openBulkModal(){ document.getElementById('modBulk').classList.add('open
 function closeAll(){ document.querySelectorAll('.modal-ov').forEach(m=>m.classList.remove('open')); }
 function swTab(v,b){ document.querySelectorAll('.view').forEach(x=>x.style.display='none'); document.getElementById('v-'+v).style.display='block'; document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active')); b.classList.add('active'); sync(); }
 function selAll(cb){ document.querySelectorAll('.sel-row').forEach(x=>x.checked=cb.checked); }
-async function checkAccess(){ if(localStorage.getItem('admin_master')==='true'){document.getElementById('lock-screen').style.display='none'; sync(); return;} document.getElementById('lock-screen').style.display='flex'; }
+async function checkAccess(){ 
+    if(localStorage.getItem('admin_master')==='true'){
+        document.getElementById('lock-screen').style.display='none'; 
+        document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'block');
+        sync(); return;
+    } 
+    document.getElementById('lock-screen').style.display='flex'; 
+}
 async function richiediAccesso(){ if(document.getElementById('reg-nome').value.toUpperCase()==='ADMIN_PRO'){localStorage.setItem('admin_master','true'); location.reload();} }
 setLang('it'); checkAccess(); setInterval(sync, 20000);
 </script>
 </body>
 </html>
+```
