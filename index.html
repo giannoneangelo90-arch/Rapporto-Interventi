@@ -2,83 +2,72 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CellaTesto PRO 2.4 — Diagnosi Attiva</title>
-    <!-- Caricamento Supabase Standard -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <title>CellaTesto — TEST DI RETE</title>
     <style>
-        body { font-family: sans-serif; background: #f4f3ef; padding: 20px; }
-        #debug-box { background: #fee2e2; color: #991b1b; padding: 15px; border-radius: 8px; display: none; margin-bottom: 20px; border: 1px solid #f87171; }
-        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .btn { padding: 10px 20px; background: #2a5c45; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
-        .status { padding: 5px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; }
+        body { font-family: sans-serif; padding: 30px; background: #f0f2f5; }
+        .box { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .log { background: #1e1e1e; color: #00ff00; padding: 15px; border-radius: 5px; font-family: monospace; min-height: 100px; margin-top: 10px; overflow-x: auto; }
+        .green { color: #22c55e; }
+        .red { color: #ef4444; }
     </style>
 </head>
 <body>
 
-    <!-- Box che appare SOLO se c'è un errore nel codice -->
-    <div id="debug-box">
-        <b>⚠️ ERRORE RILEVATO:</b> <span id="error-msg"></span>
-    </div>
-
-    <div class="card">
-        <h1>📋 CellaTesto PRO 2.4</h1>
-        <p>Stato Connessione: <span id="status-label" class="status" style="background:#f87171; color:white;">VERIFICA IN CORSO...</span></p>
-        <hr>
-        <div id="app-content">
-            <button class="btn" onclick="testAutomatico()">🚀 CLICCA QUI PER TESTARE</button>
-        </div>
+    <div class="box">
+        <h2>🛠️ Diagnosi Connessione Diretta</h2>
+        <p>Questo test controlla se il database risponde via internet.</p>
+        <button onclick="testDiretto()" style="padding:10px 20px; cursor:pointer;">AVVIA TEST</button>
+        
+        <div id="log-screen" class="log">In attesa del test...</div>
     </div>
 
 <script>
-// --- DIAGNOSI ERRORI ---
-window.onerror = function(msg, url, line) {
-    document.getElementById('debug-box').style.display = 'block';
-    document.getElementById('error-msg').textContent = msg + " (Riga: " + line + ")";
-    return false;
-};
-
-// --- CHIAVI ---
-const S_URL = ''https://ukzconegwpoaculadefx.supabase.co';'
-const S_KEY = 'sb_publishable_dS8SzPIks90Yd1ISjsXQFQ_T8VtusA1';
-
-let db = null;
-
-async function testAutomatico() {
-    try {
-        console.log("Inizializzo Supabase...");
-        
-        // Prova a creare il client in due modi diversi
-        if (window.supabase && window.supabase.createClient) {
-            db = window.supabase.createClient(S_URL, S_KEY);
-        } else if (typeof supabase !== 'undefined') {
-            db = supabase.createClient(S_URL, S_KEY);
-        } else {
-            throw new Error("Libreria Supabase non caricata! Controlla la connessione internet.");
-        }
-
-        const label = document.getElementById('status-label');
-        
-        // Test di lettura
-        const { data, error } = await db.from('interventi').select('count');
-        
-        if (error) {
-            label.style.background = "#ef4444";
-            label.textContent = "ERRORE: " + error.message;
-            alert("Il database risponde con errore: " + error.message);
-        } else {
-            label.style.background = "#22c55e";
-            label.textContent = "COLLEGATO AL CLOUD!";
-            alert("CONGRATULAZIONI! Il sistema è connesso e funzionante.");
-        }
-    } catch (e) {
-        alert("ERRORE CRITICO: " + e.message);
-    }
+function scrivi(testo, colore) {
+    const screen = document.getElementById('log-screen');
+    const riga = document.createElement('div');
+    riga.innerHTML = "> " + testo;
+    if(colore) riga.style.color = colore;
+    screen.appendChild(riga);
 }
 
-// Avvio automatico al caricamento
-setTimeout(testAutomatico, 1000);
+async function testDiretto() {
+    const screen = document.getElementById('log-screen');
+    screen.innerHTML = "";
+    
+    // --- DATI DA CONTROLLARE ---
+    const URL = ''https://ukzconegwpoaculadefx.supabase.co';
+    const KEY = 'sb_publishable_dS8SzPIks90Yd1ISjsXQFQ_T8VtusA1';
 
+    scrivi("Avvio test di rete...");
+    scrivi("Indirizzo: " + URL);
+    
+    try {
+        scrivi("Tentativo di fetch su /rest/v1/interventi...");
+        
+        const response = await fetch(URL + '/rest/v1/interventi?select=count', {
+            method: 'GET',
+            headers: {
+                'apikey': KEY,
+                'Authorization': 'Bearer ' + KEY
+            }
+        });
+
+        if (response.ok) {
+            scrivi("✅ RISPOSTA POSITIVA! Il database ha risposto.", "#4ade80");
+            scrivi("Stato: " + response.status);
+            alert("SUCCESSO! Il database è raggiungibile. Possiamo procedere con l'app.");
+        } else {
+            const errText = await response.text();
+            scrivi("❌ ERRORE SERVER: " + response.status, "#f87171");
+            scrivi("Dettagli: " + errText);
+            alert("Errore: " + response.status + ". Leggi i dettagli nel riquadro nero.");
+        }
+
+    } catch (e) {
+        scrivi("🛑 ERRORE DI RETE: " + e.message, "#f87171");
+        scrivi("Suggerimento: Controlla che l'URL sia scritto bene e senza spazi.");
+    }
+}
 </script>
 </body>
 </html>
