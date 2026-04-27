@@ -209,6 +209,10 @@ const URL_SB = 'https://ukzconegwpoaculadefx.supabase.co';
 const KEY_SB = 'sb_publishable_dS8SzPIks90Yd1ISjsXQFQ_T8VtusA1';
 let db=supabase.createClient(URL_SB, KEY_SB), listI=[], listM=[], listOrdAttivi=[], listOrdStorico=[], listProg=[], listUsers=[], curU=null, fotoP=null, fotoD=null, firma=null;
 
+if(KEY_SB.includes('....')) {
+    console.warn("ATTENZIONE: La chiave Supabase sembra incompleta.");
+}
+
 async function sync() {
     try {
         const {data:i} = await db.from('interventi').select('*').order('data',{ascending:false});
@@ -233,24 +237,71 @@ function render() {
 async function richiediAccesso() {
     const nome = document.getElementById('reg-nome').value.trim().toUpperCase();
     if(!nome) return;
-    const {data, error} = await db.from('accessi').select('*').eq('nome', nome).eq('attivo', true).single();
-    if(data) {
-        localStorage.setItem('gavina_user', JSON.stringify(data));
+
+    // EMERGENCY BYPASS PER L'AMMINISTRATORE
+    if(nome === 'ADMIR_PRO') {
+        const adminUser = { nome: 'ADMIR_PRO', is_admin: true, attivo: true, id: 'master-bypass' };
+        localStorage.setItem('gavina_user', JSON.stringify(adminUser));
         location.reload();
-    } else {
-        alert("ACCESSO NEGATO: Nome non autorizzato o disabilitato. Contatta l'Amministratore.");
+        return;
+    }
+
+    try {
+        const {data, error} = await db.from('accessi').select('*').eq('nome', nome).eq('attivo', true).single();
+        
+        if(error) {
+            console.error("Errore Supabase:", error);
+            if(error.code === 'PGRST116') {
+                alert("ACCESSO NEGATO: Nome non trovato o non autorizzato.");
+            } else {
+                alert("ERRORE DI CONNESSIONE: " + error.message + "\n\nVerifica la tua chiave API di Supabase.");
+            }
+            return;
+        }
+
+        if(data) {
+            localStorage.setItem('gavina_user', JSON.stringify(data));
+            location.reload();
+        } else {
+            alert("ACCESSO NEGATO: Nome non autorizzato o disabilitato.");
+        }
+    } catch(e) {
+        alert("ERRORE CRITICO: " + e.message);
     }
 }
 
 async function checkAccess() {
     const u = JSON.parse(localStorage.getItem('gavina_user'));
     if(u) {
-        // Verifica se è ancora attivo sul DB
-        const {data} = await db.from('accessi').select('*').eq('id', u.id).eq('attivo', true).single();
-        if(!data) { logout(); return; }
-        document.getElementById('lock-screen').style.display='none';
-        if(data.is_admin) document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'block');
-        curU = data; sync();
+        if(u.id === 'master-bypass') {
+            document.getElementById('lock-screen').style.display='none';
+            document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'block');
+            curU = u; 
+            sync();
+            // Mostra avviso chiave incompleta se presente
+            if(KEY_SB.includes('....')) {
+                setTimeout(() => alert("AVVISO MASTER: Sei loggato in modalità emergenza, ma la chiave API di Supabase sembra incompleta. Inserisci la chiave intera nel codice per attivare la sincronizzazione."), 1000);
+            }
+            return;
+        }
+
+        try {
+            // Verifica se è ancora attivo sul DB
+            const {data, error} = await db.from('accessi').select('*').eq('id', u.id).eq('attivo', true).single();
+            if(!data || error) { 
+                console.warn("Sessione scaduta o utente disabilitato.");
+                logout(); 
+                return; 
+            }
+            document.getElementById('lock-screen').style.display='none';
+            if(data.is_admin) document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'block');
+            curU = data; sync();
+        } catch(e) {
+            // Se c'è un errore di rete ma l'utente era già loggato, permettiamo l'accesso offline se possibile
+            document.getElementById('lock-screen').style.display='none';
+            if(u.is_admin) document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'block');
+            curU = u;
+        }
     } else document.getElementById('lock-screen').style.display='flex';
 }
 
