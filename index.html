@@ -181,7 +181,17 @@
 </div>
 
 <div class="modal-ov" id="modProg"><div class="modal" style="max-width:550px;"><span class="close-x" onclick="closeAll()">&times;</span><h2>Programma Lavoro</h2><input type="hidden" id="p-id"><div class="fg"><label>Data</label><input type="date" id="p-data"></div><div class="fg"><label>Servizio</label><textarea id="p-serv" rows="4"></textarea></div><div class="fg"><label>Operaio</label><input type="text" id="p-op"></div><button class="btn btn-p" style="width:100%; margin-top:20px;" onclick="saveProg()">💾 SALVA</button></div></div>
-<div class="modal-ov" id="modOrd"><div class="modal" style="max-width:550px;"><span class="close-x" onclick="closeAll()">&times;</span><h2>Nuovo Comando</h2><input type="hidden" id="o-id"><div class="fg"><label>Titolo</label><input type="text" id="o-titolo"></div><div class="fg"><label>Descrizione</label><textarea id="o-desc" rows="4"></textarea></div><div class="fg"><label>Priorità</label><select id="o-prio"><option>Alta</option><option>Media</option></select></div><button class="btn btn-danger" style="width:100%; margin-top:20px;" onclick="saveOrd()">🚀 INVIA</button></div></div>
+<div class="modal-ov" id="modOrd">
+    <div class="modal" style="max-width:550px;"><span class="close-x" onclick="closeAll()">&times;</span>
+        <h2>Nuovo Comando</h2><input type="hidden" id="o-id">
+        <div class="fg"><label>Titolo</label><input type="text" id="o-titolo"></div>
+        <div class="fg"><label>Descrizione</label><textarea id="o-desc" rows="4"></textarea></div>
+        <div class="fg"><label>Priorità</label><select id="o-prio"><option>Alta</option><option>Media</option></select></div>
+        <div class="fg"><label>Incaricato / Persona</label><input type="text" id="o-pers"></div>
+        <div class="fg"><label>Media / Foto</label><div class="photo-box" onclick="document.getElementById('o-img').click()"><input type="file" id="o-img" hidden onchange="hPhotoO(this)"><div id="pr-o">📷 Foto Comando</div></div></div>
+        <button class="btn btn-danger" style="width:100%; margin-top:20px;" onclick="saveOrd()">🚀 INVIA</button>
+    </div>
+</div>
 <div class="modal-ov" id="modM"><div class="modal" style="max-width:500px;"><span class="close-x" onclick="closeAll()">&times;</span><h2>Magazzino</h2><input type="hidden" id="m-id"><div class="fg"><label>Articolo</label><input type="text" id="m-nome"></div><div class="fg"><label>Giacenza</label><input type="number" id="m-giac"></div><div class="fg"><label>Costo (€)</label><input type="number" id="m-prez" step="0.01"></div><div class="fg"><label>Foto</label><div class="photo-box" onclick="document.getElementById('m-img').click()"><input type="file" id="m-img" hidden onchange="hPhotoM(this)"><div id="pr-m">📷 Foto</div></div></div><button class="btn btn-p" style="width:100%; margin-top:20px;" onclick="saveM()">💾 SALVA</button></div></div>
 
 <script>
@@ -266,41 +276,41 @@ function esportaWordPro() {
 
     let h = `<html><head><meta charset='utf-8'><style>
         body{font-family:Arial, sans-serif; color:#333; line-height:1.4;} 
-        .header{text-align:center; border-bottom:3px solid #004d40; padding-bottom:10px; margin-bottom:20px;}
-        .section-title{background:#004d40; color:white; padding:10px; font-weight:bold; margin-top:30px; text-transform:uppercase;}
-        .summary-table{width:100%; border-collapse:collapse; margin-bottom:20px;}
-        .summary-table td, .summary-table th{border:1px solid #ddd; padding:10px; text-align:left;}
-        .summary-table th{background:#f8fafb; color:#546e7a; font-size:11px;}
-        .scheda-box{border:3px solid #004d40; padding:20px; margin-bottom:40px; page-break-inside:avoid; border-radius:10px;}
+        .header{text-align:center; border-bottom:4px solid #004d40; padding-bottom:15px; margin-bottom:30px;}
+        .section-title{background:#004d40; color:white; padding:12px; font-weight:bold; margin-top:40px; text-transform:uppercase; border-radius:5px;}
+        .summary-table{width:100%; border-collapse:collapse; margin-bottom:25px;}
+        .summary-table td, .summary-table th{border:1px solid #ddd; padding:12px; text-align:left;}
+        .summary-table th{background:#f0f4f5; color:#004d40; font-size:12px;}
+        .scheda-box{border:3px solid #004d40; padding:25px; margin-bottom:50px; page-break-inside:avoid; border-radius:15px; background:#fff;}
         .scheda-table{width:100%; border-collapse:collapse;}
-        .scheda-table td{padding:8px; border-bottom:1px solid #eee; font-size:14px;}
-        .photo-table{width:100%; margin-top:20px;}
-        .photo-table td{text-align:center; vertical-align:top; padding:10px; border:none;}
-        .photo-img{width:280px; border-radius:10px; border:1px solid #ddd;}
+        .scheda-table td{padding:10px; border-bottom:1px solid #eee; font-size:15px;}
+        .photo-table{width:100%; margin-top:25px;}
+        .photo-table td{text-align:center; vertical-align:top; padding:15px; border:none;}
+        .photo-img{width:300px; border-radius:15px; border:2px solid #eee; box-shadow: 0 4px 10px rgba(0,0,0,0.1);}
     </style></head><body>
         <div class='header'>
-            <img src='https://i.postimg.cc/mD8zM6T1/GAVINA-LOGO.png' width='100'><br>
-            <h1 style='color:#004d40; margin:5px;'>CAMPING GAVINA VILLAGE</h1>
-            <h2 style='color:#028574; margin:0;'>REPORT STRATEGICO TECNICO</h2>
+            <img src='https://i.postimg.cc/mD8zM6T1/GAVINA-LOGO.png' width='120'><br>
+            <h1 style='color:#004d40; margin:10px;'>CAMPING GAVINA VILLAGE</h1>
+            <h2 style='color:#028574; margin:0;'>REPORT TECNICO MASTER COMMANDER</h2>
         </div>
 
         <table class='summary-table'>
-            <tr bgcolor='#004d40' style='color:white;'><th colspan='2'>RIEPILOGO GENERALE SETTIMANALE</th></tr>
-            <tr><td width='30%'><b>OGGETTO:</b></td><td>${document.getElementById('rep-obj').value}</td></tr>
+            <tr bgcolor='#004d40' style='color:white;'><th colspan='2'>RIEPILOGO STRATEGICO GENERALE</th></tr>
+            <tr><td width='35%'><b>OGGETTO:</b></td><td>${document.getElementById('rep-obj').value}</td></tr>
             <tr><td><b>PROGRAMMA A FINIRE:</b></td><td>${document.getElementById('rep-fin').value}</td></tr>
-            <tr><td><b>PERSONALE:</b></td><td>${document.getElementById('rep-pers').value}</td></tr>
-            <tr><td><b>RITARDI/INCIDENTI:</b></td><td>${document.getElementById('rep-rit').value}</td></tr>
-            <tr><td><b>ORE SETTIMANALI:</b></td><td>${document.getElementById('rep-ore').value}</td></tr>
-            <tr><td><b>STATO ATTUALE:</b></td><td>${document.getElementById('rep-stato').value}</td></tr>
+            <tr><td><b>PERSONALE INCARICATO:</b></td><td>${document.getElementById('rep-pers').value}</td></tr>
+            <tr><td><b>RITARDI / INCIDENTI:</b></td><td>${document.getElementById('rep-rit').value}</td></tr>
+            <tr><td><b>TOTALE ORE SETTIMANALI:</b></td><td>${document.getElementById('rep-ore').value}</td></tr>
+            <tr><td><b>STATO LAVORI ATTUALI:</b></td><td>${document.getElementById('rep-stato').value}</td></tr>
         </table>`;
 
     if(selI.length > 0) {
-        h += `<div class='section-title'>Registro Manutenzioni - Schede Tecniche Gavina</div>`;
+        h += `<div class='section-title'>1) Registro Manutenzioni - Schede Tecniche Gavina</div>`;
         selI.forEach(i => {
             h += `<div class='scheda-box'>
                 <table class='scheda-table'>
-                    <tr><td width='30%'><b>DATA E ORA:</b></td><td>${i.data} ${i.ora||''}</td></tr>
-                    <tr><td><b>METEO LOCALE:</b></td><td>${i.meteo || '-'}</td></tr>
+                    <tr><td width='35%'><b>📅 DATA E ORA:</b></td><td>${i.data} ${i.ora||''}</td></tr>
+                    <tr><td><b>☁️ METEO LOCALE:</b></td><td>${i.meteo || '-'}</td></tr>
                     <tr><td><b>🏠 ALLOGGIO / AREA:</b></td><td>${i.bungalow}</td></tr>
                     <tr><td><b>📍 UNITÀ SPECIFICA:</b></td><td>${i.area || '-'}</td></tr>
                     <tr><td><b>👷 OPERAIO:</b></td><td>${i.operatore}</td></tr>
@@ -311,44 +321,53 @@ function esportaWordPro() {
                         <td>
                             <b>FOTO INIZIO (Prima)</b><br>
                             ${i.foto_prima_url ? `<img src='${i.foto_prima_url}' class='photo-img'>` : '<i>(Nessuna foto)</i>'}<br>
-                            <i>${i.foto_prima_note || 'Prima'}</i>
+                            <i>${i.foto_prima_note || ''}</i>
                         </td>
                         <td>
                             <b>FOTO FINE (Dopo)</b><br>
                             ${i.foto_dopo_url ? `<img src='${i.foto_dopo_url}' class='photo-img'>` : '<i>(Nessuna foto)</i>'}<br>
-                            <i>${i.foto_dopo_note || 'Dopo'}</i>
+                            <i>${i.foto_dopo_note || ''}</i>
                         </td>
                     </tr>
                 </table>
-                <div style='margin-top:20px; border-top:1px dashed #ccc; padding-top:10px;'>
-                    <b>FIRMA APPROVAZIONE:</b><br>
-                    ${i.firma_url ? `<img src='${i.firma_url}' width='150'>` : '<i>(Nessuna firma)</i>'}
+                <div style='margin-top:25px; border-top:2px dashed #004d40; padding-top:15px; text-align:right;'>
+                    <b>FIRMA DI APPROVAZIONE:</b><br><br>
+                    ${i.firma_url ? `<img src='${i.firma_url}' width='180'>` : '<i>___________________________</i>'}
                 </div>
             </div>`;
         });
     }
 
     if(selP.length > 0) {
-        h += `<div class='section-title'>Programma di Lavoro</div><table class='summary-table'><tr><th>Data / Ora</th><th>Servizio</th><th>Operaio</th></tr>`;
+        h += `<div class='section-title'>2) Programma di Lavoro Giornaliero</div><table class='summary-table'><tr><th>Data / Ora</th><th>Servizio / Lavoro</th><th>Operaio</th></tr>`;
         selP.forEach(p => { h += `<tr><td>${p.data} ${p.ora||''}</td><td>${p.servizio}</td><td>${p.operaio||'-'}</td></tr>`; });
         h += `</table>`;
     }
 
     if(selO.length > 0) {
-        h += `<div class='section-title'>Comandi & Sollecitazioni</div><table class='summary-table'><tr><th>Data / Ora</th><th>Titolo</th><th>Descrizione</th><th>Stato</th></tr>`;
-        selO.forEach(o => { h += `<tr><td>${new Date(o.data_ordine).toLocaleString()}</td><td>${o.titolo}</td><td>${o.descrizione}</td><td>${o.stato}</td></tr>`; });
-        h += `</table>`;
+        h += `<div class='section-title'>3) Comandi & Sollecitazioni Eseguite</div>`;
+        selO.forEach(o => {
+            h += `<div style='border:1px solid #ddd; padding:15px; margin-bottom:20px;'>
+                <b>COMANDO:</b> ${o.titolo}<br>
+                <b>DATA:</b> ${new Date(o.data_ordine).toLocaleString()}<br>
+                <b>DESCRIZIONE:</b> ${o.descrizione}<br>
+                <b>PERSONA:</b> ${o.completato_da || o.incaricato || '-'}<br>
+                <b>STATO:</b> ${o.stato}<br>
+                ${o.foto_url ? `<br><img src='${o.foto_url}' width='250' style='border-radius:10px;'>` : ''}
+            </div>`;
+        });
     }
 
     if(selM.length > 0) {
-        h += `<div class='section-title'>Movimentazione Magazzino</div><table class='summary-table'><tr><th>Articolo</th><th>Giacenza</th><th>Costo Unit.</th><th>Valore Totale</th></tr>`;
+        h += `<div class='section-title'>4) Monitoraggio Magazzino & Materiali</div><table class='summary-table'><tr><th>Articolo</th><th>Giacenza</th><th>Costo Unit.</th><th>Valore Totale</th></tr>`;
         selM.forEach(m => { h += `<tr><td>${m.nome_articolo}</td><td>${m.giacenza_attuale}</td><td>€${(m.prezzo||0).toFixed(2)}</td><td>€${(m.giacenza_attuale*(m.prezzo||0)).toFixed(2)}</td></tr>`; });
         h += `</table>`;
     }
 
-    h += `<p style='text-align:center; font-size:10px; color:#999; margin-top:50px;'>Documento generato da Gavina Commander 3.9</p></body></html>`;
+    h += `<p style='text-align:center; font-size:11px; color:#666; margin-top:60px; border-top:1px solid #eee; padding-top:20px;'>GAVINA MASTER COMMANDER 3.9 - Camping Gavina Village</p></body></html>`;
 
-    const b = new Blob(['\ufeff', h], {type:'application/msword'}); const a = document.createElement('a'); a.href=URL.createObjectURL(b); a.download=`Report_Gavina_${new Date().toISOString().split('T')[0]}.doc`; a.click(); closeAll();
+    const b = new Blob(['\ufeff', h], {type:'application/msword'}); const a = document.createElement('a'); a.href=URL.createObjectURL(b); a.download=`REPORT_GAVINA_${new Date().toISOString().split('T')[0]}.doc`; a.click(); closeAll();
+}
 }
 
 // Funzioni Share & Delete
@@ -430,9 +449,12 @@ async function saveProg() {
     if(id) await db.from('programma_lavoro').update(r).eq('id',id); else await db.from('programma_lavoro').insert([r]);
     closeAll(); sync();
 }
+let fotoO=null;
+function hPhotoO(input) { if(input.files && input.files[0]) { const r=new FileReader(); r.onload=e=>{fotoO=e.target.result; document.getElementById('pr-o').innerHTML=`<img src="${fotoO}" style="max-height:100px;">`;}; r.readAsDataURL(input.files[0]); } }
+
 async function saveOrd() {
     const id = document.getElementById('o-id').value;
-    const r = { titolo: document.getElementById('o-titolo').value, descrizione: document.getElementById('o-desc').value, priorita: document.getElementById('o-prio').value, stato: 'Attivo', data_ordine: new Date().toISOString() };
+    const r = { titolo: document.getElementById('o-titolo').value, descrizione: document.getElementById('o-desc').value, priorita: document.getElementById('o-prio').value, incaricato: document.getElementById('o-pers').value, foto_url: fotoO, stato: 'Attivo', data_ordine: new Date().toISOString() };
     if(id) await db.from('ordini').update(r).eq('id',id); else await db.from('ordini').insert([r]);
     closeAll(); sync();
 }
@@ -449,7 +471,7 @@ async function chiudiOrdine(id) {
 }
 
 function editProg(id) { const r=listProg.find(x=>x.id===id); document.getElementById('p-id').value=r.id; document.getElementById('p-data').value=r.data; document.getElementById('p-serv').value=r.servizio; document.getElementById('p-op').value=r.operaio||''; document.getElementById('modProg').classList.add('open'); }
-function editOrd(id) { const r=listOrd.find(x=>x.id===id); document.getElementById('o-id').value=r.id; document.getElementById('o-titolo').value=r.titolo; document.getElementById('o-desc').value=r.descrizione; document.getElementById('o-prio').value=r.priorita; document.getElementById('modOrd').classList.add('open'); }
+function editOrd(id) { const r=listOrd.find(x=>x.id===id); document.getElementById('o-id').value=r.id; document.getElementById('o-titolo').value=r.titolo; document.getElementById('o-desc').value=r.descrizione; document.getElementById('o-prio').value=r.priorita; document.getElementById('o-pers').value=r.incaricato||''; fotoO=r.foto_url; document.getElementById('pr-o').innerHTML=fotoO?`<img src="${fotoO}" style="max-height:100px;">`:'📷 Foto Comando'; document.getElementById('modOrd').classList.add('open'); }
 function editM(id) { const r=listM.find(x=>x.id===id); document.getElementById('m-id').value=r.id; document.getElementById('m-nome').value=r.nome_articolo; document.getElementById('m-giac').value=r.giacenza_attuale; document.getElementById('m-prez').value=r.prezzo||0; fotoM=r.foto_url; document.getElementById('pr-m').innerHTML=fotoM?`<img src="${fotoM}">`:'📷'; document.getElementById('modM').classList.add('open'); }
 
 // Login
