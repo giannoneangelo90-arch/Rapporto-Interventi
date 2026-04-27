@@ -105,6 +105,7 @@
         <div class="toolbar">
             <h2>Programma di Lavoro</h2>
             <div style="display:flex; gap:10px;">
+                <button class="btn btn-blue admin-only" onclick="openBulkModal()">📅 Report Word Pro</button>
                 <button class="btn btn-wa" onclick="shareAllWA_P()">📲 WhatsApp</button>
                 <button class="btn btn-mail" onclick="shareAllEmail_P()">📧 Email</button>
                 <button class="btn btn-p" onclick="openModProg()">+ Nuovo Compito</button>
@@ -117,6 +118,7 @@
         <div class="toolbar">
             <h2>📢 Comandi & Sollecitazioni</h2>
             <div style="display:flex; gap:10px;">
+                <button class="btn btn-blue admin-only" onclick="openBulkModal()">📅 Report Word Pro</button>
                 <button class="btn btn-wa" onclick="shareAllWA_O()">📲 WhatsApp</button>
                 <button class="btn btn-p" onclick="openModOrd()">+ Nuovo Comando</button>
             </div>
@@ -128,6 +130,7 @@
         <div class="toolbar">
             <h2>📦 Magazzino</h2>
             <div style="display:flex; gap:10px;">
+                <button class="btn btn-blue admin-only" onclick="openBulkModal()">📅 Report Word Pro</button>
                 <button class="btn btn-wa" onclick="shareAllWA_M()">📲 WhatsApp</button>
                 <button class="btn btn-p" onclick="openModM()">+ Aggiungi</button>
             </div>
@@ -257,56 +260,126 @@ function esportaWordPro() {
     const selO = Array.from(document.querySelectorAll('.sel-o:checked')).map(x=>listOrd.find(o=>o.id===x.value));
     const selM = Array.from(document.querySelectorAll('.sel-m:checked')).map(x=>listM.find(m=>m.id===x.value));
 
-    let h = `<html><head><meta charset='utf-8'><style>.h{background:#004d40; color:white; padding:10px; font-weight:bold;}</style></head><body style='font-family:Arial;'>
-        <div style='text-align:center;'><img src='https://i.postimg.cc/mD8zM6T1/GAVINA-LOGO.png' width='80'><br><h1>CAMPING GAVINA VILLAGE</h1></div>
-        <table border='1' width='100%' style='border-collapse:collapse; margin-top:20px;'>
-            <tr bgcolor='#004d40' style='color:white;'><td><b>CAMPING:</b> GAVINA</td><td><b>OGGETTO:</b> ${document.getElementById('rep-obj').value}</td></tr>
+    let h = `<html><head><meta charset='utf-8'><style>
+        body{font-family:Arial, sans-serif; color:#333;} 
+        .header{text-align:center; border-bottom:3px solid #004d40; padding-bottom:10px; margin-bottom:20px;}
+        .h{background:#004d40; color:white; padding:10px; font-weight:bold; margin-top:20px;}
+        .summary-table{width:100%; border-collapse:collapse; margin-bottom:20px;}
+        .summary-table td, .summary-table th{border:1px solid #ddd; padding:8px;}
+        .item-box{border:2px solid #004d40; padding:15px; margin-bottom:30px; page-break-inside:avoid;}
+        .info-table{width:100%; border-collapse:collapse;}
+        .info-table td{padding:5px; border-bottom:1px solid #eee;}
+        .photo-table{width:100%; margin-top:15px;}
+        .photo-table td{text-align:center; vertical-align:top; padding:10px;}
+    </style></head><body>
+        <div class='header'>
+            <img src='https://i.postimg.cc/mD8zM6T1/GAVINA-LOGO.png' width='100'><br>
+            <h1 style='color:#004d40; margin:5px;'>CAMPING GAVINA VILLAGE</h1>
+            <h2 style='color:#s; margin:0;'>REPORT STRATEGICO TECNICO</h2>
+        </div>
+
+        <table class='summary-table'>
+            <tr bgcolor='#004d40' style='color:white;'><th>DETTAGLIO GENERALE</th><th>RIFERIMENTO</th></tr>
+            <tr><td><b>OGGETTO:</b></td><td>${document.getElementById('rep-obj').value}</td></tr>
             <tr><td><b>PROGRAMMA A FINIRE:</b></td><td>${document.getElementById('rep-fin').value}</td></tr>
             <tr><td><b>PERSONALE:</b></td><td>${document.getElementById('rep-pers').value}</td></tr>
             <tr><td><b>RITARDI/INCIDENTI:</b></td><td>${document.getElementById('rep-rit').value}</td></tr>
             <tr><td><b>ORE SETTIMANALI:</b></td><td>${document.getElementById('rep-ore').value}</td></tr>
             <tr><td><b>STATO ATTUALE:</b></td><td>${document.getElementById('rep-stato').value}</td></tr>
-        </table><br>`;
+        </table>`;
 
     if(selI.length > 0) {
-        h += `<h3 class='h'>DETTAGLIO INTERVENTI</h3>`;
-        selI.forEach(i => { h += `<div style='border:1px solid #ddd; padding:10px; margin-bottom:15px;'><b>${i.bungalow} - ${i.data}</b><br>${i.descrizione}<br><table width='100%'><tr><td><img src='${i.foto_prima_url}' width='250'><br><i>${i.foto_prima_note||'Inizio'}</i></td><td><img src='${i.foto_dopo_url}' width='250'><br><i>${i.foto_dopo_note||'Fine'}</i></td></tr></table><br><i>Firma:</i><br><img src='${i.firma_url}' width='120'></div>`; });
+        h += `<h3 class='h'>DETTAGLIO SCHEDE TECNICHE GAVINA</h3>`;
+        selI.forEach(i => {
+            h += `<div class='item-box'>
+                <table class='info-table'>
+                    <tr><td width='30%'><b>DATA:</b></td><td>${i.data}</td></tr>
+                    <tr><td><b>METEO LOCALE:</b></td><td>${i.meteo || '-'}</td></tr>
+                    <tr><td><b>🏠 ALLOGGIO / AREA:</b></td><td>${i.bungalow}</td></tr>
+                    <tr><td><b>📍 UNITÀ SPECIFICA:</b></td><td>${i.area || '-'}</td></tr>
+                    <tr><td><b>👷 OPERAIO:</b></td><td>${i.operatore}</td></tr>
+                    <tr><td><b>📝 DESCRIZIONE LAVORI:</b></td><td>${i.descrizione}</td></tr>
+                </table>
+                <table class='photo-table'>
+                    <tr>
+                        <td>
+                            <b>FOTO INIZIO</b><br>
+                            ${i.foto_prima_url ? `<img src='${i.foto_prima_url}' width='280'>` : '<i>(Nessuna foto)</i>'}<br>
+                            <i>${i.foto_prima_note || 'Prima dell\'intervento'}</i>
+                        </td>
+                        <td>
+                            <b>FOTO FINE</b><br>
+                            ${i.foto_dopo_url ? `<img src='${i.foto_dopo_url}' width='280'>` : '<i>(Nessuna foto)</i>'}<br>
+                            <i>${i.foto_dopo_note || 'Dopo l\'intervento'}</i>
+                        </td>
+                    </tr>
+                </table>
+                <div style='margin-top:15px;'>
+                    <b>FIRMA APPROVAZIONE:</b><br>
+                    ${i.firma_url ? `<img src='${i.firma_url}' width='150'>` : '<i>(Nessuna firma)</i>'}
+                </div>
+            </div>`;
+        });
     }
+
     if(selP.length > 0) {
-        h += `<h3 class='h'>PROGRAMMA LAVORO</h3>`;
-        selP.forEach(p => { h += `<div style='border:1px solid #ddd; padding:10px; margin-bottom:5px;'>📅 <b>${p.data}</b>: ${p.servizio} (${p.operaio||'-'})</div>`; });
+        h += `<h3 class='h'>PROGRAMMA DI LAVORO</h3><table class='summary-table'><tr><th>Data</th><th>Servizio</th><th>Operaio</th></tr>`;
+        selP.forEach(p => { h += `<tr><td>${p.data}</td><td>${p.servizio}</td><td>${p.operaio||'-'}</td></tr>`; });
+        h += `</table>`;
     }
+
     if(selO.length > 0) {
-        h += `<h3 class='h'>COMANDI & SOLLECITAZIONI</h3>`;
-        selO.forEach(o => { h += `<div style='border:1px solid #ddd; padding:10px; margin-bottom:5px;'>🚀 <b>${o.titolo}</b>: ${o.descrizione} [${o.stato}]</div>`; });
+        h += `<h3 class='h'>COMANDI & SOLLECITAZIONI</h3><table class='summary-table'><tr><th>Data</th><th>Titolo</th><th>Descrizione</th><th>Stato</th></tr>`;
+        selO.forEach(o => { h += `<tr><td>${new Date(o.data_ordine).toLocaleDateString()}</td><td>${o.titolo}</td><td>${o.descrizione}</td><td>${o.stato}</td></tr>`; });
+        h += `</table>`;
     }
+
     if(selM.length > 0) {
-        h += `<h3 class='h'>MOVIMENTAZIONE MAGAZZINO</h3>`;
-        selM.forEach(m => { h += `<div style='border:1px solid #ddd; padding:10px; margin-bottom:5px;'>📦 <b>${m.nome_articolo}</b>: Giacenza ${m.giacenza_attuale} (Valore: €${(m.giacenza_attuale*m.prezzo).toFixed(2)})</div>`; });
+        h += `<h3 class='h'>MOVIMENTAZIONE MAGAZZINO</h3><table class='summary-table'><tr><th>Articolo</th><th>Giacenza attuale</th><th>Costo unit.</th><th>Valore totale</th></tr>`;
+        selM.forEach(m => { h += `<tr><td>${m.nome_articolo}</td><td>${m.giacenza_attuale}</td><td>€${(m.prezzo||0).toFixed(2)}</td><td>€${(m.giacenza_attuale*(m.prezzo||0)).toFixed(2)}</td></tr>`; });
+        h += `</table>`;
     }
+
+    h += `<p style='text-align:center; font-size:10px; color:#999; margin-top:50px;'>Documento generato da Gavina Commander 3.9</p></body></html>`;
 
     const b = new Blob(['\ufeff', h], {type:'application/msword'}); const a = document.createElement('a'); a.href=URL.createObjectURL(b); a.download=`Report_Gavina_${new Date().toISOString().split('T')[0]}.doc`; a.click(); closeAll();
 }
 
 // Funzioni Share & Delete
-function shareWA_I(id){ const i=listI.find(x=>x.id===id); window.open(`https://wa.me/?text=${encodeURIComponent(`*GAVINA REPORT*\n🏠 *${i.bungalow}*\n👷 ${i.operatore}\n📝 ${i.descrizione}`)}`); }
-function shareWA_P(id){ const p=listProg.find(x=>x.id===id); window.open(`https://wa.me/?text=${encodeURIComponent(`*PROGRAMMA GAVINA*\n📅 *${p.data}*\n🛠️ ${p.servizio}\n👷 ${p.operaio||'-'}`)}`); }
-function shareWA_M(id){ const m=listM.find(x=>x.id===id); window.open(`https://wa.me/?text=${encodeURIComponent(`*GAVINA MAGAZZINO*\n📦 *${m.nome_articolo}*\n🔢 Giacenza: ${m.giacenza_attuale}`)}`); }
-function shareWA_O(id){ const o=listOrd.find(x=>x.id===id); window.open(`https://wa.me/?text=${encodeURIComponent(`*GAVINA COMANDO*\n🚀 *${o.titolo}*\n📝 ${o.descrizione}\n📊 Stato: ${o.stato}`)}`); }
+function shareWA_I(id){ 
+    const i=listI.find(x=>x.id===id); 
+    const text = "*GAVINA REPORT*\n\n" + "🏠 *" + i.bungalow + "*\n" + "👷 " + i.operatore + "\n" + "📝 " + i.descrizione;
+    window.open("https://wa.me/?text=" + encodeURIComponent(text)); 
+}
+function shareWA_P(id){ 
+    const p=listProg.find(x=>x.id===id); 
+    const text = "*PROGRAMMA GAVINA*\n\n" + "📅 *" + p.data + "*\n" + "🛠️ " + p.servizio + "\n" + "👷 " + (p.operaio||"-");
+    window.open("https://wa.me/?text=" + encodeURIComponent(text)); 
+}
+function shareWA_M(id){ 
+    const m=listM.find(x=>x.id===id); 
+    const text = "*GAVINA MAGAZZINO*\n\n" + "📦 *" + m.nome_articolo + "*\n" + "🔢 Giacenza: " + m.giacenza_attuale;
+    window.open("https://wa.me/?text=" + encodeURIComponent(text)); 
+}
+function shareWA_O(id){ 
+    const o=listOrd.find(x=>x.id===id); 
+    const text = "*GAVINA COMANDO*\n\n" + "🚀 *" + o.titolo + "*\n" + "📝 " + o.descrizione + "\n" + "📊 Stato: " + o.stato;
+    window.open("https://wa.me/?text=" + encodeURIComponent(text)); 
+}
 
 function shareAllWA_I() {
     const sel = Array.from(document.querySelectorAll('.sel-i:checked')).map(x=>listI.find(i=>i.id===x.value));
     if(sel.length===0) { alert("Seleziona almeno un intervento"); return; }
     let msg = "*GAVINA VILLAGE - RIEPILOGO LAVORI*\n\n";
-    sel.forEach(i => { msg += `🏠 *${i.bungalow}* (${i.data})\n🛠️ ${i.descrizione}\n\n`; });
-    window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`);
+    sel.forEach(i => { msg += "🏠 *" + i.bungalow + "* (" + i.data + ")\n" + "🛠️ " + i.descrizione + "\n\n"; });
+    window.open("https://wa.me/?text=" + encodeURIComponent(msg));
 }
 function shareAllWA_P() {
     const sel = Array.from(document.querySelectorAll('.sel-p:checked')).map(x=>listProg.find(p=>p.id===x.value));
     const list = sel.length > 0 ? sel : listProg;
     let msg="*GAVINA: PROGRAMMA DI LAVORO*\n\n";
-    list.forEach(p=>msg+=`📅 *${p.data}*: ${p.servizio} (${p.operaio||'-'})\n`);
-    window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`);
+    list.forEach(p=>msg+= "📅 *" + p.data + "*: " + p.servizio + " (" + (p.operaio||"-") + ")\n");
+    window.open("https://wa.me/?text=" + encodeURIComponent(msg));
 }
 function shareAllEmail_P() {
     const sel = Array.from(document.querySelectorAll('.sel-p:checked')).map(x=>listProg.find(p=>p.id===x.value));
