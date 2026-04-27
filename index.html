@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GAVINA VILLAGE | Master Commander 3.5</title>
+    <title>GAVINA VILLAGE | Master Commander 3.6</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&display=swap" rel="stylesheet">
@@ -23,7 +23,7 @@
         .toolbar { padding: 1.5rem 2.5rem; background: #fff; border-bottom: 1px solid #f0f3f5; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; }
         table { width: 100%; border-collapse: collapse; }
         th { background: #f8fafb; padding: 18px; text-align: left; font-size: 11px; color: #546e7a; text-transform: uppercase; font-weight: 900; border-bottom: 2px solid #edf1f2; }
-        td { padding: 18px; border-bottom: 1px solid #f1f4f6; font-size: 14px; font-weight: 500; }
+        td { padding: 15px 18px; border-bottom: 1px solid #f1f4f6; font-size: 14px; font-weight: 500; }
         .btn { padding: 10px 18px; border-radius: 10px; border: none; cursor: pointer; font-weight: 900; font-size: 10px; display: inline-flex; align-items: center; gap: 6px; text-transform: uppercase; transition: 0.2s; }
         .btn-p { background: var(--p); color: white; }
         .btn-blue { background: #1565c0; color: white; }
@@ -45,7 +45,7 @@
 <div id="lock-screen"><div class="logo-circle" style="width:100px; height:100px; font-size:45px; margin-bottom:30px;">G</div><h1>GAVINA COMMANDER</h1><input type="text" id="reg-nome" placeholder="IL TUO NOME" style="padding:20px; border:3px solid var(--p); border-radius:15px; width:350px; text-align:center; font-size:22px;"><br><br><button class="btn btn-p" onclick="richiediAccesso()">ACCEDI AL SISTEMA</button></div>
 
 <header>
-    <div class="logo-box"><div class="logo-circle">G</div><div><div style="font-size:22px; font-weight:900;">GAVINA VILLAGE</div><div style="font-size:10px; opacity:0.8; letter-spacing:2px; font-weight:700;">MASTER COMMANDER 3.5</div></div></div>
+    <div class="logo-box"><div class="logo-circle">G</div><div><div style="font-size:22px; font-weight:900;">GAVINA VILLAGE</div><div style="font-size:10px; opacity:0.8; letter-spacing:2px; font-weight:700;">MASTER COMMANDER 3.6</div></div></div>
     <div style="display:flex; align-items:center; gap:20px;"><div class="on-badge"><div id="dot"></div><span id="st-text">ONLINE</span></div><button class="btn btn-danger" onclick="logout()">LOGOUT</button></div>
 </header>
 
@@ -58,7 +58,10 @@
 </nav>
 
 <div class="container">
-    <div id="v-reg" class="view"><div class="toolbar"><h2>Registro Manutenzioni</h2><div style="display:flex; gap:10px;"><button class="btn btn-blue admin-only" onclick="openBulkModal()">📅 Report Word Pro</button><button class="btn btn-p" onclick="openM()">+ Nuova Scheda</button></div></div><div class="card"><table><thead><tr><th><input type="checkbox" onclick="selAll(this)"></th><th>Data</th><th>Alloggio</th><th>Operaio</th><th>Azioni</th></tr></thead><tbody id="tbodyI"></tbody></table></div></div>
+    <div id="v-reg" class="view">
+        <div class="toolbar"><h2>Registro Manutenzioni</h2><div style="display:flex; gap:10px;"><button class="btn btn-blue admin-only" onclick="openBulkModal()">📅 Report Word Pro</button><button class="btn btn-p" onclick="openM()">+ Nuova Scheda</button></div></div>
+        <div class="card"><table><thead><tr><th><input type="checkbox" onclick="selAll(this)"></th><th>FOTO</th><th>Data</th><th>Alloggio</th><th>Operaio</th><th>Azioni</th></tr></thead><tbody id="tbodyI"></tbody></table></div>
+    </div>
     <div id="v-prog" class="view admin-only" style="display:none;"><div class="toolbar"><h2>Programma Lavoro</h2><button class="btn btn-p" onclick="openModProg()">+ Nuovo</button></div><div class="card"><table><thead><tr><th>Data</th><th>Servizio</th><th>Operaio</th><th>Azioni</th></tr></thead><tbody id="tbodyProg"></tbody></table></div><div style="margin-top:20px; display:flex; gap:10px; justify-content:flex-end;"><button class="btn btn-wa" style="background:#25D366; color:white;" onclick="shareProgWA()">📲 WhatsApp</button></div></div>
     <div id="v-ord" class="view admin-only" style="display:none;"><div class="toolbar"><h2>📢 Comandi</h2><button class="btn btn-p" onclick="openModOrd()">+ Nuovo</button></div><div class="card"><table><thead><tr><th>Data</th><th>Titolo</th><th>Stato</th><th>Azioni</th></tr></thead><tbody id="tbodyOrd"></tbody></table></div></div>
     <div id="v-mag" class="view admin-only" style="display:none;"><div class="toolbar"><h2>📦 Magazzino</h2><button class="btn btn-p" onclick="openModM()">+ Aggiungi</button></div><div class="card"><table><thead><tr><th>FOTO</th><th>ARTICOLO</th><th>GIACENZA</th><th>VALORE</th><th>AZIONI</th></tr></thead><tbody id="tbodyM"></tbody></table></div></div>
@@ -71,7 +74,7 @@
         <div class="form-grid">
             <div class="fg"><label>📅 Data</label><input type="date" id="f-data"></div>
             <div class="fg"><label>☁️ Meteo</label><div style="display:flex; gap:8px;"><input type="text" id="f-citta" value="Mont-roig del Camp"><button class="btn btn-ghost" onclick="getWeather()">CERCA</button></div><div id="wInfo" style="margin-top:8px; font-weight:900; color:var(--p);"></div><input type="hidden" id="f-meteo-val"></div>
-            <div class="fg"><label>🏠 Alloggio</label><select id="f-bung"></select></div>
+            <div class="fg"><label>🏠 Alloggio / Area</label><select id="f-bung"></select></div>
             <div class="fg"><label>👷 Operaio</label><input type="text" id="f-op"></div>
             <div class="fg" style="grid-column:span 2;"><label>📝 Descrizione</label><textarea id="f-desc" rows="3"></textarea></div>
             <div class="fg"><label>Foto Inizio</label><div class="photo-input" onclick="document.getElementById('i-p').click()"><input type="file" id="i-p" capture="environment" hidden onchange="hPhoto(this,'p')"><div id="pr-p">📷 Foto</div></div><input type="text" id="f-note-p" placeholder="Note Inizio..."></div>
@@ -108,7 +111,7 @@ async function sync() {
 }
 
 function render() {
-    document.getElementById('tbodyI').innerHTML = listI.map(i => `<tr><td><input type="checkbox" class="sel-row" value="${i.id}"></td><td>${i.data}</td><td><b>${i.bungalow}</b></td><td>${i.operatore}</td><td><div style="display:flex;gap:5px;"><button class="btn" onclick="shareWA_I('${i.id}')">📲</button><button class="btn" onclick="editI('${i.id}')">✏️</button><button class="btn btn-danger" onclick="delI('${i.id}')">🗑️</button></div></td></tr>`).join('');
+    document.getElementById('tbodyI').innerHTML = listI.map(i => `<tr><td><input type="checkbox" class="sel-row" value="${i.id}"></td><td><img src="${i.foto_dopo_url||''}" width="45" style="border-radius:8px; cursor:pointer;" onclick="editI('${i.id}')"></td><td>${i.data}</td><td><b>${i.bungalow}</b></td><td>${i.operatore}</td><td><div style="display:flex;gap:5px;"><button class="btn" onclick="shareWA_I('${i.id}')">📲</button><button class="btn" onclick="editI('${i.id}')">✏️</button><button class="btn btn-danger" onclick="delI('${i.id}')">🗑️</button></div></td></tr>`).join('');
     document.getElementById('tbodyProg').innerHTML = listProg.map(p => `<tr><td>${p.data}</td><td>${p.servizio}</td><td><b>${p.operaio||'-'}</b></td><td><div style="display:flex;gap:5px;"><button class="btn" onclick="editProg('${p.id}')">✏️</button><button class="btn btn-danger" onclick="delProg('${p.id}')">🗑️</button></div></td></tr>`).join('');
     document.getElementById('tbodyM').innerHTML = listM.map(m => `<tr><td><img src="${m.foto_url||''}" width="45" style="border-radius:8px;"></td><td><b>${m.nome_articolo}</b></td><td>${m.giacenza_attuale}</td><td>€${(m.giacenza_attuale*(m.prezzo||0)).toFixed(2)}</td><td><div style="display:flex;gap:5px;"><button class="btn" onclick="shareWA_M('${m.id}')">📲</button><button class="btn" onclick="editM('${m.id}')">✏️</button><button class="btn btn-danger" onclick="delM('${m.id}')">🗑️</button></div></td></tr>`).join('');
     document.getElementById('tbodyOrd').innerHTML = listOrd.map(o => `<tr><td>${new Date(o.data_ordine).toLocaleDateString()}</td><td>${o.titolo}</td><td><b>${o.stato}</b></td><td><div style="display:flex;gap:5px;"><button class="btn" onclick="shareWA_O('${o.id}')">📲</button><button class="btn" onclick="editOrd('${o.id}')">✏️</button><button class="btn btn-danger" onclick="delOrd('${o.id}')">🗑️</button></div></td></tr>`).join('');
@@ -149,7 +152,7 @@ function esportaWordPro() {
     const ids=Array.from(document.querySelectorAll('.sel-row:checked')).map(x=>x.value); if(ids.length===0) return alert("Seleziona lavori!");
     const list=listI.filter(x=>ids.includes(x.id)); const intro=document.getElementById('bulk-notes').value;
     let h=`<html><body style='font-family:Arial;'><h1 style='text-align:center;'>REPORT TECNICO GAVINA VILLAGE</h1><p><b>Nota:</b> ${intro}</p><hr>`;
-    list.forEach(i=>{ h+=`<div style='margin-bottom:30px;'><h2>${i.bungalow} - ${i.data}</h2><p><b>Operaio:</b> ${i.operatore}</p><p><b>Dettagli:</b> ${i.descrizione}</p><p><b>Meteo:</b> ${i.meteo||'-'}</p><table width='100%'><tr><td><img src='${i.foto_prima_url}' width='250'><br><i>Prima</i></td><td><img src='${i.foto_dopo_url}' width='250'><br><i>Dopo</i></td></tr></table><br><p><b>Firma:</b></p><img src='${i.firma_url}' width='150'></div><hr>`; });
+    list.forEach(i=>{ h+=`<div style='margin-bottom:30px;'><h2>${i.bungalow} - ${i.data}</h2><p><b>Operaio:</b> ${i.operatore}</p><p><b>Dettagli:</b> ${i.descrizione}</p><table width='100%'><tr><td><img src='${i.foto_prima_url}' width='250'><br><i>Prima</i></td><td><img src='${i.foto_dopo_url}' width='250'><br><i>Dopo</i></td></tr></table><br><p><b>Firma:</b></p><img src='${i.firma_url}' width='150'></div><hr>`; });
     const b=new Blob(['\ufeff', h], {type:'application/msword'}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download="Report_Gavina.doc"; a.click(); closeAll();
 }
 
@@ -166,12 +169,19 @@ function hPhoto(input,t){const r=new FileReader();r.onload=(e)=>{const i=new Ima
 function hPhotoM(input){const r=new FileReader();r.onload=(e)=>{const i=new Image();i.onload=()=>{const cv=document.createElement('canvas');cv.width=300;cv.height=300;cv.getContext('2d').drawImage(i,0,0,300,300);fotoM=cv.toDataURL('image/jpeg',0.6);document.getElementById('pr-m').innerHTML=`<img src="${fotoM}">`;};i.src=e.target.result;};r.readAsDataURL(input.files[0]);}
 function initCv(){const c=document.getElementById('cvF'),ctx=c.getContext('2d');ctx.clearRect(0,0,c.width,c.height);ctx.lineWidth=2;const p=(e)=>{const r=c.getBoundingClientRect();return {x:(e.clientX||e.touches[0].clientX)-r.left,y:(e.clientY||e.touches[0].clientY)-r.top};};c.onmousedown=(e)=>{drw=true;ctx.beginPath();ctx.moveTo(p(e).x,p(e).y);};c.onmousemove=(e)=>{if(!drw)return;e.preventDefault();ctx.lineTo(p(e).x,p(e).y);ctx.stroke();};window.onmouseup=()=>{if(drw){drw=false;firma=c.toDataURL();}};c.ontouchstart=c.onmousedown;c.ontouchmove=c.onmousemove;}
 function renderAccommodations() { 
-    const list = `<option value="">--</option>
-    <optgroup label="TENDE"><option>Junior</option><option>Kenya</option><option>Safari</option><option>Safari+</option></optgroup>
-    <optgroup label="MOBILHOMES"><option>Tarraco 6</option><option>Costa</option><option>Mediterraneo</option></optgroup>
-    <optgroup label="BUNGALOWS"><option>Dune</option><option>Beach</option><option>Bungalow Luxe</option></optgroup>
-    <optgroup label="AREE"><option>Piscina</option><option>Ristorante</option><option>Lavanderia</option></optgroup>`;
-    document.getElementById('f-bung').innerHTML = list; 
+    const html = `<option value="">--</option>
+    <optgroup label="NEGOZIO / TIENDA"><option>JUNIOR</option><option>KENYA</option><option>LUNA</option><option>VICTORIA</option><option>SOLE</option><option>MAYOTTE</option><option>SAFARI +</option></optgroup>
+    <optgroup label="CASE MOBILI / MOBILHOMES"><option>TARRACCO 6</option><option>TARRACCO 4</option><option>TARRACCO 2</option></optgroup>
+    <optgroup label="BUNGALOW"><option>DUNE</option><option>BEACH</option></optgroup>
+    <optgroup label="TINY HOMES"><option>TINY HOME</option><option>TINY NATURA</option></optgroup>
+    <optgroup label="CASETTE SPIAGGIA / BEACH CABINS"><option>VISTA MARE</option><option>2ª FILA</option></optgroup>
+    <optgroup label="PIAZZOLE / PARCELAS"><option>1ª FILA</option><option>2ª FILA</option><option>3ª FILA</option></optgroup>
+    <optgroup label="SERVIZI / SERVICIOS"><option>RECEPTION</option><option>CARICATORE AUTO ELETTRICA</option><option>SVUOTAMENTO ACQUE NERE</option><option>LAVAGGIO AUTO/PUNTO RIFIUTI</option></optgroup>
+    <optgroup label="RISTORANTI & NEGOZI"><option>SUPERMERCATO</option><option>TAKE AWAY</option><option>RISTORANTE GAVINA</option><option>CON-TENEDOR</option><option>BEACH CLUB</option></optgroup>
+    <optgroup label="ATTIVITÀ & SPORT"><option>LOUNGE</option><option>BASE NAUTICA</option><option>CENTRO INFORMAZIONI</option><option>KIDS CLUB</option><option>PING PONG</option><option>PISCINA</option><option>PALCOSCENICO</option><option>AGORA</option><option>CAMPO DA TENNIS</option><option>CAMPI PETANQUE</option><option>CAMPO MULTISPORT</option><option>CABINE MASSAGGI</option></optgroup>
+    <optgroup label="PARCHEGGIO / PARKING"><option>RECEPTION ZONA 4</option><option>LUNGO PERIMETRO</option><option>ZONA PISCINA</option><option>ZONA CAMPO CALCIO</option><option>PERIMETRO PIAZZOLA</option></optgroup>
+    <optgroup label="BAGNI / BAÑOS"><option>ZONA NEGOZIO JUNIOR</option><option>ZONA PISCINA AREA 8</option><option>ZONA PIAZZOLA AREA 3</option></optgroup>`;
+    document.getElementById('f-bung').innerHTML = html; 
 }
 function swTab(v,b){document.querySelectorAll('.view').forEach(x=>x.style.display='none');document.getElementById('v-'+v).style.display='block';document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));b.classList.add('active');sync();}
 function openM(){document.getElementById('f-id').value='';document.getElementById('f-data').value=new Date().toISOString().split('T')[0];document.getElementById('modI').classList.add('open');initCv();renderAccommodations();}
