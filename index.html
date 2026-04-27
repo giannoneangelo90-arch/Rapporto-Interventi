@@ -259,32 +259,34 @@ async function saveI() {
 }
 
 function esportaWordPro() {
-    const selI = Array.from(document.querySelectorAll('.sel-i:checked')).map(x=>listI.find(i=>String(i.id)===x.value));
-    const selP = Array.from(document.querySelectorAll('.sel-p:checked')).map(x=>listProg.find(p=>String(p.id)===x.value));
-    const selO = Array.from(document.querySelectorAll('.sel-o:checked')).map(x=>listOrd.find(o=>String(o.id)===x.value));
-    const selM = Array.from(document.querySelectorAll('.sel-m:checked')).map(x=>listM.find(m=>String(m.id)===x.value));
+    const selI = Array.from(document.querySelectorAll('.sel-i:checked')).map(x => listI.find(i => String(i.id) == String(x.value))).filter(i => i);
+    const selP = Array.from(document.querySelectorAll('.sel-p:checked')).map(x => listProg.find(p => String(p.id) == String(x.value))).filter(p => p);
+    const selO = Array.from(document.querySelectorAll('.sel-o:checked')).map(x => listOrd.find(o => String(o.id) == String(x.value))).filter(o => o);
+    const selM = Array.from(document.querySelectorAll('.sel-m:checked')).map(x => listM.find(m => String(m.id) == String(x.value))).filter(m => m);
 
     let h = `<html><head><meta charset='utf-8'><style>
-        body{font-family:Arial, sans-serif; color:#333;} 
+        body{font-family:Arial, sans-serif; color:#333; line-height:1.4;} 
         .header{text-align:center; border-bottom:3px solid #004d40; padding-bottom:10px; margin-bottom:20px;}
-        .h{background:#004d40; color:white; padding:10px; font-weight:bold; margin-top:20px;}
+        .section-title{background:#004d40; color:white; padding:10px; font-weight:bold; margin-top:30px; text-transform:uppercase;}
         .summary-table{width:100%; border-collapse:collapse; margin-bottom:20px;}
-        .summary-table td, .summary-table th{border:1px solid #ddd; padding:8px;}
-        .item-box{border:2px solid #004d40; padding:15px; margin-bottom:30px; page-break-inside:avoid;}
-        .info-table{width:100%; border-collapse:collapse;}
-        .info-table td{padding:5px; border-bottom:1px solid #eee;}
-        .photo-table{width:100%; margin-top:15px;}
-        .photo-table td{text-align:center; vertical-align:top; padding:10px;}
+        .summary-table td, .summary-table th{border:1px solid #ddd; padding:10px; text-align:left;}
+        .summary-table th{background:#f8fafb; color:#546e7a; font-size:11px;}
+        .scheda-box{border:3px solid #004d40; padding:20px; margin-bottom:40px; page-break-inside:avoid; border-radius:10px;}
+        .scheda-table{width:100%; border-collapse:collapse;}
+        .scheda-table td{padding:8px; border-bottom:1px solid #eee; font-size:14px;}
+        .photo-table{width:100%; margin-top:20px;}
+        .photo-table td{text-align:center; vertical-align:top; padding:10px; border:none;}
+        .photo-img{width:280px; border-radius:10px; border:1px solid #ddd;}
     </style></head><body>
         <div class='header'>
             <img src='https://i.postimg.cc/mD8zM6T1/GAVINA-LOGO.png' width='100'><br>
             <h1 style='color:#004d40; margin:5px;'>CAMPING GAVINA VILLAGE</h1>
-            <h2 style='color:#s; margin:0;'>REPORT STRATEGICO TECNICO</h2>
+            <h2 style='color:#028574; margin:0;'>REPORT STRATEGICO TECNICO</h2>
         </div>
 
         <table class='summary-table'>
-            <tr bgcolor='#004d40' style='color:white;'><th>DETTAGLIO GENERALE</th><th>RIFERIMENTO</th></tr>
-            <tr><td><b>OGGETTO:</b></td><td>${document.getElementById('rep-obj').value}</td></tr>
+            <tr bgcolor='#004d40' style='color:white;'><th colspan='2'>RIEPILOGO GENERALE SETTIMANALE</th></tr>
+            <tr><td width='30%'><b>OGGETTO:</b></td><td>${document.getElementById('rep-obj').value}</td></tr>
             <tr><td><b>PROGRAMMA A FINIRE:</b></td><td>${document.getElementById('rep-fin').value}</td></tr>
             <tr><td><b>PERSONALE:</b></td><td>${document.getElementById('rep-pers').value}</td></tr>
             <tr><td><b>RITARDI/INCIDENTI:</b></td><td>${document.getElementById('rep-rit').value}</td></tr>
@@ -293,10 +295,10 @@ function esportaWordPro() {
         </table>`;
 
     if(selI.length > 0) {
-        h += `<h3 class='h'>DETTAGLIO SCHEDE TECNICHE GAVINA</h3>`;
+        h += `<div class='section-title'>Registro Manutenzioni - Schede Tecniche Gavina</div>`;
         selI.forEach(i => {
-            h += `<div class='item-box'>
-                <table class='info-table'>
+            h += `<div class='scheda-box'>
+                <table class='scheda-table'>
                     <tr><td width='30%'><b>DATA E ORA:</b></td><td>${i.data} ${i.ora||''}</td></tr>
                     <tr><td><b>METEO LOCALE:</b></td><td>${i.meteo || '-'}</td></tr>
                     <tr><td><b>🏠 ALLOGGIO / AREA:</b></td><td>${i.bungalow}</td></tr>
@@ -307,18 +309,18 @@ function esportaWordPro() {
                 <table class='photo-table'>
                     <tr>
                         <td>
-                            <b>FOTO INIZIO</b><br>
-                            ${i.foto_prima_url ? `<img src='${i.foto_prima_url}' width='280'>` : '<i>(Nessuna foto)</i>'}<br>
-                            <i>${i.foto_prima_note || 'Prima dell\'intervento'}</i>
+                            <b>FOTO INIZIO (Prima)</b><br>
+                            ${i.foto_prima_url ? `<img src='${i.foto_prima_url}' class='photo-img'>` : '<i>(Nessuna foto)</i>'}<br>
+                            <i>${i.foto_prima_note || 'Prima'}</i>
                         </td>
                         <td>
-                            <b>FOTO FINE</b><br>
-                            ${i.foto_dopo_url ? `<img src='${i.foto_dopo_url}' width='280'>` : '<i>(Nessuna foto)</i>'}<br>
-                            <i>${i.foto_dopo_note || 'Dopo l\'intervento'}</i>
+                            <b>FOTO FINE (Dopo)</b><br>
+                            ${i.foto_dopo_url ? `<img src='${i.foto_dopo_url}' class='photo-img'>` : '<i>(Nessuna foto)</i>'}<br>
+                            <i>${i.foto_dopo_note || 'Dopo'}</i>
                         </td>
                     </tr>
                 </table>
-                <div style='margin-top:15px;'>
+                <div style='margin-top:20px; border-top:1px dashed #ccc; padding-top:10px;'>
                     <b>FIRMA APPROVAZIONE:</b><br>
                     ${i.firma_url ? `<img src='${i.firma_url}' width='150'>` : '<i>(Nessuna firma)</i>'}
                 </div>
@@ -327,19 +329,19 @@ function esportaWordPro() {
     }
 
     if(selP.length > 0) {
-        h += `<h3 class='h'>PROGRAMMA DI LAVORO</h3><table class='summary-table'><tr><th>Data</th><th>Servizio</th><th>Operaio</th></tr>`;
-        selP.forEach(p => { h += `<tr><td>${p.data}</td><td>${p.servizio}</td><td>${p.operaio||'-'}</td></tr>`; });
+        h += `<div class='section-title'>Programma di Lavoro</div><table class='summary-table'><tr><th>Data / Ora</th><th>Servizio</th><th>Operaio</th></tr>`;
+        selP.forEach(p => { h += `<tr><td>${p.data} ${p.ora||''}</td><td>${p.servizio}</td><td>${p.operaio||'-'}</td></tr>`; });
         h += `</table>`;
     }
 
     if(selO.length > 0) {
-        h += `<h3 class='h'>COMANDI & SOLLECITAZIONI</h3><table class='summary-table'><tr><th>Data</th><th>Titolo</th><th>Descrizione</th><th>Stato</th></tr>`;
-        selO.forEach(o => { h += `<tr><td>${new Date(o.data_ordine).toLocaleDateString()}</td><td>${o.titolo}</td><td>${o.descrizione}</td><td>${o.stato}</td></tr>`; });
+        h += `<div class='section-title'>Comandi & Sollecitazioni</div><table class='summary-table'><tr><th>Data / Ora</th><th>Titolo</th><th>Descrizione</th><th>Stato</th></tr>`;
+        selO.forEach(o => { h += `<tr><td>${new Date(o.data_ordine).toLocaleString()}</td><td>${o.titolo}</td><td>${o.descrizione}</td><td>${o.stato}</td></tr>`; });
         h += `</table>`;
     }
 
     if(selM.length > 0) {
-        h += `<h3 class='h'>MOVIMENTAZIONE MAGAZZINO</h3><table class='summary-table'><tr><th>Articolo</th><th>Giacenza attuale</th><th>Costo unit.</th><th>Valore totale</th></tr>`;
+        h += `<div class='section-title'>Movimentazione Magazzino</div><table class='summary-table'><tr><th>Articolo</th><th>Giacenza</th><th>Costo Unit.</th><th>Valore Totale</th></tr>`;
         selM.forEach(m => { h += `<tr><td>${m.nome_articolo}</td><td>${m.giacenza_attuale}</td><td>€${(m.prezzo||0).toFixed(2)}</td><td>€${(m.giacenza_attuale*(m.prezzo||0)).toFixed(2)}</td></tr>`; });
         h += `</table>`;
     }
