@@ -44,12 +44,7 @@
         .btn-blue { background: #1565c0; color: white; }
         .btn-green { background: #2e7d32; color: white; }
         .btn-danger { background: var(--danger); color: white; }
-        .btn-wa { background: var(--wa); color: white; }
-        .btn-mail { background: var(--mail); color: white; }
-        .btn:hover { transform: translateY(-3px); opacity: 0.9; }
-
-        .btn-icon { padding: 8px; border-radius: 10px; border: 1px solid #eee; background: white; cursor: pointer; transition: 0.2s; display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; }
-        .btn-icon:hover { background: #f5f5f5; border-color: #ddd; transform: scale(1.1); }
+        .btn:hover { transform: translateY(-3px); }
 
         .modal-ov { display: none; position: fixed; inset: 0; background: rgba(0, 15, 12, 0.95); z-index: 2000; justify-content: center; align-items: center; backdrop-filter: blur(15px); padding: 20px; }
         .modal-ov.open { display: flex; }
@@ -60,22 +55,19 @@
         .fg label { display: block; font-size: 11px; font-weight: 900; margin-bottom: 6px; color: var(--p); text-transform: uppercase; }
         .fg input, .fg select, .fg textarea { width: 100%; padding: 14px; border: 2.5px solid #e0e6e9; border-radius: 14px; font-size: 15px; font-family: inherit; font-weight: 600; box-sizing: border-box; }
         
+        .photo-input { border: 3px dashed #cfd8dc; border-radius: 20px; padding: 15px; text-align: center; cursor: pointer; background: #fafbfc; min-height: 100px; display: flex; align-items: center; justify-content: center; }
+        .photo-input img { max-height: 160px; border-radius: 12px; }
+        
+        .weather-box { background: linear-gradient(135deg, #e0f2f1 0%, #ffffff 100%); padding: 20px; border-radius: 20px; border-left: 8px solid var(--s); margin-top: 15px; display: none; }
+        .w-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 10px; font-size: 14px; font-weight: 800; }
+        
         #lock-screen { position:fixed; inset:0; background:white; z-index:9999; display:none; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:20px; }
         .admin-only { display: none; }
-        .viper-logo { font-size: 24px; font-weight: 900; color: #333; letter-spacing: 2px; border: 2px solid #333; padding: 5px 15px; display: inline-block; margin-bottom: 10px; }
     </style>
 </head>
 <body>
 
-<div id="lock-screen">
-    <div class="logo-circle" style="width:100px; height:100px; font-size:45px; margin-bottom:30px;">G</div>
-    <h1 style="letter-spacing: 3px;">GAVINA COMMANDER</h1>
-    <p id="lock-msg" style="color: #666; margin-bottom: 20px;">Inserisci il tuo nome autorizzato per accedere.</p>
-    <div id="lock-content">
-        <input type="text" id="reg-nome" placeholder="IL TUO NOME" style="padding:20px; border:3px solid var(--p); border-radius:15px; width:350px; text-align:center; font-size:22px; text-transform: uppercase;">
-        <br><br><button class="btn btn-p" onclick="richiediAccesso()">VERIFICA ACCESSO</button>
-    </div>
-</div>
+<div id="lock-screen"><div class="logo-circle" style="width:100px; height:100px; font-size:45px; margin-bottom:30px;">G</div><h1>GAVINA COMMANDER</h1><div id="lock-content"><input type="text" id="reg-nome" placeholder="NOME UTENTE" style="padding:20px; border:3px solid var(--p); border-radius:15px; width:350px; text-align:center; font-size:22px;"><br><br><button class="btn btn-p" onclick="richiediAccesso()">AUTORIZZA LOGIN</button></div></div>
 
 <header>
     <div class="logo-box">
@@ -87,7 +79,7 @@
     </div>
     <div style="display:flex; align-items:center; gap:20px;">
         <div class="lang-picker"><span class="flag" id="flag-it" onclick="setLang('it')">🇮🇹</span><span class="flag" id="flag-es" onclick="setLang('es')">🇪🇸</span></div>
-        <div class="on-badge"><div id="dot"></div><span id="st-text">ONLINE</span></div>
+        <div class="on-badge"><div id="dot"></div><span id="st-text">SYSTEM ONLINE</span></div>
         <button class="btn btn-danger" style="padding: 8px 15px; font-size: 9px;" onclick="logout()">LOGOUT</button>
     </div>
 </header>
@@ -102,35 +94,19 @@
     <div class="tab admin-only" data-t="t-prog" onclick="swTab('prog', this)">Programma Lavoro</div>
     <div class="tab admin-only" data-t="t-ord" onclick="swTab('ord', this)" style="color:var(--danger);">📢 Comandi</div>
     <div class="tab admin-only" data-t="t-mag" onclick="swTab('mag', this)">Magazzino</div>
-    <div class="tab admin-only" data-t="t-rep" onclick="swTab('rep', this)">Backup & Accessi</div>
+    <div class="tab admin-only" data-t="t-rep" onclick="swTab('rep', this)">Backup</div>
 </nav>
 
 <div class="container">
     <div id="v-reg" class="view">
         <div class="toolbar"><h2 data-t="h-reg" style="font-weight:900; color:var(--p);">Registro Manutenzioni</h2><div style="display:flex; gap:12px;"><button class="btn btn-blue admin-only" onclick="openBulkModal()">📅 Report Word Pro</button><button class="btn btn-p" onclick="openM()">+ Nuova Scheda</button></div></div>
-        <div class="card"><table><thead><tr><th><input type="checkbox" onclick="selAll(this)"></th><th data-t="th-date">Data</th><th data-t="th-bung">Alloggio</th><th>Operaio</th><th>Condividi</th><th>Azioni</th></tr></thead><tbody id="tbodyI"></tbody></table></div>
+        <div class="card"><table><thead><tr><th><input type="checkbox" onclick="selAll(this)"></th><th data-t="th-date">Data</th><th data-t="th-bung">Alloggio</th><th>Operaio</th><th>Azioni</th></tr></thead><tbody id="tbodyI"></tbody></table></div>
     </div>
 
-    <!-- VIEW: PROGRAMMA LAVORO (ADMIN ONLY) -->
+    <!-- VIEW: PROGRAMMA LAVORO -->
     <div id="v-prog" class="view admin-only" style="display:none;">
-        <div class="toolbar">
-            <h2 style="font-weight:900; color:var(--p);" data-t="t-prog">Programma di Lavoro</h2>
-            <button class="btn btn-p" onclick="openModProg()">+ Nuovo Programma</button>
-        </div>
-        <div class="card" style="padding: 20px;">
-            <div style="text-align: center; border-bottom: 2px solid #333; padding-bottom: 15px; margin-bottom: 20px;">
-                <div class="viper-logo">VIPER</div>
-                <div style="font-weight: 900; font-size: 20px; text-transform: uppercase;">PROGRAMMA DI LAVORO</div>
-            </div>
-            <table>
-                <thead><tr><th>DATA</th><th>DETTAGLIO SERVIZIO</th><th>OSSERVAZIONI</th><th class="no-print">AZIONI</th></tr></thead>
-                <tbody id="tbodyProg"></tbody>
-            </table>
-        </div>
-        <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: flex-end;">
-            <button class="btn btn-wa" onclick="shareProgWA()">📲 WhatsApp</button>
-            <button class="btn btn-mail" onclick="shareProgMail()">📧 Email</button>
-        </div>
+        <div class="toolbar"><h2>Programma di Lavoro</h2><button class="btn btn-p" onclick="openModProg()">+ Nuovo Programma</button></div>
+        <div class="card"><table><thead><tr><th>DATA</th><th>SERVIZIO</th><th>NOTE</th><th>ELIMINA</th></tr></thead><tbody id="tbodyProg"></tbody></table></div>
     </div>
 
     <!-- VIEW: COMANDI -->
@@ -144,36 +120,23 @@
             </div>
             <button class="btn btn-danger" style="width:100%; margin-top:20px; padding:18px;" onclick="inviaOrdine()">🚀 LANCIA COMANDO IMMEDIATO</button>
         </div>
-        <div class="toolbar"><h2>✅ STORICO COMANDI COMPLETATI</h2></div>
+        <div class="toolbar"><h2 style="font-size:18px;">✅ STORICO COMANDI COMPLETATI</h2></div>
         <div class="card"><table><thead><tr><th>Data</th><th>Ordine</th><th>Fatto Da</th><th>Azione</th></tr></thead><tbody id="tbodyOrdStorico"></tbody></table></div>
     </div>
 
     <!-- VIEW: MAGAZZINO -->
     <div id="v-mag" class="view admin-only" style="display:none;">
         <div class="toolbar"><h2>📦 Magazzino Materiali</h2><button class="btn btn-p" onclick="openMM()">+ Aggiungi</button></div>
-        <div class="card"><table><thead><tr><th>FOTO</th><th>NOME</th><th>QUANTITÀ</th><th>COSTO</th><th>VALORE</th><th>🗑️</th></tr></thead><tbody id="tbodyM"></tbody></table></div>
+        <div class="card"><table><thead><tr><th>FOTO</th><th>NOME</th><th>QUANTITÀ</th><th>COSTO UNIT.</th><th>VALORE</th><th>🗑️</th></tr></thead><tbody id="tbodyM"></tbody></table></div>
     </div>
 
-    <!-- VIEW: BACKUP & ACCESSI (ADMIN ONLY) -->
+    <!-- VIEW: EXCEL -->
     <div id="v-rep" class="view admin-only" style="display:none;">
-        <div class="toolbar"><h2>📊 Backup & Esportazione</h2><button class="btn btn-green" onclick="esportaExcelCompleto()">📊 EXCEL COMPLETO</button></div>
-        
-        <div class="toolbar"><h2>👥 Gestione Accessi Autorizzati</h2></div>
-        <div class="card" style="padding: 20px;">
-            <div class="form-grid" style="grid-template-columns: 2fr 1fr auto; margin-bottom: 20px;">
-                <div class="fg"><label>Nome Operaio</label><input type="text" id="new-user-name" placeholder="ES: MARIO ROSSI"></div>
-                <div class="fg"><label>Tipo</label><select id="new-user-admin"><option value="false">Operaio Semplice</option><option value="true">Admin</option></select></div>
-                <button class="btn btn-p" style="align-self: flex-end;" onclick="addUser()">+ AUTORIZZA NOME</button>
-            </div>
-            <table>
-                <thead><tr><th>Nome Utente</th><th>Ruolo</th><th>Stato</th><th>Azione</th></tr></thead>
-                <tbody id="tbodyUsers"></tbody>
-            </table>
-        </div>
+        <div class="card" style="padding:8rem; text-align:center;"><button class="btn btn-green" style="padding:15px 50px; font-size:16px;" onclick="esportaExcelCompleto()">📊 EXCEL CON TUTTE LE FOTO</button></div>
     </div>
 </div>
 
-<!-- MODALI -->
+<!-- MODALE SCHEDA GAVINA -->
 <div class="modal-ov" id="modI">
     <div class="modal">
         <span class="close-x" onclick="closeAll()">&times;</span>
@@ -181,37 +144,39 @@
         <input type="hidden" id="f-id">
         <div class="form-grid">
             <div class="fg"><label data-t="l-date">📅 Data</label><input type="date" id="f-data"></div>
-            <div class="fg"><label data-t="l-meteo">☁️ Meteo</label><div style="display:flex; gap:8px;"><input type="text" id="f-citta" value="Mont-roig del Camp"><button class="btn btn-ghost" onclick="getWeather()">CERCA</button></div><div id="wInfo" style="margin-top:10px;"></div></div>
+            <div class="fg"><label data-t="l-meteo">☁️ Meteo Locale</label><div style="display:flex; gap:8px;"><input type="text" id="f-citta" value="Mont-roig del Camp"><button class="btn btn-ghost" onclick="getWeather()">CERCA</button></div><div id="wInfo" class="weather-box"></div><input type="hidden" id="f-meteo"></div>
             <div class="fg"><label>🏠 Tipo Alloggio</label><select id="f-bung"></select></div>
-            <div class="fg"><label>📍 Unità</label><input type="text" id="f-area"></div>
-            <div class="fg" style="grid-column: span 2;"><label>📝 Descrizione</label><textarea id="f-desc" rows="3"></textarea></div>
-            <div class="fg"><label>Foto Inizio</label><input type="file" capture="environment" onchange="hPhoto(this,'p')"><div id="pr-p"></div></div>
-            <div class="fg"><label>Foto Fine</label><input type="file" capture="environment" onchange="hPhoto(this,'d')"><div id="pr-d"></div></div>
-            <div class="fg" style="grid-column: span 2;"><label>Firma</label><canvas id="cvF" width="800" height="150" style="width:100%; border:2px solid #ddd; border-radius:15px;"></canvas></div>
+            <div class="fg"><label>📍 Unità / Area</label><input type="text" id="f-area"></div>
+            <div class="fg"><label>👷 Operaio</label><input type="text" id="f-op"></div>
+            <div class="fg" style="grid-column: span 2;"><label>📝 Descrizione Lavori</label><textarea id="f-desc" rows="3"></textarea></div>
+
+            <div class="fg"><label>Foto Inizio</label><div class="photo-input" onclick="document.getElementById('i-p').click()"><input type="file" id="i-p" accept="image/*" capture="environment" hidden onchange="hPhoto(this,'p')"><div id="pr-p">📷 Foto</div></div><input type="text" id="f-note-p" placeholder="Note Inizio..." style="margin-top:10px;"></div>
+            
+            <div class="fg"><label>Foto Fine</label><div class="photo-input" onclick="document.getElementById('i-d').click()"><input type="file" id="i-d" accept="image/*" capture="environment" hidden onchange="hPhoto(this,'d')"><div id="pr-d">📸 Foto</div></div><input type="text" id="f-note-d" placeholder="Note Fine..." style="margin-top:10px;"></div>
+
+            <div class="fg" style="grid-column: span 3;"><label>Firma Approvazione</label><canvas id="cvF" width="800" height="150" style="width:100%; border:2px solid #ddd; background:#fff; border-radius:15px; touch-action:none;"></canvas></div>
         </div>
-        <button class="btn btn-p" style="width:100%; margin-top:30px; padding:20px;" onclick="saveI()">💾 SALVA E SINCRONIZZA</button>
+        <button class="btn btn-p" style="width:100%; margin-top:30px; padding:20px;" onclick="saveI()">💾 SALVA NELLA CLOUD GAVINA</button>
     </div>
 </div>
 
-<div class="modal-ov" id="modProg">
-    <div class="modal" style="max-width: 600px;">
-        <span class="close-x" onclick="closeAll()">&times;</span>
-        <h2>Nuovo Programma</h2>
-        <div class="fg"><label>Data</label><input type="date" id="p-data"></div>
-        <div class="fg"><label>Servizio</label><textarea id="p-serv" rows="4"></textarea></div>
-        <div class="fg"><label>Note</label><input type="text" id="p-oss"></div>
-        <button class="btn btn-p" style="width:100%; margin-top: 25px;" onclick="saveProg()">💾 AGGIUNGI</button>
-    </div>
-</div>
+<!-- MODALE PROGRAMMA -->
+<div class="modal-ov" id="modProg"><div class="modal" style="max-width:550px;"><span class="close-x" onclick="closeAll()">&times;</span><h2>Nuovo Programma</h2><div class="fg"><label>Data</label><input type="date" id="p-data"></div><div class="fg"><label>Servizio</label><textarea id="p-serv" rows="4"></textarea></div><div class="fg"><label>Note</label><input type="text" id="p-oss"></div><button class="btn btn-p" style="width:100%; margin-top:20px;" onclick="saveProg()">💾 AGGIUNGI</button></div></div>
+
+<!-- Altri Modali (Magazzino e Word) -->
+<div class="modal-ov" id="modM"><div class="modal" style="max-width:450px;"><span class="close-x" onclick="closeAll()">&times;</span><h2>Magazzino</h2><div class="fg"><label>Articolo</label><input type="text" id="m-nome"></div><div class="fg"><label>Quantità</label><input type="number" id="m-giac"></div><div class="fg"><label>Costo Unitario (€)</label><input type="number" id="m-prez" step="0.01"></div><button class="btn btn-p" style="width:100%; margin-top:20px;" onclick="saveM()">💾 AGGIUNGI</button></div></div>
+<div class="modal-ov" id="modBulk"><div class="modal" style="max-width:550px;"><span class="close-x" onclick="closeAll()">&times;</span><h3>Report Word Strategico</h3><textarea id="bulk-notes" placeholder="Note del report..." style="width:100%; height:130px; margin-top:10px;"></textarea><button class="btn btn-blue" style="width:100%; margin-top:20px; padding:18px;" onclick="esportaWordPro()">📝 GENERA DOCUMENTO</button></div></div>
 
 <script>
 const URL_SB = 'https://ukzconegwpoaculadefx.supabase.co';
 const KEY_SB = 'sb_publishable_dS8SzPIks90Yd1ISjsXQFQ_T8VtusA1';
-let db=supabase.createClient(URL_SB, KEY_SB), listI=[], listM=[], listOrdAttivi=[], listOrdStorico=[], listProg=[], listUsers=[], curU=null, fotoP=null, fotoD=null, firma=null;
 
-if(KEY_SB.includes('....')) {
-    console.warn("ATTENZIONE: La chiave Supabase sembra incompleta.");
-}
+const LAN = {
+    it: { 't-reg': 'Registro', 't-ord': 'Ordini', 't-mag': 'Magazzino', 't-rep': 'Backup', 'h-priority': '⚠️ GAVINA TEAM: ORDINI URGENTI', 'h-reg': 'Lavori Gavina Village', 'th-date': 'Data', 'th-bung': 'Unità', 'l-date': 'Data', 'l-meteo': 'Meteo Dettagliato', 'm-title': 'Scheda Tecnica Gavina' },
+    es: { 't-reg': 'Registro', 't-ord': 'Comandos', 't-mag': 'Almacén', 't-rep': 'Copia', 'h-priority': '⚠️ EQUIPO GAVINA: ÓRDENES', 'h-reg': 'Mantenimiento Gavina', 'th-date': 'Fecha', 'th-bung': 'Unidad', 'l-date': 'Fecha', 'l-meteo': 'Clima detalle', 'm-title': 'Ficha Tecnica Gavina' }
+};
+
+let curL='it', db=supabase.createClient(URL_SB, KEY_SB), listI=[], listM=[], listOrdAttivi=[], listOrdStorico=[], listProg=[], fotoP=null, fotoD=null, firma=null, drw=false;
 
 async function sync() {
     try {
@@ -220,112 +185,96 @@ async function sync() {
         const {data:oA} = await db.from('ordini').select('*').eq('stato','Attivo').order('data_ordine',{ascending:false});
         const {data:oS} = await db.from('ordini').select('*').eq('stato','Chiuso').order('data_ordine',{ascending:false}).limit(20);
         const {data:p} = await db.from('programma_lavoro').select('*').order('data',{ascending:false});
-        const {data:u} = await db.from('accessi').select('*').order('nome');
         
-        listI=i||[]; listM=m||[]; listOrdAttivi=oA||[]; listOrdStorico=oS||[]; listProg=p||[]; listUsers=u||[];
-        render(); document.getElementById('dot').style.background='#69f0ae';
+        listI=i||[]; listM=m||[]; listOrdAttivi=oA||[]; listOrdStorico=oS||[]; listProg=p||[]; render();
+        document.getElementById('dot').style.background='#69f0ae';
     } catch(e){}
 }
 
 function render() {
-    document.getElementById('tbodyI').innerHTML = listI.map(i => `<tr><td><input type="checkbox" class="sel-row" value="${i.id}"></td><td>${i.data}</td><td><b>${i.bungalow}</b></td><td>${i.operatore}</td><td><button onclick='shareWA("${i.id}")'>📲</button></td><td><button onclick="editI('${i.id}')">✏️</button></td></tr>`).join('');
+    document.getElementById('tbodyI').innerHTML = listI.map(i => `<tr><td><input type="checkbox" class="sel-row" value="${i.id}"></td><td>${i.data}</td><td><b>${i.bungalow}</b></td><td>${i.operatore}</td><td><button class="btn btn-ghost" onclick="editI('${i.id}')">✏️</button></td></tr>`).join('');
     document.getElementById('tbodyProg').innerHTML = listProg.map(p => `<tr><td>${p.data}</td><td>${p.servizio}</td><td>${p.osservazioni || '-'}</td><td><button onclick="delProg('${p.id}')">🗑️</button></td></tr>`).join('');
-    document.getElementById('tbodyUsers').innerHTML = listUsers.map(u => `<tr><td><b>${u.nome}</b></td><td>${u.is_admin?'Admin':'Operaio'}</td><td>${u.attivo?'✅ Attivo':'❌ Bloccato'}</td><td><button class="btn-danger" onclick="delUser('${u.id}')">ELIMINA</button></td></tr>`).join('');
-    // Altri render...
+    document.getElementById('tbodyM').innerHTML = listM.map(m => `<tr><td>-</td><td><b>${m.nome_articolo}</b></td><td>${m.giacenza_attuale}</td><td>€${(m.prezzo||0).toFixed(2)}</td><td><b>€${(m.giacenza_attuale*(m.prezzo||0)).toFixed(2)}</b></td><td><button class="btn btn-danger" onclick="delM('${m.id}')">🗑️</button></td></tr>`).join('');
+    
+    if(listOrdAttivi.length>0) {
+        document.getElementById('order-banner').style.display='block';
+        document.getElementById('order-list').innerHTML=listOrdAttivi.map(o=>`<div class="order-card"><div><b>${o.priorita}:</b> ${o.titolo}<br><small>${o.descrizione}</small></div><button class="btn btn-blue" onclick="chiudiOrdine('${o.id}')">OK FATTO</button></div>`).join('');
+    } else document.getElementById('order-banner').style.display='none';
 }
 
-async function richiediAccesso() {
-    const nome = document.getElementById('reg-nome').value.trim().toUpperCase();
-    if(!nome) return;
-
-    // EMERGENCY BYPASS PER L'AMMINISTRATORE
-    if(nome === 'ADMIR_PRO') {
-        const adminUser = { nome: 'ADMIR_PRO', is_admin: true, attivo: true, id: 'master-bypass' };
-        localStorage.setItem('gavina_user', JSON.stringify(adminUser));
-        location.reload();
-        return;
-    }
-
-    try {
-        const {data, error} = await db.from('accessi').select('*').eq('nome', nome).eq('attivo', true).single();
-        
-        if(error) {
-            console.error("Errore Supabase:", error);
-            if(error.code === 'PGRST116') {
-                alert("ACCESSO NEGATO: Nome non trovato o non autorizzato.");
-            } else {
-                alert("ERRORE DI CONNESSIONE: " + error.message + "\n\nVerifica la tua chiave API di Supabase.");
-            }
-            return;
-        }
-
-        if(data) {
-            localStorage.setItem('gavina_user', JSON.stringify(data));
-            location.reload();
-        } else {
-            alert("ACCESSO NEGATO: Nome non autorizzato o disabilitato.");
-        }
-    } catch(e) {
-        alert("ERRORE CRITICO: " + e.message);
-    }
+async function saveI() {
+    const r = { data:document.getElementById('f-data').value, bungalow:document.getElementById('f-bung').value, area:document.getElementById('f-area').value, descrizione:document.getElementById('f-desc').value, operatore:document.getElementById('f-op').value, foto_prima_url:fotoP, foto_dopo_url:fotoD, foto_prima_note:document.getElementById('f-note-p').value, foto_dopo_note:document.getElementById('f-note-d').value, firma_url:firma };
+    const id=document.getElementById('f-id').value; 
+    const {error} = id ? await db.from('interventi').update(r).eq('id',id) : await db.from('interventi').insert([r]);
+    if(error) alert("ERRORE SALVATAGGIO: " + error.message);
+    closeAll(); sync();
 }
 
-async function checkAccess() {
-    const u = JSON.parse(localStorage.getItem('gavina_user'));
-    if(u) {
-        if(u.id === 'master-bypass') {
-            document.getElementById('lock-screen').style.display='none';
-            document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'block');
-            curU = u; 
-            sync();
-            // Mostra avviso chiave incompleta se presente
-            if(KEY_SB.includes('....')) {
-                setTimeout(() => alert("AVVISO MASTER: Sei loggato in modalità emergenza, ma la chiave API di Supabase sembra incompleta. Inserisci la chiave intera nel codice per attivare la sincronizzazione."), 1000);
-            }
-            return;
-        }
-
-        try {
-            // Verifica se è ancora attivo sul DB
-            const {data, error} = await db.from('accessi').select('*').eq('id', u.id).eq('attivo', true).single();
-            if(!data || error) { 
-                console.warn("Sessione scaduta o utente disabilitato.");
-                logout(); 
-                return; 
-            }
-            document.getElementById('lock-screen').style.display='none';
-            if(data.is_admin) document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'block');
-            curU = data; sync();
-        } catch(e) {
-            // Se c'è un errore di rete ma l'utente era già loggato, permettiamo l'accesso offline se possibile
-            document.getElementById('lock-screen').style.display='none';
-            if(u.is_admin) document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'block');
-            curU = u;
-        }
-    } else document.getElementById('lock-screen').style.display='flex';
+function editI(id) {
+    const r=listI.find(x=>x.id===id); document.getElementById('f-id').value=r.id; document.getElementById('f-note-p').value=r.foto_prima_note||''; document.getElementById('f-note-d').value=r.foto_dopo_note||'';
+    fotoP=r.foto_prima_url; fotoD=r.foto_dopo_url; if(fotoP) document.getElementById('pr-p').innerHTML=`<img src="${fotoP}">`; if(fotoD) document.getElementById('pr-d').innerHTML=`<img src="${fotoD}">`;
+    document.getElementById('modI').classList.add('open'); initCv(); renderAccommodations();
 }
 
-async function addUser() {
-    const n = document.getElementById('new-user-name').value.trim().toUpperCase();
-    const a = document.getElementById('new-user-admin').value === 'true';
-    if(!n) return;
-    await db.from('accessi').insert([{ nome:n, is_admin:a, attivo:true }]);
-    sync(); document.getElementById('new-user-name').value='';
+async function getWeather() {
+    const cit=document.getElementById('f-citta').value; try {
+        const gR=await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${cit}`); const g=await gR.json();
+        const wR=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${g[0].lat}&longitude=${g[0].lon}&current_weather=true&daily=temperature_2m_max,temperature_2m_min,precipitation_sum&timezone=auto`); const w=await wR.json();
+        const meta = `<div style="font-size:18px;">${w.current_weather.weathercode === 0 ? 'Sereno' : 'Variabile'}</div><div class="w-grid"><span>Min: ${w.daily.temperature_2m_min[0]}°C</span><span>Max: ${w.daily.temperature_2m_max[0]}°C</span><span>💨 Vento: ${w.current_weather.windspeed} km/h</span></div>`;
+        document.getElementById('wInfo').style.display='block'; document.getElementById('wInfo').innerHTML=meta;
+    } catch(e){ alert("Città non trovata"); }
 }
 
-async function delUser(id) { if(confirm("Eliminare definitivamente l'accesso a questo utente?")) { await db.from('accessi').delete().eq('id',id); sync(); } }
+function hPhoto(input, tipo) { const r=new FileReader(); r.onload=(e)=>{ const i=new Image(); i.onload=()=>{ const cv=document.createElement('canvas'); const s=450/i.width; cv.width=450; cv.height=i.height*s; cv.getContext('2d').drawImage(i,0,0,450,cv.height); const res=cv.toDataURL('image/jpeg',0.5); if(tipo==='p') fotoP=res; else if(tipo==='d') fotoD=res; document.getElementById('pr-'+tipo).innerHTML=`<img src="${res}">`; }; i.src=e.target.result; }; r.readAsDataURL(input.files[0]); }
+
+function initCv() { 
+    const c=document.getElementById('cvF'); const ctx=c.getContext('2d'); 
+    ctx.clearRect(0,0,c.width,c.height); ctx.lineWidth=2; ctx.lineCap='round';
+    const p=(e)=>{ const r=c.getBoundingClientRect(); return { x:(e.clientX||(e.touches&&e.touches[0].clientX))-r.left, y:(e.clientY||(e.touches&&e.touches[0].clientY))-r.top }; }; 
+    c.onmousedown=(e)=>{ drw=true; ctx.beginPath(); ctx.moveTo(p(e).x,p(e).y); }; 
+    c.onmousemove=(e)=>{ if(!drw)return; e.preventDefault(); ctx.lineTo(p(e).x,p(e).y); ctx.stroke(); }; 
+    window.onmouseup=()=>{ if(drw){drw=false; firma=c.toDataURL();} };
+    c.ontouchstart=c.onmousedown; c.ontouchmove=c.onmousemove;
+}
+
+function setLang(l) { curL=l; renderAccommodations(); }
+function renderAccommodations() { 
+    const c = { it:['TENDE','MOBILHOMES','BUNGALOWS','TINY','CABINS','PIAZZOLE'], es:['TIENDAS','MOBILHOMES','BUNGALOWS','TINY','CABINS','PARCELAS'] }[curL] || ['-']; 
+    document.getElementById('f-bung').innerHTML = `<option value="">--</option><optgroup label="${c[0]}"><option>Junior</option><option>Kenya</option><option>Safari+</option></optgroup><optgroup label="${c[1]}"><option>Tarraco 6</option><option>Costa</option></optgroup><optgroup label="${c[2]}"><option>Dune</option><option>Beach</option></optgroup>`; 
+}
+
 async function saveProg() { 
     const {error} = await db.from('programma_lavoro').insert([{ data:document.getElementById('p-data').value, servizio:document.getElementById('p-serv').value, osservazioni:document.getElementById('p-oss').value }]); 
-    if(error) alert("ERRORE: Assicurati di aver creato la tabella programma_lavoro in Supabase!");
+    if(error) alert("ERRORE: " + error.message);
     closeAll(); sync(); 
 }
 async function delProg(id) { await db.from('programma_lavoro').delete().eq('id',id); sync(); }
 
-function logout() { localStorage.removeItem('gavina_user'); location.reload(); }
+function logout() { localStorage.removeItem('admin_master'); location.reload(); }
+function openM(){ document.getElementById('f-id').value=''; document.getElementById('f-data').value=new Date().toISOString().split('T')[0]; document.getElementById('modI').classList.add('open'); initCv(); renderAccommodations(); }
+function openModProg(){ document.getElementById('modProg').classList.add('open'); }
+function openBulkModal(){ document.getElementById('modBulk').classList.add('open'); }
 function closeAll(){ document.querySelectorAll('.modal-ov').forEach(m=>m.classList.remove('open')); }
 function swTab(v,b){ document.querySelectorAll('.view').forEach(x=>x.style.display='none'); document.getElementById('v-'+v).style.display='block'; document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active')); b.classList.add('active'); sync(); }
-function openM(){ document.getElementById('f-id').value=''; document.getElementById('f-data').value=new Date().toISOString().split('T')[0]; document.getElementById('modI').classList.add('open'); }
-function openModProg(){ document.getElementById('modProg').classList.add('open'); }
+function selAll(cb){ document.querySelectorAll('.sel-row').forEach(x=>x.checked=cb.checked); }
+
+async function checkAccess(){ 
+    if(localStorage.getItem('admin_master')==='true'){
+        document.getElementById('lock-screen').style.display='none'; 
+        document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'block');
+        sync(); return;
+    } 
+    document.getElementById('lock-screen').style.display='flex'; 
+}
+async function richiediAccesso(){ 
+    const n = document.getElementById('reg-nome').value.toUpperCase();
+    if(n === 'ADMIN_PRO' || n === 'ADMIR_PRO'){
+        localStorage.setItem('admin_master','true'); 
+        location.reload();
+    } else {
+        alert("Accesso Negato");
+    }
+}
 
 checkAccess(); setInterval(sync, 20000);
 </script>
