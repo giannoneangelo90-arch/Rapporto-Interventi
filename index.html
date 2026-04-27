@@ -93,7 +93,8 @@
         <div class="toolbar">
             <h2 data-t="h-reg">Registro Manutenzioni</h2>
             <div style="display:flex; gap:10px;">
-                <button class="btn btn-wa admin-only" onclick="shareAllWA_I()">📲 Condividi Tutto</button>
+                <button class="btn btn-wa admin-only" onclick="shareAllWA_I()">📲 WhatsApp</button>
+                <button class="btn btn-mail admin-only" onclick="shareAllEmail_I()">📧 Email</button>
                 <button class="btn btn-blue admin-only" onclick="openBulkModal()">📅 Report Word Pro</button>
                 <button class="btn btn-p" onclick="openM()">+ Nuova Scheda</button>
             </div>
@@ -118,20 +119,22 @@
         <div class="toolbar">
             <h2>📢 Comandi & Sollecitazioni</h2>
             <div style="display:flex; gap:10px;">
-                <button class="btn btn-blue admin-only" onclick="openBulkModal()">📅 Report Word Pro</button>
                 <button class="btn btn-wa" onclick="shareAllWA_O()">📲 WhatsApp</button>
+                <button class="btn btn-mail" onclick="shareAllEmail_O()">📧 Email</button>
+                <button class="btn btn-blue admin-only" onclick="openBulkModal()">📅 Report Word Pro</button>
                 <button class="btn btn-p" onclick="openModOrd()">+ Nuovo Comando</button>
             </div>
         </div>
-        <div class="card"><table><thead><tr><th><input type="checkbox" onclick="selAll('.sel-o')"></th><th>Data</th><th>Comando / Anteprima</th><th>Stato / Riscontro</th><th>Azioni</th></tr></thead><tbody id="tbodyOrd"></tbody></table></div>
+        <div class="card"><table><thead><tr><th><input type="checkbox" onclick="selAll('.sel-o')"></th><th>Data / Ora</th><th>Comando / Anteprima</th><th>Stato / Riscontro</th><th>Azioni</th></tr></thead><tbody id="tbodyOrd"></tbody></table></div>
     </div>
     <!-- VIEW: MAGAZZINO -->
     <div id="v-mag" class="view admin-only" style="display:none;">
         <div class="toolbar">
             <h2>📦 Magazzino</h2>
             <div style="display:flex; gap:10px;">
-                <button class="btn btn-blue admin-only" onclick="openBulkModal()">📅 Report Word Pro</button>
                 <button class="btn btn-wa" onclick="shareAllWA_M()">📲 WhatsApp</button>
+                <button class="btn btn-mail" onclick="shareAllEmail_M()">📧 Email</button>
+                <button class="btn btn-blue admin-only" onclick="openBulkModal()">📅 Report Word Pro</button>
                 <button class="btn btn-p" onclick="openModM()">+ Aggiungi</button>
             </div>
         </div>
@@ -206,16 +209,16 @@ async function sync() {
 
 function render() {
     // REGISTRO
-    document.getElementById('tbodyI').innerHTML = listI.map(i => `<tr><td><input type="checkbox" class="sel-i" value="${i.id}"></td><td><img src="${i.foto_dopo_url||''}" class="logo-img" style="width:40px;height:40px;cursor:pointer;" onclick="editI('${i.id}')"></td><td>${i.data}</td><td><b>${i.bungalow}</b></td><td>${i.operatore}</td><td><div style="display:flex;gap:5px;"><button class="btn" onclick="shareWA_I('${i.id}')">📲</button><button class="btn" onclick="editI('${i.id}')">✏️</button><button class="btn btn-danger" onclick="delI('${i.id}')">🗑️</button></div></td></tr>`).join('');
+    document.getElementById('tbodyI').innerHTML = listI.map(i => `<tr><td><input type="checkbox" class="sel-i" value="${i.id}"></td><td><img src="${i.foto_dopo_url||''}" class="logo-img" style="width:40px;height:40px;cursor:pointer;" onclick="editI('${i.id}')"></td><td>${i.data} <small>${i.ora||''}</small></td><td><b>${i.bungalow}</b></td><td>${i.operatore}</td><td><div style="display:flex;gap:5px;"><button class="btn" onclick="shareWA_I('${i.id}')">📲</button><button class="btn" onclick="editI('${i.id}')">✏️</button><button class="btn btn-danger" onclick="delI('${i.id}')">🗑️</button></div></td></tr>`).join('');
     
     // PROGRAMMA
-    document.getElementById('tbodyProg').innerHTML = listProg.map(p => `<tr><td><input type="checkbox" class="sel-p" value="${p.id}"></td><td>${p.data}</td><td>${p.servizio}</td><td><b>${p.operaio||'-'}</b></td><td><div style="display:flex;gap:5px;"><button class="btn" onclick="shareWA_P('${p.id}')">📲</button><button class="btn" onclick="editProg('${p.id}')">✏️</button><button class="btn btn-danger" onclick="delProg('${p.id}')">🗑️</button></div></td></tr>`).join('');
+    document.getElementById('tbodyProg').innerHTML = listProg.map(p => `<tr><td><input type="checkbox" class="sel-p" value="${p.id}"></td><td>${p.data} <small>${p.ora||''}</small></td><td>${p.servizio}</td><td><b>${p.operaio||'-'}</b></td><td><div style="display:flex;gap:5px;"><button class="btn" onclick="shareWA_P('${p.id}')">📲</button><button class="btn" onclick="editProg('${p.id}')">✏️</button><button class="btn btn-danger" onclick="delProg('${p.id}')">🗑️</button></div></td></tr>`).join('');
     
     // MAGAZZINO
     document.getElementById('tbodyM').innerHTML = listM.map(m => `<tr><td><input type="checkbox" class="sel-m" value="${m.id}"></td><td><img src="${m.foto_url||''}" class="logo-img" style="width:40px;height:40px;"></td><td><b>${m.nome_articolo}</b></td><td>${m.giacenza_attuale}</td><td><div style="display:flex;gap:5px;"><button class="btn" onclick="shareWA_M('${m.id}')">📲</button><button class="btn" onclick="editM('${m.id}')">✏️</button><button class="btn btn-danger" onclick="delM('${m.id}')">🗑️</button></div></td></tr>`).join('');
     
     // COMANDI
-    document.getElementById('tbodyOrd').innerHTML = listOrd.map(o => `<tr><td><input type="checkbox" class="sel-o" value="${o.id}"></td><td>${new Date(o.data_ordine).toLocaleDateString()}</td><td><b>${o.titolo}</b><br><small>${o.descrizione.substring(0,30)}...</small></td><td><span class="badge-status ${o.stato==='Chiuso'?'status-done':'status-todo'}">${o.stato==='Chiuso'?'FATTO':'DA REALIZZARE'}</span><br>${o.stato!=='Chiuso' ? `<button class="btn btn-blue" style="margin-top:5px;padding:4px 8px;" onclick="chiudiOrdine('${o.id}')">OK FATTO</button>` : `<small>${o.completato_da}</small>`}</td><td><div style="display:flex;gap:5px;"><button class="btn" onclick="shareWA_O('${o.id}')">📲</button><button class="btn" onclick="editOrd('${o.id}')">✏️</button><button class="btn btn-danger" onclick="delOrd('${o.id}')">🗑️</button></div></td></tr>`).join('');
+    document.getElementById('tbodyOrd').innerHTML = listOrd.map(o => `<tr><td><input type="checkbox" class="sel-o" value="${o.id}"></td><td>${new Date(o.data_ordine).toLocaleDateString()} <small>${new Date(o.data_ordine).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</small></td><td><b>${o.titolo}</b><br><small>${o.descrizione.substring(0,30)}...</small></td><td><span class="badge-status ${o.stato==='Chiuso'?'status-done':'status-todo'}">${o.stato==='Chiuso'?'FATTO':'DA REALIZZARE'}</span><br>${o.stato!=='Chiuso' ? `<button class="btn btn-blue" style="margin-top:5px;padding:4px 8px;" onclick="chiudiOrdine('${o.id}')">OK FATTO</button>` : `<small>${o.completato_da}</small>`}</td><td><div style="display:flex;gap:5px;"><button class="btn" onclick="shareWA_O('${o.id}')">📲</button><button class="btn" onclick="editOrd('${o.id}')">✏️</button><button class="btn btn-danger" onclick="delOrd('${o.id}')">🗑️</button></div></td></tr>`).join('');
     
     // ACCESSI
     document.getElementById('tbodyAcc').innerHTML = listAcc.map(a => `<tr><td><b>${a.nome}</b></td><td>${a.attivo?'✅ ATTIVO':'❌ BLOCCATO'}</td><td><div style="display:flex;gap:5px;"><button class="btn btn-p" onclick="toggleAcc('${a.id}',${a.attivo})">CAMBIA</button><button class="btn btn-danger" onclick="delAcc('${a.id}')">🗑️</button></div></td></tr>`).join('');
@@ -249,16 +252,17 @@ function editI(id) {
 }
 
 async function saveI() {
-    const r={data:document.getElementById('f-data').value, bungalow:document.getElementById('f-bung').value, area:document.getElementById('f-area').value, descrizione:document.getElementById('f-desc').value, operatore:document.getElementById('f-op').value, foto_prima_url:fotoP, foto_dopo_url:fotoD, foto_prima_note:document.getElementById('f-note-p').value, foto_dopo_note:document.getElementById('f-note-d').value, firma_url:firma, meteo:document.getElementById('f-meteo-val').value};
+    const time = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+    const r={data:document.getElementById('f-data').value, ora:time, bungalow:document.getElementById('f-bung').value, area:document.getElementById('f-area').value, descrizione:document.getElementById('f-desc').value, operatore:document.getElementById('f-op').value, foto_prima_url:fotoP, foto_dopo_url:fotoD, foto_prima_note:document.getElementById('f-note-p').value, foto_dopo_note:document.getElementById('f-note-d').value, firma_url:firma, meteo:document.getElementById('f-meteo-val').value};
     const id=document.getElementById('f-id').value; if(id) await db.from('interventi').update(r).eq('id',id); else await db.from('interventi').insert([r]);
     closeAll(); sync();
 }
 
 function esportaWordPro() {
-    const selI = Array.from(document.querySelectorAll('.sel-i:checked')).map(x=>listI.find(i=>i.id===x.value));
-    const selP = Array.from(document.querySelectorAll('.sel-p:checked')).map(x=>listProg.find(p=>p.id===x.value));
-    const selO = Array.from(document.querySelectorAll('.sel-o:checked')).map(x=>listOrd.find(o=>o.id===x.value));
-    const selM = Array.from(document.querySelectorAll('.sel-m:checked')).map(x=>listM.find(m=>m.id===x.value));
+    const selI = Array.from(document.querySelectorAll('.sel-i:checked')).map(x=>listI.find(i=>String(i.id)===x.value));
+    const selP = Array.from(document.querySelectorAll('.sel-p:checked')).map(x=>listProg.find(p=>String(p.id)===x.value));
+    const selO = Array.from(document.querySelectorAll('.sel-o:checked')).map(x=>listOrd.find(o=>String(o.id)===x.value));
+    const selM = Array.from(document.querySelectorAll('.sel-m:checked')).map(x=>listM.find(m=>String(m.id)===x.value));
 
     let h = `<html><head><meta charset='utf-8'><style>
         body{font-family:Arial, sans-serif; color:#333;} 
@@ -293,7 +297,7 @@ function esportaWordPro() {
         selI.forEach(i => {
             h += `<div class='item-box'>
                 <table class='info-table'>
-                    <tr><td width='30%'><b>DATA:</b></td><td>${i.data}</td></tr>
+                    <tr><td width='30%'><b>DATA E ORA:</b></td><td>${i.data} ${i.ora||''}</td></tr>
                     <tr><td><b>METEO LOCALE:</b></td><td>${i.meteo || '-'}</td></tr>
                     <tr><td><b>🏠 ALLOGGIO / AREA:</b></td><td>${i.bungalow}</td></tr>
                     <tr><td><b>📍 UNITÀ SPECIFICA:</b></td><td>${i.area || '-'}</td></tr>
@@ -381,26 +385,33 @@ function shareAllWA_P() {
     list.forEach(p=>msg+= "📅 *" + p.data + "*: " + p.servizio + " (" + (p.operaio||"-") + ")\n");
     window.open("https://wa.me/?text=" + encodeURIComponent(msg));
 }
+function shareAllEmail_I() {
+    const sel = Array.from(document.querySelectorAll('.sel-i:checked')).map(x=>listI.find(i=>String(i.id)===x.value));
+    if(sel.length===0) { alert("Seleziona interventi"); return; }
+    let body = "GAVINA VILLAGE - RIEPILOGO LAVORI\n\n";
+    sel.forEach(i => { body += `ALLOGGIO: ${i.bungalow} (${i.data} ${i.ora||''})\nDESCRIZIONE: ${i.descrizione}\n\n`; });
+    window.location.href = `mailto:?subject=Riepilogo Lavori Gavina&body=${encodeURIComponent(body)}`;
+}
 function shareAllEmail_P() {
-    const sel = Array.from(document.querySelectorAll('.sel-p:checked')).map(x=>listProg.find(p=>p.id===x.value));
+    const sel = Array.from(document.querySelectorAll('.sel-p:checked')).map(x=>listProg.find(p=>String(p.id)===x.value));
     const list = sel.length > 0 ? sel : listProg;
     let body="GAVINA: PROGRAMMA DI LAVORO\n\n";
-    list.forEach(p=>body+=`DATA: ${p.data}\nSERVIZIO: ${p.servizio}\nOPERAIO: ${p.operaio||'-'}\n\n`);
+    list.forEach(p=>body+=`DATA: ${p.data} ${p.ora||''}\nSERVIZIO: ${p.servizio}\nOPERAIO: ${p.operaio||'-'}\n\n`);
     window.location.href = `mailto:?subject=Programma Lavoro Gavina&body=${encodeURIComponent(body)}`;
 }
-function shareAllWA_M() {
-    const sel = Array.from(document.querySelectorAll('.sel-m:checked')).map(x=>listM.find(m=>m.id===x.value));
-    if(sel.length===0) { alert("Seleziona materiali"); return; }
-    let msg = "*GAVINA: RIEPILOGO MAGAZZINO*\n\n";
-    sel.forEach(m => { msg += `📦 *${m.nome_articolo}*: ${m.giacenza_attuale}\n`; });
-    window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`);
-}
-function shareAllWA_O() {
-    const sel = Array.from(document.querySelectorAll('.sel-o:checked')).map(x=>listOrd.find(o=>o.id===x.value));
+function shareAllEmail_O() {
+    const sel = Array.from(document.querySelectorAll('.sel-o:checked')).map(x=>listOrd.find(o=>String(o.id)===x.value));
     if(sel.length===0) { alert("Seleziona comandi"); return; }
-    let msg = "*GAVINA: RIEPILOGO COMANDI*\n\n";
-    sel.forEach(o => { msg += `🚀 *${o.titolo}*: ${o.stato}\n`; });
-    window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`);
+    let body = "GAVINA: RIEPILOGO COMANDI\n\n";
+    sel.forEach(o => { body += `DATA: ${new Date(o.data_ordine).toLocaleString()}\nTITOLO: ${o.titolo}\nSTATO: ${o.stato}\n\n`; });
+    window.location.href = `mailto:?subject=Riepilogo Comandi Gavina&body=${encodeURIComponent(body)}`;
+}
+function shareAllEmail_M() {
+    const sel = Array.from(document.querySelectorAll('.sel-m:checked')).map(x=>listM.find(m=>String(m.id)===x.value));
+    if(sel.length===0) { alert("Seleziona materiali"); return; }
+    let body = "GAVINA: RIEPILOGO MAGAZZINO\n\n";
+    sel.forEach(m => { body += `ARTICOLO: ${m.nome_articolo}\nGIACENZA: ${m.giacenza_attuale}\n\n`; });
+    window.location.href = `mailto:?subject=Riepilogo Magazzino Gavina&body=${encodeURIComponent(body)}`;
 }
 
 async function delI(id){ if(confirm("Eliminare?")) { await db.from('interventi').delete().eq('id',id); sync(); } }
@@ -411,8 +422,9 @@ async function delAcc(id){ if(confirm("Eliminare?")) { await db.from('accessi').
 async function toggleAcc(id,s){ await db.from('accessi').update({attivo:!s}).eq('id',id); sync(); }
 
 async function saveProg() {
+    const time = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
     const id = document.getElementById('p-id').value;
-    const r = { data: document.getElementById('p-data').value, servizio: document.getElementById('p-serv').value, operaio: document.getElementById('p-op').value };
+    const r = { data: document.getElementById('p-data').value, ora: time, servizio: document.getElementById('p-serv').value, operaio: document.getElementById('p-op').value };
     if(id) await db.from('programma_lavoro').update(r).eq('id',id); else await db.from('programma_lavoro').insert([r]);
     closeAll(); sync();
 }
