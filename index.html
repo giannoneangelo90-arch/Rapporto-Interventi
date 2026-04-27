@@ -218,116 +218,30 @@ async function sync() {
 }
 
 function render() {
-
     // REGISTRO
-    document.getElementById('tbodyI').innerHTML = listI.map(i => `
-        <tr>
-            <td><input type="checkbox" class="sel-i" value="${i.id}"></td>
-            <td><img src="${i.foto_dopo_url || ''}" class="logo-img" style="width:40px;height:40px;cursor:pointer;" onclick="editI('${i.id}')"></td>
-            <td>${i.data} <small>${i.ora || ''}</small></td>
-            <td><b>${i.bungalow}</b></td>
-            <td>${i.operatore}</td>
-            <td>
-                <div style="display:flex;gap:5px;">
-                    <button class="btn" onclick="shareWA_I('${i.id}')">📲</button>
-                    <button class="btn" onclick="editI('${i.id}')">✏️</button>
-                    <button class="btn btn-danger" onclick="delI('${i.id}')">🗑️</button>
-                </div>
-            </td>
-        </tr>
-    `).join('');
-
+    document.getElementById('tbodyI').innerHTML = listI.map(i => <tr><td><input type="checkbox" class="sel-i" value="${i.id}"></td><td><img src="${i.foto_dopo_url||''}" class="logo-img" style="width:40px;height:40px;cursor:pointer;" onclick="editI('${i.id}')"></td><td>${i.data} <small>${i.ora||''}</small></td><td><b>${i.bungalow}</b></td><td>${i.operatore}</td><td><div style="display:flex;gap:5px;"><button class="btn" onclick="shareWA_I('${i.id}')">📲</button><button class="btn" onclick="editI('${i.id}')">✏️</button><button class="btn btn-danger" onclick="delI('${i.id}')">🗑️</button></div></td></tr>).join('');
+    
     // PROGRAMMA
-    document.getElementById('tbodyProg').innerHTML = listProg.map(p => `
-        <tr>
-            <td><input type="checkbox" class="sel-p" value="${p.id}"></td>
-            <td>${p.data} <small>${p.ora || ''}</small></td>
-            <td>${p.servizio}</td>
-            <td><b>${p.operaio || '-'}</b></td>
-            <td>
-                <div style="display:flex;gap:5px;">
-                    <button class="btn" onclick="shareWA_P('${p.id}')">📲</button>
-                    <button class="btn" onclick="editProg('${p.id}')">✏️</button>
-                    <button class="btn btn-danger" onclick="delProg('${p.id}')">🗑️</button>
-                </div>
-            </td>
-        </tr>
-    `).join('');
-
+    document.getElementById('tbodyProg').innerHTML = listProg.map(p => <tr><td><input type="checkbox" class="sel-p" value="${p.id}"></td><td>${p.data} <small>${p.ora||''}</small></td><td>${p.servizio}</td><td><b>${p.operaio||'-'}</b></td><td><div style="display:flex;gap:5px;"><button class="btn" onclick="shareWA_P('${p.id}')">📲</button><button class="btn" onclick="editProg('${p.id}')">✏️</button><button class="btn btn-danger" onclick="delProg('${p.id}')">🗑️</button></div></td></tr>).join('');
+    
     // MAGAZZINO
-    document.getElementById('tbodyM').innerHTML = listM.map(m => `
-        <tr>
-            <td><input type="checkbox" class="sel-m" value="${m.id}"></td>
-            <td><img src="${m.foto_url || ''}" class="logo-img" style="width:40px;height:40px;"></td>
-            <td><b>${m.nome_articolo}</b></td>
-            <td>${m.giacenza_attuale}</td>
-            <td>
-                <div style="display:flex;gap:5px;">
-                    <button class="btn" onclick="shareWA_M('${m.id}')">📲</button>
-                    <button class="btn" onclick="editM('${m.id}')">✏️</button>
-                    <button class="btn btn-danger" onclick="delM('${m.id}')">🗑️</button>
-                </div>
-            </td>
-        </tr>
-    `).join('');
-
+    document.getElementById('tbodyM').innerHTML = listM.map(m => <tr><td><input type="checkbox" class="sel-m" value="${m.id}"></td><td><img src="${m.foto_url||''}" class="logo-img" style="width:40px;height:40px;"></td><td><b>${m.nome_articolo}</b></td><td>${m.giacenza_attuale}</td><td><div style="display:flex;gap:5px;"><button class="btn" onclick="shareWA_M('${m.id}')">📲</button><button class="btn" onclick="editM('${m.id}')">✏️</button><button class="btn btn-danger" onclick="delM('${m.id}')">🗑️</button></div></td></tr>).join('');
+    
     // COMANDI
-    document.getElementById('tbodyOrd').innerHTML = listOrd.map(o => `
-        <tr>
-            <td><input type="checkbox" class="sel-o" value="${o.id}"></td>
-            <td>${new Date(o.data_ordine).toLocaleDateString()}</td>
-            <td><b>${o.titolo}</b><br><small>${o.descrizione.substring(0,30)}...</small></td>
-            <td>
-                <span class="badge-status ${o.stato === 'Chiuso' ? 'status-done' : 'status-todo'}">
-                    ${o.stato === 'Chiuso' ? 'FATTO' : 'DA REALIZZARE'}
-                </span>
-            </td>
-            <td>
-                <div style="display:flex;gap:5px;">
-                    <button class="btn" onclick="shareWA_O('${o.id}')">📲</button>
-                    <button class="btn" onclick="editOrd('${o.id}')">✏️</button>
-                    <button class="btn btn-danger" onclick="delOrd('${o.id}')">🗑️</button>
-                </div>
-            </td>
-        </tr>
-    `).join('');
-
+    document.getElementById('tbodyOrd').innerHTML = listOrd.map(o => <tr><td><input type="checkbox" class="sel-o" value="${o.id}"></td><td>${new Date(o.data_ordine).toLocaleDateString()} <small>${new Date(o.data_ordine).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</small></td><td><b>${o.titolo}</b><br><small>${o.descrizione.substring(0,30)}...</small></td><td><span class="badge-status ${o.stato==='Chiuso'?'status-done':'status-todo'}">${o.stato==='Chiuso'?'FATTO':'DA REALIZZARE'}</span><br>${o.stato!=='Chiuso' ? `<button class="btn btn-blue" style="margin-top:5px;padding:4px 8px;" onclick="chiudiOrdine('${o.id}')">OK FATTO</button> : <small>${o.completato_da}</small>}</td><td><div style="display:flex;gap:5px;"><button class="btn" onclick="shareWA_O('${o.id}')">📲</button><button class="btn" onclick="editOrd('${o.id}')">✏️</button><button class="btn btn-danger" onclick="delOrd('${o.id}')">🗑️</button></div></td></tr>`).join('');
+    
     // ACCESSI
-    document.getElementById('tbodyAcc').innerHTML = listAcc.map(a => `
-        <tr>
-            <td><b>${a.nome}</b></td>
-            <td>${a.attivo ? '✅ ATTIVO' : '❌ BLOCCATO'}</td>
-            <td>
-                <div style="display:flex;gap:5px;">
-                    <button class="btn btn-p" onclick="toggleAcc('${a.id}', ${a.attivo})">CAMBIA</button>
-                    <button class="btn btn-danger" onclick="delAcc('${a.id}')">🗑️</button>
-                </div>
-            </td>
-        </tr>
-    `).join('');
+    document.getElementById('tbodyAcc').innerHTML = listAcc.map(a => <tr><td><b>${a.nome}</b></td><td>${a.attivo?'✅ ATTIVO':'❌ BLOCCATO'}</td><td><div style="display:flex;gap:5px;"><button class="btn btn-p" onclick="toggleAcc('${a.id}',${a.attivo})">CAMBIA</button><button class="btn btn-danger" onclick="delAcc('${a.id}')">🗑️</button></div></td></tr>).join('');
 }
 
 async function getWeather() {
-    const cit = document.getElementById('f-citta').value;
-
-    try {
-        const gR = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${cit}`);
-        const g = await gR.json();
-
-        const wR = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${g[0].lat}&longitude=${g[0].lon}&current_weather=true&hourly=precipitation&daily=temperature_2m_max,temperature_2m_min&timezone=auto`);
-        const w = await wR.json();
-
-        const pVal = w.hourly.precipitation[0];
-        let pT = pVal === 0 ? "☀️ Sereno" : pVal < 2 ? "🌦️ Pioggia Debole" : "🌧️ Forte";
-
-        const meta = `🌡️ ${w.daily.temperature_2m_min[0]}°C / ${w.daily.temperature_2m_max[0]}°C | 💨 ${w.current_weather.windspeed}km/h | ${pT}`;
-
-        document.getElementById('wInfo').innerHTML = meta;
-        document.getElementById('f-meteo-val').value = meta;
-
-    } catch (e) {
-        alert("Errore Meteo");
-    }
+    const cit=document.getElementById('f-citta').value; try {
+        const gR=await fetch(https://nominatim.openstreetmap.org/search?format=json&q=${cit}); const g=await gR.json();
+        const wR=await fetch(https://api.open-meteo.com/v1/forecast?latitude=${g[0].lat}&longitude=${g[0].lon}&current_weather=true&hourly=precipitation&daily=temperature_2m_max,temperature_2m_min&timezone=auto); const w=await wR.json();
+        const pVal = w.hourly.precipitation[0]; let pT = pVal===0?"☀️ Sereno":pVal<2?"🌦️ Pioggia Debole":"🌧️ Forte";
+        const meta = 🌡️ ${w.daily.temperature_2m_min[0]}°C / ${w.daily.temperature_2m_max[0]}°C | 💨 ${w.current_weather.windspeed}km/h | ${pT};
+        document.getElementById('wInfo').innerHTML = meta; document.getElementById('f-meteo-val').value = meta;
+    } catch(e){ alert("Errore Meteo"); }
 }
 
 function editI(id) { 
