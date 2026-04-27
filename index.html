@@ -1,520 +1,119 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GAVINA VILLAGE | Master Commander 3.9</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&display=swap" rel="stylesheet">
-    <style>
-        :root { --p: #004d40; --s: #028574; --bg: #f2f7f7; --danger: #d32f2f; --warn: #ffca28; --brand: #ffca28; --wa: #25D366; --mail: #0078d4; }
-        body { font-family: 'Outfit', sans-serif; background: var(--bg); color: #1a232f; margin: 0; padding-bottom: 60px; }
-        header { background: var(--p); color: white; padding: 1.2rem 2.5rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 5px solid var(--brand); position: sticky; top: 0; z-index: 1000; box-shadow: 0 4px 20px rgba(0,0,0,0.15); }
-        .logo-box { display: flex; align-items: center; gap: 15px; }
-        .logo-img { width: 55px; height: 55px; border-radius: 50%; border: 2.5px solid var(--brand); background: white; object-fit: contain; }
-        .lang-picker { display: flex; gap: 10px; margin-right: 20px; }
-        .flag { cursor: pointer; font-size: 22px; filter: grayscale(1); transition: 0.3s; }
-        .flag.active { filter: grayscale(0); transform: scale(1.2); }
-        .on-badge { font-size: 11px; font-weight: 800; background: rgba(255,255,255,0.12); padding: 8px 18px; border-radius: 30px; display: flex; align-items: center; gap: 8px; }
-        #dot { width: 10px; height: 10px; border-radius: 50%; background: #69f0ae; }
-        nav.tabs { background: white; display: flex; gap: 20px; padding: 0 2.5rem; box-shadow: 0 2px 10px rgba(0,0,0,0.05); overflow-x: auto; position: sticky; top: 82px; z-index: 950; }
-        .tab { padding: 1.3rem 0; cursor: pointer; font-weight: 800; color: #b0bec5; border-bottom: 4px solid transparent; text-transform: uppercase; font-size: 11px; white-space: nowrap; transition: 0.3s; }
-        .tab.active { color: var(--p); border-bottom-color: var(--p); }
-        .container { max-width: 1450px; margin: 30px auto; padding: 0 20px; }
-        .card { background: white; border-radius: 22px; border: 1px solid #cfd8dc; box-shadow: 0 10px 40px rgba(0,0,0,0.04); overflow: hidden; margin-bottom: 30px; }
-        .toolbar { padding: 1.5rem 2.5rem; background: #fff; border-bottom: 1px solid #f0f3f5; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; }
-        table { width: 100%; border-collapse: collapse; }
-        th { background: #f8fafb; padding: 18px; text-align: left; font-size: 11px; color: #546e7a; text-transform: uppercase; font-weight: 900; border-bottom: 2px solid #edf1f2; }
-        td { padding: 15px 18px; border-bottom: 1px solid #f1f4f6; font-size: 14px; font-weight: 500; }
-        .btn { padding: 10px 18px; border-radius: 10px; border: none; cursor: pointer; font-weight: 900; font-size: 10px; display: inline-flex; align-items: center; gap: 6px; text-transform: uppercase; transition: 0.2s; }
-        .btn-p { background: var(--p); color: white; }
-        .btn-blue { background: #1565c0; color: white; }
-        .btn-danger { background: var(--danger); color: white; }
-        .btn-wa { background: var(--wa); color: white; }
-        .btn-mail { background: var(--mail); color: white; }
-        .btn-ghost { background: #f1f4f6; color: var(--p); }
-        .btn:hover { transform: translateY(-2px); }
-        .modal-ov { display: none; position: fixed; inset: 0; background: rgba(0, 15, 12, 0.95); z-index: 2000; justify-content: center; align-items: center; backdrop-filter: blur(15px); padding: 20px; }
-        .modal-ov.open { display: flex; }
-        .modal { background: white; border-radius: 32px; width: 100%; max-width: 1100px; padding: 2.5rem; max-height: 94vh; overflow-y: auto; position: relative; }
-        .close-x { position: absolute; top: 20px; right: 30px; font-size: 40px; cursor: pointer; color: #ccc; }
-        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px; }
-        .fg label { display: block; font-size: 11px; font-weight: 900; margin-bottom: 6px; color: var(--p); text-transform: uppercase; }
-        .fg input, .fg select, .fg textarea { width: 100%; padding: 12px; border: 2.5px solid #e0e6e9; border-radius: 12px; font-size: 14px; font-family: inherit; font-weight: 600; box-sizing: border-box; }
-        .photo-box { border: 3px dashed #cfd8dc; border-radius: 20px; padding: 15px; text-align: center; cursor: pointer; background: #fafbfc; min-height: 120px; display: flex; align-items: center; justify-content: center; }
-        .photo-box img { max-height: 180px; border-radius: 12px; }
-        #lock-screen { position:fixed; inset:0; background:white; z-index:9999; display:none; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:20px; }
-        .admin-only { display: none; }
-        .badge-status { padding: 5px 10px; border-radius: 8px; font-size: 10px; font-weight: 900; text-transform: uppercase; }
-        .status-todo { background: #fff3e0; color: #ef6c00; }
-        .status-done { background: #e8f5e9; color: #2e7d32; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>GAVINA MASTER COMMANDER 6.0</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<style>
+body{font-family:Arial;background:#f2f7f7;margin:0;}
+header{background:#004d40;color:white;padding:15px;font-weight:bold;}
+.container{padding:20px;}
+.card{background:white;padding:20px;border-radius:15px;margin-bottom:20px;}
+
+.kpi{display:flex;gap:10px;}
+.kpi div{flex:1;background:#004d40;color:white;padding:15px;border-radius:10px;text-align:center;}
+
+button{padding:10px;margin:5px;border:none;border-radius:8px;cursor:pointer;}
+</style>
 </head>
+
 <body>
 
-<div id="lock-screen">
-    <img src="https://i.postimg.cc/mD8zM6T1/GAVINA-LOGO.png" style="width:140px; margin-bottom:30px;">
-    <h1 style="color:var(--p); font-weight:900;">GAVINA COMMANDER</h1>
-    <input type="text" id="reg-nome" placeholder="IL TUO NOME" style="padding:20px; border:3px solid var(--p); border-radius:15px; width:350px; text-align:center; font-size:22px;">
-    <br><br><button class="btn btn-p" style="padding:18px 40px;" onclick="richiediAccesso()">ENTRA NEL SISTEMA</button>
-</div>
-
-<header>
-    <div class="logo-box">
-        <img src="https://i.postimg.cc/mD8zM6T1/GAVINA-LOGO.png" class="logo-img">
-        <div>
-            <div style="font-size:20px; font-weight:900;">GAVINA VILLAGE</div>
-            <div style="font-size:10px; opacity:0.8; font-weight:700;">MASTER COMMANDER 3.9</div>
-        </div>
-    </div>
-    <div style="display:flex; align-items:center;">
-        <div class="lang-picker">
-            <span class="flag" id="flag-it" onclick="setLang('it')">🇮🇹</span>
-            <span class="flag" id="flag-es" onclick="setLang('es')">🇪🇸</span>
-            <span class="flag" id="flag-en" onclick="setLang('en')">🇬🇧</span>
-        </div>
-        <div class="on-badge"><div id="dot"></div><span id="st-text">SYSTEM ONLINE</span></div>
-        <button class="btn btn-danger" style="margin-left:15px;" onclick="logout()">LOGOUT</button>
-    </div>
-</header>
-
-<nav class="tabs">
-    <div class="tab active" data-t="t-reg" onclick="swTab('reg', this)">Registro Lavori</div>
-    <div class="tab admin-only" data-t="t-prog" onclick="swTab('prog', this)">Programma Lavoro</div>
-    <div class="tab admin-only" data-t="t-ord" onclick="swTab('ord', this)">📢 Comandi</div>
-    <div class="tab admin-only" data-t="t-mag" onclick="swTab('mag', this)">Magazzino</div>
-    <div class="tab admin-only" data-t="t-acc" onclick="swTab('acc', this)" style="color:var(--danger);">🔑 Accessi</div>
-</nav>
+<header>GAVINA MASTER COMMANDER 6.0</header>
 
 <div class="container">
-    <!-- VIEW: REGISTRO -->
-    <div id="v-reg" class="view">
-        <div class="toolbar">
-            <h2 data-t="h-reg">Registro Manutenzioni</h2>
-            <div style="display:flex; gap:10px;">
-                <button class="btn btn-wa admin-only" onclick="shareAllWA_I()">📲 WhatsApp</button>
-                <button class="btn btn-mail admin-only" onclick="shareAllEmail_I()">📧 Email</button>
-                <button class="btn btn-blue admin-only" onclick="openBulkModal()">📅 Report Word Pro</button>
-                <button class="btn btn-p" onclick="openM()">+ Nuova Scheda</button>
-            </div>
-        </div>
-        <div class="card"><table><thead><tr><th><input type="checkbox" onclick="selAll('.sel-i')"></th><th>FOTO</th><th data-t="th-date">Data</th><th data-t="th-bung">Alloggio</th><th>Operaio</th><th>Azioni</th></tr></thead><tbody id="tbodyI"></tbody></table></div>
-    </div>
-    <!-- VIEW: PROGRAMMA -->
-    <div id="v-prog" class="view admin-only" style="display:none;">
-        <div class="toolbar">
-            <h2>Programma di Lavoro</h2>
-            <div style="display:flex; gap:10px;">
-                <button class="btn btn-blue admin-only" onclick="openBulkModal()">📅 Report Word Pro</button>
-                <button class="btn btn-wa" onclick="shareAllWA_P()">📲 WhatsApp</button>
-                <button class="btn btn-mail" onclick="shareAllEmail_P()">📧 Email</button>
-                <button class="btn btn-p" onclick="openModProg()">+ Nuovo Compito</button>
-            </div>
-        </div>
-        <div class="card"><table><thead><tr><th><input type="checkbox" onclick="selAll('.sel-p')"></th><th>Data</th><th>Servizio</th><th>Operaio</th><th>Azioni</th></tr></thead><tbody id="tbodyProg"></tbody></table></div>
-    </div>
-    <!-- VIEW: COMANDI -->
-    <div id="v-ord" class="view admin-only" style="display:none;">
-        <div class="toolbar">
-            <h2>📢 Comandi & Sollecitazioni</h2>
-            <div style="display:flex; gap:10px;">
-                <button class="btn btn-wa" onclick="shareAllWA_O()">📲 WhatsApp</button>
-                <button class="btn btn-mail" onclick="shareAllEmail_O()">📧 Email</button>
-                <button class="btn btn-blue admin-only" onclick="openBulkModal()">📅 Report Word Pro</button>
-                <button class="btn btn-p" onclick="openModOrd()">+ Nuovo Comando</button>
-            </div>
-        </div>
-        <div class="card"><table><thead><tr><th><input type="checkbox" onclick="selAll('.sel-o')"></th><th>Data / Ora</th><th>Comando / Anteprima</th><th>Stato / Riscontro</th><th>Azioni</th></tr></thead><tbody id="tbodyOrd"></tbody></table></div>
-    </div>
-    <!-- VIEW: MAGAZZINO -->
-    <div id="v-mag" class="view admin-only" style="display:none;">
-        <div class="toolbar">
-            <h2>📦 Magazzino</h2>
-            <div style="display:flex; gap:10px;">
-                <button class="btn btn-wa" onclick="shareAllWA_M()">📲 WhatsApp</button>
-                <button class="btn btn-mail" onclick="shareAllEmail_M()">📧 Email</button>
-                <button class="btn btn-blue admin-only" onclick="openBulkModal()">📅 Report Word Pro</button>
-                <button class="btn btn-p" onclick="openModM()">+ Aggiungi</button>
-            </div>
-        </div>
-        <div class="card"><table><thead><tr><th><input type="checkbox" onclick="selAll('.sel-m')"></th><th>FOTO</th><th>ARTICOLO</th><th>GIACENZA</th><th>AZIONI</th></tr></thead><tbody id="tbodyM"></tbody></table></div>
-    </div>
-    <!-- VIEW: ACCESSI -->
-    <div id="v-acc" class="view admin-only" style="display:none;">
-        <div class="toolbar"><h2>🔑 Gestione Accessi Utenti</h2></div>
-        <div class="card"><table><thead><tr><th>NOME UTENTE</th><th>STATO</th><th>AZIONI</th></tr></thead><tbody id="tbodyAcc"></tbody></table></div>
-    </div>
+
+<!-- KPI -->
+<div class="card kpi">
+<div><b>Interventi</b><div id="kpi-int">0</div></div>
+<div><b>Ore</b><div id="kpi-ore">0</div></div>
+<div><b>Comandi</b><div id="kpi-ord">0</div></div>
+<div><b>Magazzino</b><div id="kpi-mag">0</div></div>
 </div>
 
-<!-- MODALE SCHEDA TECNICA -->
-<div class="modal-ov" id="modI">
-    <div class="modal"><span class="close-x" onclick="closeAll()">&times;</span><h2 data-t="m-title">Scheda Tecnica Gavina</h2><input type="hidden" id="f-id">
-        <div class="form-grid">
-            <div class="fg"><label data-t="l-date">📅 Data</label><input type="date" id="f-data"></div>
-            <div class="fg"><label data-t="l-meteo">☁️ Meteo</label><div style="display:flex; gap:8px;"><input type="text" id="f-citta" value="Mont-roig del Camp"><button class="btn btn-ghost" onclick="getWeather()">CERCA</button></div><div id="wInfo" style="margin-top:5px; font-weight:900;"></div><input type="hidden" id="f-meteo-val"></div>
-            <div class="fg"><label>🏠 Alloggio / Area</label><select id="f-bung"></select></div>
-            <div class="fg"><label>📍 Unità / Area Specifica</label><input type="text" id="f-area"></div>
-            <div class="fg"><label>👷 Operaio</label><input type="text" id="f-op"></div>
-            <div class="fg" style="grid-column:span 2;"><label>📝 Descrizione Lavori</label><textarea id="f-desc" rows="3"></textarea></div>
-            <div class="fg"><label>Foto Inizio</label><div class="photo-box" onclick="document.getElementById('i-p').click()"><input type="file" id="i-p" capture="environment" hidden onchange="hPhoto(this,'p')"><div id="pr-p">📷 Clicca per Foto</div></div><input type="text" id="f-note-p" placeholder="Note Inizio..." style="margin-top:8px;"></div>
-            <div class="fg"><label>Foto Fine</label><div class="photo-box" onclick="document.getElementById('i-d').click()"><input type="file" id="i-d" capture="environment" hidden onchange="hPhoto(this,'d')"><div id="pr-d">📸 Clicca per Foto</div></div><input type="text" id="f-note-d" placeholder="Note Fine..." style="margin-top:8px;"></div>
-            <div class="fg" style="grid-column: span 2;"><label>Firma Approvazione</label><canvas id="cvF" width="800" height="150" style="width:100%; border:2px solid #ddd; border-radius:15px; background:#fff; touch-action:none;"></canvas></div>
-        </div>
-        <button class="btn btn-p" style="width:100%; margin-top:20px; padding:18px;" onclick="saveI()">💾 SALVA NELLA CLOUD GAVINA</button>
-    </div>
+<!-- BOTTONI -->
+<div class="card">
+<button onclick="generaPDF()">📄 REPORT PDF</button>
+<button onclick="alertLavori()">⚠️ Controllo Lavori</button>
 </div>
 
-<!-- MODALE REPORT WORD -->
-<div class="modal-ov" id="modBulk">
-    <div class="modal" style="max-width:800px;"><span class="close-x" onclick="closeAll()">&times;</span><h2>Report Strategico Settimanale</h2>
-        <div class="form-grid">
-            <div class="fg" style="grid-column:span 2;"><label>Oggetto</label><input type="text" id="rep-obj" value="REPORT SETTIMANALE"></div>
-            <div class="fg"><label>Lavori a Finire</label><textarea id="rep-fin" rows="3"></textarea></div>
-            <div class="fg"><label>Personale Incaricato</label><textarea id="rep-pers" rows="3"></textarea></div>
-            <div class="fg"><label>Ritardi / Incidenti</label><textarea id="rep-rit" rows="2"></textarea></div>
-            <div class="fg"><label>Totale Ore</label><input type="text" id="rep-ore"></div>
-            <div class="fg" style="grid-column:span 2;"><label>Stato Lavori Attuali</label><textarea id="rep-stato" rows="3"></textarea></div>
-        </div>
-        <button class="btn btn-blue" style="width:100%; margin-top:20px; padding:18px;" onclick="esportaWordPro()">📝 GENERA DOCUMENTO WORD</button>
-    </div>
 </div>
-
-<div class="modal-ov" id="modProg"><div class="modal" style="max-width:550px;"><span class="close-x" onclick="closeAll()">&times;</span><h2>Programma Lavoro</h2><input type="hidden" id="p-id"><div class="fg"><label>Data</label><input type="date" id="p-data"></div><div class="fg"><label>Servizio</label><textarea id="p-serv" rows="4"></textarea></div><div class="fg"><label>Operaio</label><input type="text" id="p-op"></div><button class="btn btn-p" style="width:100%; margin-top:20px;" onclick="saveProg()">💾 SALVA</button></div></div>
-<div class="modal-ov" id="modOrd">
-    <div class="modal" style="max-width:550px;"><span class="close-x" onclick="closeAll()">&times;</span>
-        <h2>Nuovo Comando</h2><input type="hidden" id="o-id">
-        <div class="fg"><label>Titolo</label><input type="text" id="o-titolo"></div>
-        <div class="fg"><label>Descrizione</label><textarea id="o-desc" rows="4"></textarea></div>
-        <div class="fg"><label>Priorità</label><select id="o-prio"><option>Alta</option><option>Media</option></select></div>
-        <div class="fg"><label>Incaricato / Persona</label><input type="text" id="o-pers"></div>
-        <div class="fg"><label>Media / Foto</label><div class="photo-box" onclick="document.getElementById('o-img').click()"><input type="file" id="o-img" hidden onchange="hPhotoO(this)"><div id="pr-o">📷 Foto Comando</div></div></div>
-        <button class="btn btn-danger" style="width:100%; margin-top:20px;" onclick="saveOrd()">🚀 INVIA</button>
-    </div>
-</div>
-<div class="modal-ov" id="modM"><div class="modal" style="max-width:500px;"><span class="close-x" onclick="closeAll()">&times;</span><h2>Magazzino</h2><input type="hidden" id="m-id"><div class="fg"><label>Articolo</label><input type="text" id="m-nome"></div><div class="fg"><label>Giacenza</label><input type="number" id="m-giac"></div><div class="fg"><label>Costo (€)</label><input type="number" id="m-prez" step="0.01"></div><div class="fg"><label>Foto</label><div class="photo-box" onclick="document.getElementById('m-img').click()"><input type="file" id="m-img" hidden onchange="hPhotoM(this)"><div id="pr-m">📷 Foto</div></div></div><button class="btn btn-p" style="width:100%; margin-top:20px;" onclick="saveM()">💾 SALVA</button></div></div>
 
 <script>
-const URL_SB = 'https://ukzconegwpoaculadefx.supabase.co';
-const KEY_SB = 'sb_publishable_dS8SzPIks90Yd1ISjsXQFQ_T8VtusA1';
+const db = supabase.createClient(
+'https://ukzconegwpoaculadefx.supabase.co',
+'sb_publishable_dS8SzPIks90Yd1ISjsXQFQ_T8VtusA1'
+);
 
-const LAN = {
-    it: { 't-reg': 'Registro Lavori', 't-prog': 'Programma Lavoro', 't-ord': '📢 Comandi', 't-mag': 'Magazzino', 't-acc': '🔑 Accessi', 'h-reg': 'Registro Manutenzioni', 'th-date': 'Data', 'th-bung': 'Alloggio', 'l-date': 'Data', 'l-meteo': 'Meteo Locale', 'm-title': 'Scheda Tecnica Gavina' },
-    es: { 't-reg': 'Registro', 't-prog': 'Programa', 't-ord': '📢 Comandos', 't-mag': 'Almacén', 't-acc': '🔑 Accesos', 'h-reg': 'Mantenimiento', 'th-date': 'Fecha', 'th-bung': 'Unidad', 'l-date': 'Fecha', 'l-meteo': 'Clima Local', 'm-title': 'Ficha Técnica Gavina' },
-    en: { 't-reg': 'Registry', 't-prog': 'Program', 't-ord': '📢 Orders', 't-mag': 'Inventory', 't-acc': '🔑 Access', 'h-reg': 'Work Logs', 'th-date': 'Date', 'th-bung': 'Unit', 'l-date': 'Date', 'l-meteo': 'Weather', 'm-title': 'Technical Sheet' }
-};
+let listI=[], listOrd=[], listM=[];
 
-let curL='it', db=supabase.createClient(URL_SB, KEY_SB), listI=[], listM=[], listProg=[], listOrd=[], listAcc=[], fotoP=null, fotoD=null, fotoM=null, firma=null, drw=false;
+// CARICA DATI
+async function sync(){
+    const {data:i}=await db.from('interventi').select('*');
+    const {data:o}=await db.from('ordini').select('*');
+    const {data:m}=await db.from('materiali').select('*');
 
-async function sync() {
-    try {
-        const {data:i} = await db.from('interventi').select('*').order('data',{ascending:false});
-        const {data:m} = await db.from('materiali').select('*').order('nome_articolo');
-        const {data:p} = await db.from('programma_lavoro').select('*').order('data',{ascending:false});
-        const {data:o} = await db.from('ordini').select('*').order('data_ordine',{ascending:false});
-        const {data:a} = await db.from('accessi').select('*').order('nome');
-        listI=i||[]; listM=m||[]; listProg=p||[]; listOrd=o||[]; listAcc=a||[]; render();
-    } catch(e){}
+    listI=i||[];
+    listOrd=o||[];
+    listM=m||[];
+
+    render();
 }
 
-function render() {
-    // REGISTRO
-    document.getElementById('tbodyI').innerHTML = listI.map(i => `<tr><td><input type="checkbox" class="sel-i" value="${i.id}"></td><td><img src="${i.foto_dopo_url||''}" class="logo-img" style="width:40px;height:40px;cursor:pointer;" onclick="editI('${i.id}')"></td><td>${i.data} <small>${i.ora||''}</small></td><td><b>${i.bungalow}</b></td><td>${i.operatore}</td><td><div style="display:flex;gap:5px;"><button class="btn" onclick="shareWA_I('${i.id}')">📲</button><button class="btn" onclick="editI('${i.id}')">✏️</button><button class="btn btn-danger" onclick="delI('${i.id}')">🗑️</button></div></td></tr>`).join('');
-    
-    // PROGRAMMA
-    document.getElementById('tbodyProg').innerHTML = listProg.map(p => `<tr><td><input type="checkbox" class="sel-p" value="${p.id}"></td><td>${p.data} <small>${p.ora||''}</small></td><td>${p.servizio}</td><td><b>${p.operaio||'-'}</b></td><td><div style="display:flex;gap:5px;"><button class="btn" onclick="shareWA_P('${p.id}')">📲</button><button class="btn" onclick="editProg('${p.id}')">✏️</button><button class="btn btn-danger" onclick="delProg('${p.id}')">🗑️</button></div></td></tr>`).join('');
-    
-    // MAGAZZINO
-    document.getElementById('tbodyM').innerHTML = listM.map(m => `<tr><td><input type="checkbox" class="sel-m" value="${m.id}"></td><td><img src="${m.foto_url||''}" class="logo-img" style="width:40px;height:40px;"></td><td><b>${m.nome_articolo}</b></td><td>${m.giacenza_attuale}</td><td><div style="display:flex;gap:5px;"><button class="btn" onclick="shareWA_M('${m.id}')">📲</button><button class="btn" onclick="editM('${m.id}')">✏️</button><button class="btn btn-danger" onclick="delM('${m.id}')">🗑️</button></div></td></tr>`).join('');
-    
-    // COMANDI
-    document.getElementById('tbodyOrd').innerHTML = listOrd.map(o => `<tr><td><input type="checkbox" class="sel-o" value="${o.id}"></td><td>${new Date(o.data_ordine).toLocaleDateString()} <small>${new Date(o.data_ordine).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</small></td><td><b>${o.titolo}</b><br><small>${o.descrizione.substring(0,30)}...</small></td><td><span class="badge-status ${o.stato==='Chiuso'?'status-done':'status-todo'}">${o.stato==='Chiuso'?'FATTO':'DA REALIZZARE'}</span><br>${o.stato!=='Chiuso' ? `<button class="btn btn-blue" style="margin-top:5px;padding:4px 8px;" onclick="chiudiOrdine('${o.id}')">OK FATTO</button>` : `<small>${o.completato_da}</small>`}</td><td><div style="display:flex;gap:5px;"><button class="btn" onclick="shareWA_O('${o.id}')">📲</button><button class="btn" onclick="editOrd('${o.id}')">✏️</button><button class="btn btn-danger" onclick="delOrd('${o.id}')">🗑️</button></div></td></tr>`).join('');
-    
-    // ACCESSI
-    document.getElementById('tbodyAcc').innerHTML = listAcc.map(a => `<tr><td><b>${a.nome}</b></td><td>${a.attivo?'✅ ATTIVO':'❌ BLOCCATO'}</td><td><div style="display:flex;gap:5px;"><button class="btn btn-p" onclick="toggleAcc('${a.id}',${a.attivo})">CAMBIA</button><button class="btn btn-danger" onclick="delAcc('${a.id}')">🗑️</button></div></td></tr>`).join('');
+// KPI
+function render(){
+    const now=new Date();
+
+    const settimana=listI.filter(i=>{
+        const d=new Date(i.data);
+        return (now-d)/(1000*60*60*24)<=7;
+    });
+
+    document.getElementById('kpi-int').innerText=settimana.length;
+    document.getElementById('kpi-ore').innerText=(settimana.length*1.5).toFixed(1);
+    document.getElementById('kpi-ord').innerText=listOrd.filter(o=>o.stato!=='Chiuso').length;
+    document.getElementById('kpi-mag').innerText=listM.length;
 }
 
-async function getWeather() {
-    const cit=document.getElementById('f-citta').value; try {
-        const gR=await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${cit}`); const g=await gR.json();
-        const wR=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${g[0].lat}&longitude=${g[0].lon}&current_weather=true&hourly=precipitation&daily=temperature_2m_max,temperature_2m_min&timezone=auto`); const w=await wR.json();
-        const pVal = w.hourly.precipitation[0]; let pT = pVal===0?"☀️ Sereno":pVal<2?"🌦️ Pioggia Debole":"🌧️ Forte";
-        const meta = `🌡️ ${w.daily.temperature_2m_min[0]}°C / ${w.daily.temperature_2m_max[0]}°C | 💨 ${w.current_weather.windspeed}km/h | ${pT}`;
-        document.getElementById('wInfo').innerHTML = meta; document.getElementById('f-meteo-val').value = meta;
-    } catch(e){ alert("Errore Meteo"); }
-}
+// ALERT
+function alertLavori(){
+    const aperti=listOrd.filter(o=>o.stato!=='Chiuso');
 
-function editI(id) { 
-    const r=listI.find(x=>x.id===id); 
-    document.getElementById('f-id').value=r.id; 
-    document.getElementById('f-data').value=r.data; 
-    renderAccommodations(); document.getElementById('f-bung').value=r.bungalow; 
-    document.getElementById('f-area').value=r.area||'';
-    document.getElementById('f-op').value=r.operatore; 
-    document.getElementById('f-desc').value=r.descrizione; 
-    document.getElementById('f-note-p').value=r.foto_prima_note||''; 
-    document.getElementById('f-note-d').value=r.foto_dopo_note||''; 
-    fotoP=r.foto_prima_url; fotoD=r.foto_dopo_url; 
-    document.getElementById('pr-p').innerHTML=fotoP?`<img src="${fotoP}">`:'📷';
-    document.getElementById('pr-d').innerHTML=fotoD?`<img src="${fotoD}">`:'📸';
-    document.getElementById('modI').classList.add('open'); 
-    initCv();
-}
-
-async function saveI() {
-    const time = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-    const r={data:document.getElementById('f-data').value, ora:time, bungalow:document.getElementById('f-bung').value, area:document.getElementById('f-area').value, descrizione:document.getElementById('f-desc').value, operatore:document.getElementById('f-op').value, foto_prima_url:fotoP, foto_dopo_url:fotoD, foto_prima_note:document.getElementById('f-note-p').value, foto_dopo_note:document.getElementById('f-note-d').value, firma_url:firma, meteo:document.getElementById('f-meteo-val').value};
-    const id=document.getElementById('f-id').value; if(id) await db.from('interventi').update(r).eq('id',id); else await db.from('interventi').insert([r]);
-    closeAll(); sync();
-}
-
-function esportaWordPro() {
-    const selI = Array.from(document.querySelectorAll('.sel-i:checked')).map(x => listI.find(i => String(i.id) == String(x.value))).filter(i => i);
-    const selP = Array.from(document.querySelectorAll('.sel-p:checked')).map(x => listProg.find(p => String(p.id) == String(x.value))).filter(p => p);
-    const selO = Array.from(document.querySelectorAll('.sel-o:checked')).map(x => listOrd.find(o => String(o.id) == String(x.value))).filter(o => o);
-    const selM = Array.from(document.querySelectorAll('.sel-m:checked')).map(x => listM.find(m => String(m.id) == String(x.value))).filter(m => m);
-
-    let h = `<html><head><meta charset='utf-8'><style>
-        body{font-family:Arial, sans-serif; color:#333; line-height:1.4;} 
-        .header{text-align:center; border-bottom:4px solid #004d40; padding-bottom:15px; margin-bottom:30px;}
-        .section-title{background:#004d40; color:white; padding:12px; font-weight:bold; margin-top:40px; text-transform:uppercase; border-radius:5px;}
-        .summary-table{width:100%; border-collapse:collapse; margin-bottom:25px;}
-        .summary-table td, .summary-table th{border:1px solid #ddd; padding:12px; text-align:left;}
-        .summary-table th{background:#f0f4f5; color:#004d40; font-size:12px;}
-        .scheda-box{border:3px solid #004d40; padding:25px; margin-bottom:50px; page-break-inside:avoid; border-radius:15px; background:#fff;}
-        .scheda-table{width:100%; border-collapse:collapse;}
-        .scheda-table td{padding:10px; border-bottom:1px solid #eee; font-size:15px;}
-        .photo-table{width:100%; margin-top:25px;}
-        .photo-table td{text-align:center; vertical-align:top; padding:15px; border:none;}
-        .photo-img{width:300px; border-radius:15px; border:2px solid #eee; box-shadow: 0 4px 10px rgba(0,0,0,0.1);}
-    </style></head><body>
-        <div class='header'>
-            <img src='https://i.postimg.cc/mD8zM6T1/GAVINA-LOGO.png' width='120'><br>
-            <h1 style='color:#004d40; margin:10px;'>CAMPING GAVINA VILLAGE</h1>
-            <h2 style='color:#028574; margin:0;'>REPORT TECNICO MASTER COMMANDER</h2>
-        </div>
-
-        <table class='summary-table'>
-            <tr bgcolor='#004d40' style='color:white;'><th colspan='2'>RIEPILOGO STRATEGICO GENERALE</th></tr>
-            <tr><td width='35%'><b>OGGETTO:</b></td><td>${document.getElementById('rep-obj').value}</td></tr>
-            <tr><td><b>PROGRAMMA A FINIRE:</b></td><td>${document.getElementById('rep-fin').value}</td></tr>
-            <tr><td><b>PERSONALE INCARICATO:</b></td><td>${document.getElementById('rep-pers').value}</td></tr>
-            <tr><td><b>RITARDI / INCIDENTI:</b></td><td>${document.getElementById('rep-rit').value}</td></tr>
-            <tr><td><b>TOTALE ORE SETTIMANALI:</b></td><td>${document.getElementById('rep-ore').value}</td></tr>
-            <tr><td><b>STATO LAVORI ATTUALI:</b></td><td>${document.getElementById('rep-stato').value}</td></tr>
-        </table>`;
-
-    if(selI.length > 0) {
-        h += `<div class='section-title'>1) Registro Manutenzioni - Schede Tecniche Gavina</div>`;
-        selI.forEach(i => {
-            h += `<div class='scheda-box'>
-                <table class='scheda-table'>
-                    <tr><td width='35%'><b>📅 DATA E ORA:</b></td><td>${i.data} ${i.ora||''}</td></tr>
-                    <tr><td><b>☁️ METEO LOCALE:</b></td><td>${i.meteo || '-'}</td></tr>
-                    <tr><td><b>🏠 ALLOGGIO / AREA:</b></td><td>${i.bungalow}</td></tr>
-                    <tr><td><b>📍 UNITÀ SPECIFICA:</b></td><td>${i.area || '-'}</td></tr>
-                    <tr><td><b>👷 OPERAIO:</b></td><td>${i.operatore}</td></tr>
-                    <tr><td><b>📝 DESCRIZIONE LAVORI:</b></td><td>${i.descrizione}</td></tr>
-                </table>
-                <table class='photo-table'>
-                    <tr>
-                        <td>
-                            <b>FOTO INIZIO (Prima)</b><br>
-                            ${i.foto_prima_url ? `<img src='${i.foto_prima_url}' class='photo-img'>` : '<i>(Nessuna foto)</i>'}<br>
-                            <i>${i.foto_prima_note || ''}</i>
-                        </td>
-                        <td>
-                            <b>FOTO FINE (Dopo)</b><br>
-                            ${i.foto_dopo_url ? `<img src='${i.foto_dopo_url}' class='photo-img'>` : '<i>(Nessuna foto)</i>'}<br>
-                            <i>${i.foto_dopo_note || ''}</i>
-                        </td>
-                    </tr>
-                </table>
-                <div style='margin-top:25px; border-top:2px dashed #004d40; padding-top:15px; text-align:right;'>
-                    <b>FIRMA DI APPROVAZIONE:</b><br><br>
-                    ${i.firma_url ? `<img src='${i.firma_url}' width='180'>` : '<i>___________________________</i>'}
-                </div>
-            </div>`;
-        });
+    if(aperti.length===0){
+        alert("Tutto completato");
+    }else{
+        alert("Lavori aperti: "+aperti.length);
     }
-
-    if(selP.length > 0) {
-        h += `<div class='section-title'>2) Programma di Lavoro Giornaliero</div><table class='summary-table'><tr><th>Data / Ora</th><th>Servizio / Lavoro</th><th>Operaio</th></tr>`;
-        selP.forEach(p => { h += `<tr><td>${p.data} ${p.ora||''}</td><td>${p.servizio}</td><td>${p.operaio||'-'}</td></tr>`; });
-        h += `</table>`;
-    }
-
-    if(selO.length > 0) {
-        h += `<div class='section-title'>3) Comandi & Sollecitazioni Eseguite</div>`;
-        selO.forEach(o => {
-            h += `<div style='border:1px solid #ddd; padding:15px; margin-bottom:20px;'>
-                <b>COMANDO:</b> ${o.titolo}<br>
-                <b>DATA:</b> ${new Date(o.data_ordine).toLocaleString()}<br>
-                <b>DESCRIZIONE:</b> ${o.descrizione}<br>
-                <b>PERSONA:</b> ${o.completato_da || o.incaricato || '-'}<br>
-                <b>STATO:</b> ${o.stato}<br>
-                ${o.foto_url ? `<br><img src='${o.foto_url}' width='250' style='border-radius:10px;'>` : ''}
-            </div>`;
-        });
-    }
-
-    if(selM.length > 0) {
-        h += `<div class='section-title'>4) Monitoraggio Magazzino & Materiali</div><table class='summary-table'><tr><th>Articolo</th><th>Giacenza</th><th>Costo Unit.</th><th>Valore Totale</th></tr>`;
-        selM.forEach(m => { h += `<tr><td>${m.nome_articolo}</td><td>${m.giacenza_attuale}</td><td>€${(m.prezzo||0).toFixed(2)}</td><td>€${(m.giacenza_attuale*(m.prezzo||0)).toFixed(2)}</td></tr>`; });
-        h += `</table>`;
-    }
-
-    h += `<p style='text-align:center; font-size:11px; color:#666; margin-top:60px; border-top:1px solid #eee; padding-top:20px;'>GAVINA MASTER COMMANDER 3.9 - Camping Gavina Village</p></body></html>`;
-
-    const b = new Blob(['\ufeff', h], {type:'application/msword'}); const a = document.createElement('a'); a.href=URL.createObjectURL(b); a.download=`REPORT_GAVINA_${new Date().toISOString().split('T')[0]}.doc`; a.click(); closeAll();
 }
 
-// Funzioni Share & Delete
-function shareWA_I(id){ 
-    const i=listI.find(x=>x.id===id); 
-    const text = "*GAVINA REPORT*\n\n" + "🏠 *" + i.bungalow + "*\n" + "👷 " + i.operatore + "\n" + "📝 " + i.descrizione;
-    window.open("https://wa.me/?text=" + encodeURIComponent(text)); 
-}
-function shareWA_P(id){ 
-    const p=listProg.find(x=>x.id===id); 
-    const text = "*PROGRAMMA GAVINA*\n\n" + "📅 *" + p.data + "*\n" + "🛠️ " + p.servizio + "\n" + "👷 " + (p.operaio||"-");
-    window.open("https://wa.me/?text=" + encodeURIComponent(text)); 
-}
-function shareWA_M(id){ 
-    const m=listM.find(x=>x.id===id); 
-    const text = "*GAVINA MAGAZZINO*\n\n" + "📦 *" + m.nome_articolo + "*\n" + "🔢 Giacenza: " + m.giacenza_attuale;
-    window.open("https://wa.me/?text=" + encodeURIComponent(text)); 
-}
-function shareWA_O(id){ 
-    const o=listOrd.find(x=>x.id===id); 
-    const text = "*GAVINA COMANDO*\n\n" + "🚀 *" + o.titolo + "*\n" + "📝 " + o.descrizione + "\n" + "📊 Stato: " + o.stato;
-    window.open("https://wa.me/?text=" + encodeURIComponent(text)); 
+// PDF
+function generaPDF(){
+    const {jsPDF}=window.jspdf;
+    const doc=new jsPDF();
+
+    let y=10;
+    const now=new Date();
+
+    doc.text("REPORT GAVINA 6.0",10,y); y+=10;
+    doc.text(now.toLocaleString(),10,y); y+=10;
+
+    listI.slice(0,20).forEach(i=>{
+        doc.text(`${i.data} ${i.ora||''} - ${i.bungalow}`,10,y);
+        y+=6;
+    });
+
+    doc.save("report_gavina.pdf");
 }
 
-function shareAllWA_I() {
-    const sel = Array.from(document.querySelectorAll('.sel-i:checked')).map(x=>listI.find(i=>i.id===x.value));
-    if(sel.length===0) { alert("Seleziona almeno un intervento"); return; }
-    let msg = "*GAVINA VILLAGE - RIEPILOGO LAVORI*\n\n";
-    sel.forEach(i => { msg += "🏠 *" + i.bungalow + "* (" + i.data + ")\n" + "🛠️ " + i.descrizione + "\n\n"; });
-    window.open("https://wa.me/?text=" + encodeURIComponent(msg));
-}
-function shareAllWA_P() {
-    const sel = Array.from(document.querySelectorAll('.sel-p:checked')).map(x=>listProg.find(p=>p.id===x.value));
-    const list = sel.length > 0 ? sel : listProg;
-    let msg="*GAVINA: PROGRAMMA DI LAVORO*\n\n";
-    list.forEach(p=>msg+= "📅 *" + p.data + "*: " + p.servizio + " (" + (p.operaio||"-") + ")\n");
-    window.open("https://wa.me/?text=" + encodeURIComponent(msg));
-}
-function shareAllEmail_I() {
-    const sel = Array.from(document.querySelectorAll('.sel-i:checked')).map(x=>listI.find(i=>String(i.id)===x.value));
-    if(sel.length===0) { alert("Seleziona interventi"); return; }
-    let body = "GAVINA VILLAGE - RIEPILOGO LAVORI\n\n";
-    sel.forEach(i => { body += `ALLOGGIO: ${i.bungalow} (${i.data} ${i.ora||''})\nDESCRIZIONE: ${i.descrizione}\n\n`; });
-    window.location.href = `mailto:?subject=Riepilogo Lavori Gavina&body=${encodeURIComponent(body)}`;
-}
-function shareAllEmail_P() {
-    const sel = Array.from(document.querySelectorAll('.sel-p:checked')).map(x=>listProg.find(p=>String(p.id)===x.value));
-    const list = sel.length > 0 ? sel : listProg;
-    let body="GAVINA: PROGRAMMA DI LAVORO\n\n";
-    list.forEach(p=>body+=`DATA: ${p.data} ${p.ora||''}\nSERVIZIO: ${p.servizio}\nOPERAIO: ${p.operaio||'-'}\n\n`);
-    window.location.href = `mailto:?subject=Programma Lavoro Gavina&body=${encodeURIComponent(body)}`;
-}
-function shareAllEmail_O() {
-    const sel = Array.from(document.querySelectorAll('.sel-o:checked')).map(x=>listOrd.find(o=>String(o.id)===x.value));
-    if(sel.length===0) { alert("Seleziona comandi"); return; }
-    let body = "GAVINA: RIEPILOGO COMANDI\n\n";
-    sel.forEach(o => { body += `DATA: ${new Date(o.data_ordine).toLocaleString()}\nTITOLO: ${o.titolo}\nSTATO: ${o.stato}\n\n`; });
-    window.location.href = `mailto:?subject=Riepilogo Comandi Gavina&body=${encodeURIComponent(body)}`;
-}
-function shareAllEmail_M() {
-    const sel = Array.from(document.querySelectorAll('.sel-m:checked')).map(x=>listM.find(m=>String(m.id)===x.value));
-    if(sel.length===0) { alert("Seleziona materiali"); return; }
-    let body = "GAVINA: RIEPILOGO MAGAZZINO\n\n";
-    sel.forEach(m => { body += `ARTICOLO: ${m.nome_articolo}\nGIACENZA: ${m.giacenza_attuale}\n\n`; });
-    window.location.href = `mailto:?subject=Riepilogo Magazzino Gavina&body=${encodeURIComponent(body)}`;
-}
-
-async function delI(id){ if(confirm("Eliminare?")) { await db.from('interventi').delete().eq('id',id); sync(); } }
-async function delProg(id){ if(confirm("Eliminare?")) { await db.from('programma_lavoro').delete().eq('id',id); sync(); } }
-async function delOrd(id){ if(confirm("Eliminare?")) { await db.from('ordini').delete().eq('id',id); sync(); } }
-async function delM(id){ if(confirm("Eliminare?")) { await db.from('materiali').delete().eq('id',id); sync(); } }
-async function delAcc(id){ if(confirm("Eliminare?")) { await db.from('accessi').delete().eq('id',id); sync(); } }
-async function toggleAcc(id,s){ await db.from('accessi').update({attivo:!s}).eq('id',id); sync(); }
-
-async function saveProg() {
-    const time = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-    const id = document.getElementById('p-id').value;
-    const r = { data: document.getElementById('p-data').value, ora: time, servizio: document.getElementById('p-serv').value, operaio: document.getElementById('p-op').value };
-    if(id) await db.from('programma_lavoro').update(r).eq('id',id); else await db.from('programma_lavoro').insert([r]);
-    closeAll(); sync();
-}
-let fotoO=null;
-function hPhotoO(input) { if(input.files && input.files[0]) { const r=new FileReader(); r.onload=e=>{fotoO=e.target.result; document.getElementById('pr-o').innerHTML=`<img src="${fotoO}" style="max-height:100px;">`;}; r.readAsDataURL(input.files[0]); } }
-
-async function saveOrd() {
-    const id = document.getElementById('o-id').value;
-    const r = { titolo: document.getElementById('o-titolo').value, descrizione: document.getElementById('o-desc').value, priorita: document.getElementById('o-prio').value, incaricato: document.getElementById('o-pers').value, foto_url: fotoO, stato: 'Attivo', data_ordine: new Date().toISOString() };
-    if(id) await db.from('ordini').update(r).eq('id',id); else await db.from('ordini').insert([r]);
-    closeAll(); sync();
-}
-async function saveM() {
-    const id = document.getElementById('m-id').value;
-    const r = { nome_articolo: document.getElementById('m-nome').value, giacenza_attuale: document.getElementById('m-giac').value, prezzo: document.getElementById('m-prez').value, foto_url: fotoM };
-    if(id) await db.from('materiali').update(r).eq('id',id); else await db.from('materiali').insert([r]);
-    closeAll(); sync();
-}
-async function chiudiOrdine(id) { 
-    const n = localStorage.getItem('user_name') || 'Admin';
-    await db.from('ordini').update({stato:'Chiuso', completato_da: n}).eq('id',id); 
-    sync(); 
-}
-
-function editProg(id) { const r=listProg.find(x=>x.id===id); document.getElementById('p-id').value=r.id; document.getElementById('p-data').value=r.data; document.getElementById('p-serv').value=r.servizio; document.getElementById('p-op').value=r.operaio||''; document.getElementById('modProg').classList.add('open'); }
-function editOrd(id) { const r=listOrd.find(x=>x.id===id); document.getElementById('o-id').value=r.id; document.getElementById('o-titolo').value=r.titolo; document.getElementById('o-desc').value=r.descrizione; document.getElementById('o-prio').value=r.priorita; document.getElementById('o-pers').value=r.incaricato||''; fotoO=r.foto_url; document.getElementById('pr-o').innerHTML=fotoO?`<img src="${fotoO}" style="max-height:100px;">`:'📷 Foto Comando'; document.getElementById('modOrd').classList.add('open'); }
-function editM(id) { const r=listM.find(x=>x.id===id); document.getElementById('m-id').value=r.id; document.getElementById('m-nome').value=r.nome_articolo; document.getElementById('m-giac').value=r.giacenza_attuale; document.getElementById('m-prez').value=r.prezzo||0; fotoM=r.foto_url; document.getElementById('pr-m').innerHTML=fotoM?`<img src="${fotoM}">`:'📷'; document.getElementById('modM').classList.add('open'); }
-
-// Login
-async function richiediAccesso(){
-    const n=document.getElementById('reg-nome').value.toUpperCase(); if(!n) return;
-    localStorage.setItem('user_name', n);
-    if(n==='ADMIN_PRO'||n==='ADMIR_PRO'){localStorage.setItem('admin_master','true');location.reload();return;}
-    const {data} = await db.from('accessi').select('*').eq('nome',n).single();
-    if(data&&data.attivo){localStorage.setItem('admin_master','true');location.reload();} else alert("Accesso negato.");
-}
-
-function renderAccommodations() { 
-    const html = `<option value="">-- SELEZIONA ALLOGGIO --</option>
-    <optgroup label="TIENDA / NEGOZIO"><option>JUNIOR</option><option>KENYA</option><option>LUNA</option><option>VICTORIA</option><option>SOL</option><option>MAYOTTE</option><option>SAFARI +</option></optgroup>
-    <optgroup label="CASE MOBILI / MOBILHOMES"><option>TARRACCO 6</option><option>TARRACCO 4</option><option>TARRACCO 2</option></optgroup>
-    <optgroup label="BUNGALOW"><option>DUNE</option><option>BEACH</option></optgroup>
-    <optgroup label="TINY HOMES"><option>TINY HOME</option><option>TINY NATURA</option></optgroup>
-    <optgroup label="BEACH CABINS / CASETTE SPIAGGIA"><option>VISTA MARE</option><option>2ª FILA</option></optgroup>
-    <optgroup label="PIAZZOLE / PARCELAS"><option>1ª FILA</option><option>2ª FILA</option><option>3ª FILA</option></optgroup>
-    <optgroup label="SERVIZI"><option>RECEPTION</option><option>CARICATORE AUTO ELETTRICA</option><option>SVUOTAMENTO ACQUE NERE</option><option>LAVAGGIO AUTO</option></optgroup>
-    <optgroup label="RISTORANTI & BAR"><option>SUPERMERCATO</option><option>TAKE AWAY</option><option>RISTORANTE GAVINA</option><option>CON-TENEDOR</option><option>BEACH CLUB</option></optgroup>
-    <optgroup label="SPORT & ATTIVITÀ"><option>PISCINA</option><option>PALCOSCENICO</option><option>AGORA</option><option>CAMPO TENNIS</option><option>KIDS CLUB</option></optgroup>
-    <optgroup label="PARCHEGGIO"><option>RECEPTION ZONA 4</option><option>LUNGO PERIMETRO</option><option>ZONA PISCINA</option><option>ZONA CALCIO</option></optgroup>
-    <optgroup label="BAGNI"><option>ZONA JUNIOR</option><option>ZONA PISCINA</option><option>ZONA PIAZZOLA</option></optgroup>`;
-    document.getElementById('f-bung').innerHTML = html; 
-}
-
-// Supporto
-function hPhoto(input,t){const r=new FileReader();r.onload=(e)=>{const i=new Image();i.onload=()=>{const cv=document.createElement('canvas');const s=450/i.width;cv.width=450;cv.height=i.height*s;cv.getContext('2d').drawImage(i,0,0,450,cv.height);const res=cv.toDataURL('image/jpeg',0.5);if(t==='p')fotoP=res;else fotoD=res;document.getElementById('pr-'+t).innerHTML=`<img src="${res}">`;};i.src=e.target.result;};r.readAsDataURL(input.files[0]);}
-function hPhotoM(i){const r=new FileReader();r.onload=(e)=>{const img=new Image();img.onload=()=>{const cv=document.createElement('canvas');cv.width=300;cv.height=300;cv.getContext('2d').drawImage(img,0,0,300,300);fotoM=cv.toDataURL('image/jpeg',0.6);document.getElementById('pr-m').innerHTML=`<img src="${fotoM}">`;};img.src=e.target.result;};r.readAsDataURL(i.files[0]);}
-function initCv(){const c=document.getElementById('cvF'),ctx=c.getContext('2d');ctx.clearRect(0,0,c.width,c.height);ctx.lineWidth=2;const p=(e)=>{const r=c.getBoundingClientRect();return {x:(e.clientX||(e.touches?e.touches[0].clientX:0))-r.left,y:(e.clientY||(e.touches?e.touches[0].clientY:0))-r.top};};c.onmousedown=(e)=>{drw=true;ctx.beginPath();ctx.moveTo(p(e).x,p(e).y);};c.onmousemove=(e)=>{if(!drw)return;e.preventDefault();ctx.lineTo(p(e).x,p(e).y);ctx.stroke();};window.onmouseup=()=>{if(drw){drw=false;firma=c.toDataURL();}};c.ontouchstart=c.onmousedown;c.ontouchmove=c.onmousemove;}
-function setLang(l){curL=l;document.querySelectorAll('.flag').forEach(f=>f.classList.remove('active'));document.getElementById('flag-'+l).classList.add('active');document.querySelectorAll('[data-t]').forEach(el=>{const k=el.getAttribute('data-t');if(LAN[l][k])el.textContent=LAN[l][k];});renderAccommodations();}
-function swTab(v,b){document.querySelectorAll('.view').forEach(x=>x.style.display='none');document.getElementById('v-'+v).style.display='block';document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));b.classList.add('active');sync();}
-function openM(){document.getElementById('f-id').value='';document.getElementById('f-data').value=new Date().toISOString().split('T')[0];document.getElementById('modI').classList.add('open');initCv();renderAccommodations();}
-function openModM(){document.getElementById('m-id').value='';document.getElementById('modM').classList.add('open');}
-function openModProg(){document.getElementById('p-id').value='';document.getElementById('modProg').classList.add('open');}
-function openModOrd(){document.getElementById('o-id').value='';document.getElementById('modOrd').classList.add('open');}
-function openBulkModal(){document.getElementById('modBulk').classList.add('open');}
-function closeAll(){document.querySelectorAll('.modal-ov').forEach(m=>m.classList.remove('open'));}
-function selAll(cl){const cb=event.target;document.querySelectorAll(cl).forEach(x=>x.checked=cb.checked);}
-function logout(){localStorage.clear();location.reload();}
-async function checkAccess(){if(localStorage.getItem('admin_master')==='true'){document.getElementById('lock-screen').style.display='none';document.querySelectorAll('.admin-only').forEach(el=>el.style.display='block');sync();return;}document.getElementById('lock-screen').style.display='flex';}
-
-checkAccess(); setLang('it'); setInterval(sync, 20000);
+// AVVIO
+sync();
+setInterval(sync,20000);
 </script>
+
 </body>
 </html>
