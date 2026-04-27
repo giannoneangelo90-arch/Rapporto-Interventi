@@ -4,42 +4,59 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>GAVINA MASTER COMMANDER 6.0</title>
+<title>GAVINA MASTER COMMANDER 7.0</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+<script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
+
 <style>
-body{font-family:Arial;background:#f2f7f7;margin:0;}
-header{background:#004d40;color:white;padding:15px;font-weight:bold;}
+body{font-family:'Outfit';background:#f2f7f7;margin:0;}
+header{background:#004d40;color:white;padding:15px;font-weight:900;}
 .container{padding:20px;}
-.card{background:white;padding:20px;border-radius:15px;margin-bottom:20px;}
-
-.kpi{display:flex;gap:10px;}
-.kpi div{flex:1;background:#004d40;color:white;padding:15px;border-radius:10px;text-align:center;}
-
-button{padding:10px;margin:5px;border:none;border-radius:8px;cursor:pointer;}
+.card{background:white;border-radius:15px;padding:20px;margin-bottom:20px;}
+.kpi{display:flex;gap:15px;flex-wrap:wrap;}
+.kpi-box{flex:1;background:#004d40;color:white;padding:20px;border-radius:12px;text-align:center;}
+.kpi-box div{font-size:26px;font-weight:900;}
+button{padding:10px;border:none;border-radius:10px;cursor:pointer;margin:5px;}
+.btn{background:#004d40;color:white;}
+.btn-danger{background:#d32f2f;color:white;}
+table{width:100%;border-collapse:collapse;}
+td,th{padding:10px;border-bottom:1px solid #ddd;}
 </style>
 </head>
 
 <body>
 
-<header>GAVINA MASTER COMMANDER 6.0</header>
+<header>GAVINA MASTER COMMANDER 7.0</header>
 
 <div class="container">
 
 <!-- KPI -->
 <div class="card kpi">
-<div><b>Interventi</b><div id="kpi-int">0</div></div>
-<div><b>Ore</b><div id="kpi-ore">0</div></div>
-<div><b>Comandi</b><div id="kpi-ord">0</div></div>
-<div><b>Magazzino</b><div id="kpi-mag">0</div></div>
+<div class="kpi-box">Interventi<div id="kpi-int">0</div></div>
+<div class="kpi-box">Ore<div id="kpi-ore">0</div></div>
+<div class="kpi-box">Comandi Attivi<div id="kpi-ord">0</div></div>
+<div class="kpi-box">Materiali<div id="kpi-mag">0</div></div>
 </div>
 
-<!-- BOTTONI -->
+<!-- AZIONI -->
 <div class="card">
-<button onclick="generaPDF()">📄 REPORT PDF</button>
-<button onclick="alertLavori()">⚠️ Controllo Lavori</button>
+<button class="btn" onclick="generaPDF()">📄 REPORT PDF AUTO</button>
+<button class="btn-danger" onclick="alertLavori()">⚠️ Controllo Lavori</button>
+</div>
+
+<!-- TABELLA INTERVENTI -->
+<div class="card">
+<h3>Registro Interventi</h3>
+<table>
+<thead>
+<tr><th>Data</th><th>Alloggio</th><th>Operaio</th></tr>
+</thead>
+<tbody id="tbodyI"></tbody>
+</table>
 </div>
 
 </div>
@@ -52,7 +69,7 @@ const db = supabase.createClient(
 
 let listI=[], listOrd=[], listM=[];
 
-// CARICA DATI
+// SYNC
 async function sync(){
     const {data:i}=await db.from('interventi').select('*');
     const {data:o}=await db.from('ordini').select('*');
@@ -65,7 +82,7 @@ async function sync(){
     render();
 }
 
-// KPI
+// RENDER
 function render(){
     const now=new Date();
 
@@ -78,39 +95,50 @@ function render(){
     document.getElementById('kpi-ore').innerText=(settimana.length*1.5).toFixed(1);
     document.getElementById('kpi-ord').innerText=listOrd.filter(o=>o.stato!=='Chiuso').length;
     document.getElementById('kpi-mag').innerText=listM.length;
+
+    document.getElementById('tbodyI').innerHTML=listI.map(i=>`
+        <tr>
+            <td>${i.data} ${i.ora||''}</td>
+            <td>${i.bungalow}</td>
+            <td>${i.operatore}</td>
+        </tr>
+    `).join('');
 }
 
 // ALERT
 function alertLavori(){
     const aperti=listOrd.filter(o=>o.stato!=='Chiuso');
-
     if(aperti.length===0){
-        alert("Tutto completato");
+        alert("✅ Tutti i lavori completati");
     }else{
-        alert("Lavori aperti: "+aperti.length);
+        alert("⚠️ Lavori aperti: "+aperti.length);
     }
 }
 
-// PDF
+// PDF AUTO
 function generaPDF(){
     const {jsPDF}=window.jspdf;
     const doc=new jsPDF();
 
-    let y=10;
     const now=new Date();
+    let y=10;
 
-    doc.text("REPORT GAVINA 6.0",10,y); y+=10;
+    doc.setFontSize(16);
+    doc.text("GAVINA REPORT 7.0",10,y); y+=10;
+
+    doc.setFontSize(10);
     doc.text(now.toLocaleString(),10,y); y+=10;
 
-    listI.slice(0,20).forEach(i=>{
+    listI.forEach(i=>{
         doc.text(`${i.data} ${i.ora||''} - ${i.bungalow}`,10,y);
         y+=6;
+        if(y>270){doc.addPage();y=10;}
     });
 
-    doc.save("report_gavina.pdf");
+    doc.save(`GAVINA_${now.toISOString().split('T')[0]}_${now.getHours()}-${now.getMinutes()}.pdf`);
 }
 
-// AVVIO
+// AUTO REFRESH
 sync();
 setInterval(sync,20000);
 </script>
