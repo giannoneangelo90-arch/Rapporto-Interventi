@@ -368,7 +368,6 @@ function esportaWordPro() {
 
     const b = new Blob(['\ufeff', h], {type:'application/msword'}); const a = document.createElement('a'); a.href=URL.createObjectURL(b); a.download=`REPORT_GAVINA_${new Date().toISOString().split('T')[0]}.doc`; a.click(); closeAll();
 }
-}
 
 // Funzioni Share & Delete
 function shareWA_I(id){ 
