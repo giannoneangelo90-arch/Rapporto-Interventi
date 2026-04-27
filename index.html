@@ -3,144 +3,107 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>GAVINA MASTER COMMANDER 7.0</title>
+<title>GAVINA MASTER COMMANDER 8.0</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-<script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
 
 <style>
-body{font-family:'Outfit';background:#f2f7f7;margin:0;}
-header{background:#004d40;color:white;padding:15px;font-weight:900;}
-.container{padding:20px;}
-.card{background:white;border-radius:15px;padding:20px;margin-bottom:20px;}
-.kpi{display:flex;gap:15px;flex-wrap:wrap;}
-.kpi-box{flex:1;background:#004d40;color:white;padding:20px;border-radius:12px;text-align:center;}
-.kpi-box div{font-size:26px;font-weight:900;}
-button{padding:10px;border:none;border-radius:10px;cursor:pointer;margin:5px;}
-.btn{background:#004d40;color:white;}
-.btn-danger{background:#d32f2f;color:white;}
-table{width:100%;border-collapse:collapse;}
-td,th{padding:10px;border-bottom:1px solid #ddd;}
+body{font-family:Arial;background:#eef3f3;margin:0}
+header{background:#004d40;color:#fff;padding:15px;font-weight:bold}
+.container{padding:20px}
+.card{background:#fff;padding:15px;border-radius:12px;margin-bottom:20px}
+.btn{padding:10px;background:#004d40;color:#fff;border:none;border-radius:8px;cursor:pointer}
+table{width:100%;border-collapse:collapse}
+td,th{padding:10px;border-bottom:1px solid #ddd}
 </style>
 </head>
 
 <body>
 
-<header>GAVINA MASTER COMMANDER 7.0</header>
+<header>GAVINA MASTER COMMANDER 8.0 ENTERPRISE</header>
 
 <div class="container">
 
-<!-- KPI -->
-<div class="card kpi">
-<div class="kpi-box">Interventi<div id="kpi-int">0</div></div>
-<div class="kpi-box">Ore<div id="kpi-ore">0</div></div>
-<div class="kpi-box">Comandi Attivi<div id="kpi-ord">0</div></div>
-<div class="kpi-box">Materiali<div id="kpi-mag">0</div></div>
+<div class="card">
+<h3>REPORT STRATEGICO</h3>
+
+<input id="obj" placeholder="OGGETTO" style="width:100%"><br><br>
+<textarea id="fin" placeholder="PROGRAMMA A FINIRE" style="width:100%"></textarea><br><br>
+<textarea id="pers" placeholder="PERSONALE INCARICATO" style="width:100%"></textarea><br><br>
+<textarea id="rit" placeholder="RITARDI / INCIDENTI" style="width:100%"></textarea><br><br>
+<input id="ore" placeholder="ORE TOTALI" style="width:100%"><br><br>
+<textarea id="stato" placeholder="STATO LAVORI" style="width:100%"></textarea><br><br>
+
 </div>
 
-<!-- AZIONI -->
 <div class="card">
-<button class="btn" onclick="generaPDF()">📄 REPORT PDF AUTO</button>
-<button class="btn-danger" onclick="alertLavori()">⚠️ Controllo Lavori</button>
-</div>
+<h3>SELEZIONA SCHEDE</h3>
 
-<!-- TABELLA INTERVENTI -->
-<div class="card">
-<h3>Registro Interventi</h3>
-<table>
-<thead>
-<tr><th>Data</th><th>Alloggio</th><th>Operaio</th></tr>
-</thead>
-<tbody id="tbodyI"></tbody>
-</table>
+<label><input type="checkbox" class="selI"> Schede Tecniche</label><br>
+<label><input type="checkbox" class="selP"> Programma Lavoro</label><br>
+<label><input type="checkbox" class="selO"> Comandi</label><br>
+<label><input type="checkbox" class="selM"> Magazzino</label><br>
+
+<br>
+<button class="btn" onclick="generaReport()">GENERA REPORT WORD</button>
 </div>
 
 </div>
 
 <script>
-const db = supabase.createClient(
-'https://ukzconegwpoaculadefx.supabase.co',
-'sb_publishable_dS8SzPIks90Yd1ISjsXQFQ_T8VtusA1'
-);
 
-let listI=[], listOrd=[], listM=[];
-
-// SYNC
-async function sync(){
-    const {data:i}=await db.from('interventi').select('*');
-    const {data:o}=await db.from('ordini').select('*');
-    const {data:m}=await db.from('materiali').select('*');
-
-    listI=i||[];
-    listOrd=o||[];
-    listM=m||[];
-
-    render();
+function now(){
+return new Date().toLocaleString()
 }
 
-// RENDER
-function render(){
-    const now=new Date();
+function generaReport(){
 
-    const settimana=listI.filter(i=>{
-        const d=new Date(i.data);
-        return (now-d)/(1000*60*60*24)<=7;
-    });
+let h = `
+<html><body style="font-family:Arial">
 
-    document.getElementById('kpi-int').innerText=settimana.length;
-    document.getElementById('kpi-ore').innerText=(settimana.length*1.5).toFixed(1);
-    document.getElementById('kpi-ord').innerText=listOrd.filter(o=>o.stato!=='Chiuso').length;
-    document.getElementById('kpi-mag').innerText=listM.length;
+<h1>CAMPING GAVINA VILLAGE</h1>
+<h2>REPORT TECNICO MASTER COMMANDER</h2>
 
-    document.getElementById('tbodyI').innerHTML=listI.map(i=>`
-        <tr>
-            <td>${i.data} ${i.ora||''}</td>
-            <td>${i.bungalow}</td>
-            <td>${i.operatore}</td>
-        </tr>
-    `).join('');
+<table border="1" width="100%">
+<tr><td><b>OGGETTO</b></td><td>${obj.value}</td></tr>
+<tr><td><b>PROGRAMMA A FINIRE</b></td><td>${fin.value}</td></tr>
+<tr><td><b>PERSONALE</b></td><td>${pers.value}</td></tr>
+<tr><td><b>RITARDI</b></td><td>${rit.value}</td></tr>
+<tr><td><b>ORE</b></td><td>${ore.value}</td></tr>
+<tr><td><b>STATO</b></td><td>${stato.value}</td></tr>
+</table>
+`;
+
+if(document.querySelector('.selI').checked){
+h+=`<h3>SCHEDE TECNICHE GAVINA</h3>
+<p>DATA E ORA: ${now()}</p>`
 }
 
-// ALERT
-function alertLavori(){
-    const aperti=listOrd.filter(o=>o.stato!=='Chiuso');
-    if(aperti.length===0){
-        alert("✅ Tutti i lavori completati");
-    }else{
-        alert("⚠️ Lavori aperti: "+aperti.length);
-    }
+if(document.querySelector('.selP').checked){
+h+=`<h3>PROGRAMMA LAVORO</h3>
+<p>DATA E ORA: ${now()}</p>`
 }
 
-// PDF AUTO
-function generaPDF(){
-    const {jsPDF}=window.jspdf;
-    const doc=new jsPDF();
-
-    const now=new Date();
-    let y=10;
-
-    doc.setFontSize(16);
-    doc.text("GAVINA REPORT 7.0",10,y); y+=10;
-
-    doc.setFontSize(10);
-    doc.text(now.toLocaleString(),10,y); y+=10;
-
-    listI.forEach(i=>{
-        doc.text(`${i.data} ${i.ora||''} - ${i.bungalow}`,10,y);
-        y+=6;
-        if(y>270){doc.addPage();y=10;}
-    });
-
-    doc.save(`GAVINA_${now.toISOString().split('T')[0]}_${now.getHours()}-${now.getMinutes()}.pdf`);
+if(document.querySelector('.selO').checked){
+h+=`<h3>COMANDI</h3>
+<p>DATA E ORA: ${now()}</p>`
 }
 
-// AUTO REFRESH
-sync();
-setInterval(sync,20000);
+if(document.querySelector('.selM').checked){
+h+=`<h3>MAGAZZINO</h3>
+<p>DATA E ORA: ${now()}</p>`
+}
+
+h+=`<br><br><center>GAVINA MASTER COMMANDER 8.0</center></body></html>`
+
+let blob = new Blob(['\ufeff',h],{type:'application/msword'});
+let a=document.createElement('a');
+a.href=URL.createObjectURL(blob);
+a.download="REPORT_GAVINA.doc";
+a.click();
+
+}
+
 </script>
 
 </body>
